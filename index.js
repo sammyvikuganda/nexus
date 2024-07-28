@@ -1,13 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Load environment variables from .env file (for local development)
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -16,7 +12,7 @@ admin.initializeApp({
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     }),
-    databaseURL: process.env.DATABASE_URL,
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
 // Middleware
