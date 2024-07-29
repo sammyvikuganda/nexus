@@ -44,7 +44,7 @@ app.post('/api/register', async (req, res) => {
     } catch (error) {
         console.error('Error registering user:', error);
 
-        res.status(500).json({ message: 'Error registering user', error });
+        res.status(500).json({ message: 'Error registering user', error: error.message });
     }
 });
 

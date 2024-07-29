@@ -44,7 +44,7 @@ app.post('/api/register', async (req, res) => {
     } catch (error) {
         console.error('Error registering user:', error);
 
-        res.status(500).json({ message: 'Error registering user', error });
+        res.status(500).json({ message: 'Error registering user', error: error.message });
     }
 });
 
@@ -52,4 +52,3 @@ app.post('/api/register', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-
