@@ -63,7 +63,7 @@ app.post('/api/register', async (req, res) => {
             email: email,
             sponsorCode: sponsorCode,
             pin: pin,
-            balance: 100 // Set initial balance to 100 or any other default value
+            balance: 0 // Set initial balance to 0
         });
         res.json({ message: 'User registered successfully', userId: userId });
     } catch (error) {
@@ -119,4 +119,3 @@ app.get('/api/user-details/:userId', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-
