@@ -51,7 +51,7 @@ app.post('/api/login', async (req, res) => {
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
     const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode, pin } = req.body;
-    const userId = Date.now().toString(); // Generate a unique user ID
+    const userId = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit user ID
 
     try {
         await db.ref(`users/${userId}`).set({
@@ -87,6 +87,35 @@ app.patch('/api/update-balance', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Error updating balance', error });
+    }
+});
+
+// Update user details endpoint
+app.patch('/api/update-user', async (req, res) => {
+    const { userId, phoneNumber, firstName, lastName, dob, nin, email, sponsorCode, pin } = req.body;
+
+    try {
+        const userRef = db.ref(`users/${userId}`);
+        const snapshot = await userRef.once('value');
+        
+        if (snapshot.exists()) {
+            const updates = {};
+            if (phoneNumber) updates.phoneNumber = phoneNumber;
+            if (firstName) updates.firstName = firstName;
+            if (lastName) updates.lastName = lastName;
+            if (dob) updates.dob = dob;
+            if (nin) updates.nin = nin;
+            if (email) updates.email = email;
+            if (sponsorCode) updates.sponsorCode = sponsorCode;
+            if (pin) updates.pin = pin;
+
+            await userRef.update(updates);
+            res.json({ message: 'User details updated successfully', updatedFields: updates });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating user details', error });
     }
 });
 
