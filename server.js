@@ -1,4 +1,4 @@
-require('dotenv').config(); // Add this line at the top
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -21,29 +21,30 @@ admin.initializeApp({
 app.use(cors());
 app.use(express.json());
 
-// Fetch balance endpoint
-app.get('/api/balance/:userId', async (req, res) => {
-    const { userId } = req.params;
-    try {
-        const snapshot = await admin.database().ref(`users/${userId}`).once('value');
-        const balance = snapshot.val() ? snapshot.val().balance : 0;
-        res.json({ balance });
-    } catch (error) {
-        console.error('Error fetching balance:', error);
-        res.status(500).json({ message: 'Error fetching balance', error: error.message });
-    }
-});
+// Registration endpoint
+app.post('/api/register', async (req, res) => {
+    const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode } = req.body;
 
-// Update balance endpoint
-app.post('/api/update-balance/:userId', async (req, res) => {
-    const { userId } = req.params;
-    const { amount } = req.body;
+    console.log('Received registration request:', req.body);
+
     try {
-        await admin.database().ref(`users/${userId}`).set({ balance: amount });
-        res.json({ message: 'Balance updated successfully' });
+        const userId = email;
+
+        await admin.database().ref(`users/${userId}`).set({
+            phoneNumber,
+            firstName,
+            lastName,
+            dob,
+            nin,
+            email,
+            sponsorCode
+        });
+
+        res.json({ message: 'User registered successfully' });
     } catch (error) {
-        console.error('Error updating balance:', error);
-        res.status(500).json({ message: 'Error updating balance', error: error.message });
+        console.error('Error registering user:', error);
+
+        res.status(500).json({ message: 'Error registering user', error });
     }
 });
 
