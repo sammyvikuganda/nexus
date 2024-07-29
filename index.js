@@ -11,7 +11,7 @@ admin.initializeApp({
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     }),
-    databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
 const db = admin.database();
@@ -21,20 +21,20 @@ app.use(express.json());
 
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
-    const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode } = req.body;
+    const { firstName, lastName, phoneNumber, dob, nin, email, sponsorCode } = req.body;
     const userId = Date.now().toString(); // Generate a unique user ID
 
     try {
         await db.ref(`users/${userId}`).set({
-            phoneNumber: phoneNumber,
-            firstName: firstName,
-            lastName: lastName,
-            dob: dob,
-            nin: nin,
-            email: email,
-            sponsorCode: sponsorCode
+            firstName,
+            lastName,
+            phoneNumber,
+            dob,
+            nin,
+            email,
+            sponsorCode,
         });
-        res.json({ message: 'User registered successfully', userId: userId });
+        res.json({ message: 'User registered successfully', userId });
     } catch (error) {
         res.status(500).json({ message: 'Error registering user', error });
     }
@@ -43,21 +43,50 @@ app.post('/api/register', async (req, res) => {
 // Update user details endpoint
 app.post('/api/update-user/:userId', async (req, res) => {
     const { userId } = req.params;
-    const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode } = req.body;
+    const { firstName, lastName, phoneNumber, dob, nin, email, sponsorCode } = req.body;
 
     try {
         await db.ref(`users/${userId}`).update({
-            phoneNumber: phoneNumber,
-            firstName: firstName,
-            lastName: lastName,
-            dob: dob,
-            nin: nin,
-            email: email,
-            sponsorCode: sponsorCode
+            firstName,
+            lastName,
+            phoneNumber,
+            dob,
+            nin,
+            email,
+            sponsorCode,
         });
         res.json({ message: 'User details updated successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error updating user details', error });
+    }
+});
+
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+    const { name, sponsorCode } = req.body;
+
+    try {
+        const snapshot = await db.ref('users').orderByChild('sponsorCode').equalTo(sponsorCode).once('value');
+        const users = snapshot.val();
+
+        if (users) {
+            let user = null;
+            Object.keys(users).forEach(key => {
+                if (users[key].firstName === name || users[key].lastName === name) {
+                    user = { userId: key, ...users[key] };
+                }
+            });
+
+            if (user) {
+                res.json(user);
+            } else {
+                res.status(404).json({ message: 'User not found' });
+            }
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error logging in', error });
     }
 });
 
