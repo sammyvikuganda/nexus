@@ -97,20 +97,25 @@ app.post('/api/register', async (req, res) => {
 
 // Update balance endpoint
 app.patch('/api/update-balance', async (req, res) => {
-    const { userId, amount } = req.body;
+    const { userId, balance } = req.body;
+
+    if (!userId || balance === undefined) {
+        return res.status(400).json({ message: 'User ID and balance are required' });
+    }
 
     try {
         const userRef = db.ref(`users/${userId}`);
         const snapshot = await userRef.once('value');
         
         if (snapshot.exists()) {
-            await userRef.update({ balance: amount }); // Set the balance directly from the request
-            res.json({ message: 'Balance updated successfully', newBalance: amount });
+            await userRef.update({ balance: balance });
+            res.json({ message: 'Balance updated successfully', newBalance: balance });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Error updating balance', error });
+        console.error('Error updating balance:', error); // Log the error
+        res.status(500).json({ message: 'Error updating balance', error: error.message });
     }
 });
 
@@ -146,7 +151,7 @@ app.patch('/api/update-user', async (req, res) => {
 // Fetch user details endpoint
 app.get('/api/user-details/:userId', async (req, res) => {
     const { userId } = req.params;
-    const { field } = req.query; // Accept a query parameter to specify which field to fetch
+    const { field } = req.query;
 
     try {
         const snapshot = await db.ref(`users/${userId}`).once('value');
