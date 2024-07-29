@@ -21,14 +21,18 @@ app.use(express.json());
 
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
-    const { firstName, lastName, phoneNumber } = req.body;
+    const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode } = req.body;
     const userId = Date.now().toString(); // Generate a unique user ID
 
     try {
         await db.ref(`users/${userId}`).set({
+            phoneNumber: phoneNumber,
             firstName: firstName,
             lastName: lastName,
-            phoneNumber: phoneNumber,
+            dob: dob,
+            nin: nin,
+            email: email,
+            sponsorCode: sponsorCode
         });
         res.json({ message: 'User registered successfully', userId: userId });
     } catch (error) {
@@ -39,13 +43,17 @@ app.post('/api/register', async (req, res) => {
 // Update user details endpoint
 app.post('/api/update-user/:userId', async (req, res) => {
     const { userId } = req.params;
-    const { firstName, lastName, phoneNumber } = req.body;
+    const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode } = req.body;
 
     try {
         await db.ref(`users/${userId}`).update({
+            phoneNumber: phoneNumber,
             firstName: firstName,
             lastName: lastName,
-            phoneNumber: phoneNumber,
+            dob: dob,
+            nin: nin,
+            email: email,
+            sponsorCode: sponsorCode
         });
         res.json({ message: 'User details updated successfully' });
     } catch (error) {
