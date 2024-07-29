@@ -48,12 +48,35 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Helper function to check for existing user details
+const checkIfExists = async (phoneNumber, email, nin) => {
+    const snapshot = await db.ref('users').once('value');
+    const users = snapshot.val();
+
+    for (const userId in users) {
+        const user = users[userId];
+        if (user.phoneNumber === phoneNumber || user.email === email || user.nin === nin) {
+            return true;
+        }
+    }
+    return false;
+};
+
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
     const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode, pin } = req.body;
-    const userId = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit user ID
 
     try {
+        // Check for existing user details
+        const userExists = await checkIfExists(phoneNumber, email, nin);
+
+        if (userExists) {
+            return res.status(400).json({ message: 'User already exists with this phone number, email, or NIN' });
+        }
+
+        // Generate a unique 6-digit user ID
+        const userId = Math.floor(100000 + Math.random() * 900000).toString();
+
         await db.ref(`users/${userId}`).set({
             phoneNumber: phoneNumber,
             firstName: firstName,
@@ -65,6 +88,7 @@ app.post('/api/register', async (req, res) => {
             pin: pin,
             balance: 0 // Set initial balance to 0
         });
+
         res.json({ message: 'User registered successfully', userId: userId });
     } catch (error) {
         res.status(500).json({ message: 'Error registering user', error });
