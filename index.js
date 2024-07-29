@@ -1,50 +1,58 @@
-import firebase from 'firebase/app';
-import 'firebase/database';
+const express = require('express');
+const cors = require('cors');
+const admin = require('firebase-admin');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID
-};
+// Initialize Firebase Admin SDK
+admin.initializeApp({
+    credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
+    databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
+});
 
-// Initialize Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+const db = admin.database();
 
-// Reference to the database
-const database = firebase.database();
+app.use(cors());
+app.use(express.json());
 
-// Handle form submission
-document.getElementById('registration-form').addEventListener('submit', (event) => {
-  event.preventDefault(); // Prevent the default form submission
+// Register user endpoint
+app.post('/api/register', async (req, res) => {
+    const { firstName, lastName, phoneNumber } = req.body;
+    const userId = Date.now().toString(); // Generate a unique user ID
 
-  // Get form values
-  const firstName = document.getElementById('first-name').value;
-  const lastName = document.getElementById('last-name').value;
-  const phoneNumber = document.getElementById('phone-number').value;
+    try {
+        await db.ref(`users/${userId}`).set({
+            firstName: firstName,
+            lastName: lastName,
+            phoneNumber: phoneNumber,
+        });
+        res.json({ message: 'User registered successfully', userId: userId });
+    } catch (error) {
+        res.status(500).json({ message: 'Error registering user', error });
+    }
+});
 
-  // Generate a unique user ID (e.g., using timestamp or UUID)
-  const userId = Date.now().toString();
+// Update user details endpoint
+app.post('/api/update-user/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { firstName, lastName, phoneNumber } = req.body;
 
-  // Save user details to Firebase Realtime Database
-  database.ref(`users/${userId}`).set({
-    phoneNumber: phoneNumber,
-    firstName: firstName,
-    lastName: lastName
-  })
-  .then(() => {
-    alert('User registered successfully!');
-    // Clear form fields
-    document.getElementById('registration-form').reset();
-  })
-  .catch((error) => {
-    console.error('Error registering user:', error);
-    alert('Error registering user. Please try again.');
-  });
+    try {
+        await db.ref(`users/${userId}`).update({
+            firstName: firstName,
+            lastName: lastName,
+            phoneNumber: phoneNumber,
+        });
+        res.json({ message: 'User details updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating user details', error });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
