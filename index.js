@@ -151,21 +151,17 @@ app.patch('/api/update-user', async (req, res) => {
 // Fetch user details endpoint
 app.get('/api/user-details/:userId', async (req, res) => {
     const { userId } = req.params;
-    const { field } = req.query;
 
     try {
         const snapshot = await db.ref(`users/${userId}`).once('value');
         
         if (snapshot.exists()) {
             const user = snapshot.val();
-            
-            if (field === 'balance') {
-                res.json({ balance: user.balance });
-            } else if (field === 'firstName') {
-                res.json({ firstName: user.firstName });
-            } else {
-                res.status(400).json({ message: 'Invalid field requested' });
-            }
+            res.json({
+                fullName: `${user.firstName} ${user.lastName}`,
+                phoneNumber: user.phoneNumber,
+                email: user.email
+            });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
