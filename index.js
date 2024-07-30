@@ -86,7 +86,8 @@ app.post('/api/register', async (req, res) => {
             email: email,
             sponsorCode: sponsorCode,
             pin: pin,
-            balance: 0 // Set initial balance to 0
+            balance: 0, // Set initial balance to 0
+            kyc: 'Pending' // Set initial KYC status to Pending
         });
 
         res.json({ message: 'User registered successfully', userId: userId });
@@ -121,7 +122,7 @@ app.patch('/api/update-balance', async (req, res) => {
 
 // Update user details endpoint
 app.patch('/api/update-user', async (req, res) => {
-    const { userId, phoneNumber, firstName, lastName, dob, nin, email, sponsorCode, pin } = req.body;
+    const { userId, phoneNumber, firstName, lastName, dob, nin, email, sponsorCode, pin, kyc } = req.body;
 
     try {
         const userRef = db.ref(`users/${userId}`);
@@ -137,6 +138,7 @@ app.patch('/api/update-user', async (req, res) => {
             if (email) updates.email = email;
             if (sponsorCode) updates.sponsorCode = sponsorCode;
             if (pin) updates.pin = pin;
+            if (kyc) updates.kyc = kyc;
 
             await userRef.update(updates);
             res.json({ message: 'User details updated successfully', updatedFields: updates });
@@ -148,33 +150,21 @@ app.patch('/api/update-user', async (req, res) => {
     }
 });
 
-// Fetch user details with specific field order
+// Fetch user details endpoint
 app.get('/api/user-details/:userId', async (req, res) => {
     const { userId } = req.params;
-    const { field } = req.query; // Get field parameter from query
 
     try {
         const snapshot = await db.ref(`users/${userId}`).once('value');
         
         if (snapshot.exists()) {
             const user = snapshot.val();
-
-            if (field) {
-                // Check if the requested field exists
-                if (user[field] !== undefined) {
-                    res.json({ [field]: user[field] });
-                } else {
-                    res.status(400).json({ message: 'Field not found' });
-                }
-            } else {
-                // Return fields in a specific order
-                const response = {
-                    fullName: `${user.firstName} ${user.lastName}`,
-                    phoneNumber: user.phoneNumber,
-                    emailAddress: user.email
-                };
-                res.json(response);
-            }
+            res.json({
+                fullName: `${user.firstName} ${user.lastName}`,
+                phoneNumber: user.phoneNumber,
+                email: user.email,
+                kyc: user.kyc
+            });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -186,4 +176,3 @@ app.get('/api/user-details/:userId', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-
