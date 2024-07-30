@@ -148,20 +148,33 @@ app.patch('/api/update-user', async (req, res) => {
     }
 });
 
-// Fetch user details endpoint
+// Fetch user details with specific field order
 app.get('/api/user-details/:userId', async (req, res) => {
     const { userId } = req.params;
+    const { field } = req.query; // Get field parameter from query
 
     try {
         const snapshot = await db.ref(`users/${userId}`).once('value');
         
         if (snapshot.exists()) {
             const user = snapshot.val();
-            res.json({
-                fullName: `${user.firstName} ${user.lastName}`,
-                phoneNumber: user.phoneNumber,
-                email: user.email
-            });
+
+            if (field) {
+                // Check if the requested field exists
+                if (user[field] !== undefined) {
+                    res.json({ [field]: user[field] });
+                } else {
+                    res.status(400).json({ message: 'Field not found' });
+                }
+            } else {
+                // Return fields in a specific order
+                const response = {
+                    fullName: `${user.firstName} ${user.lastName}`,
+                    phoneNumber: user.phoneNumber,
+                    emailAddress: user.email
+                };
+                res.json(response);
+            }
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -173,3 +186,4 @@ app.get('/api/user-details/:userId', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
