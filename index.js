@@ -173,6 +173,29 @@ app.get('/api/user-details/:userId', async (req, res) => {
     }
 });
 
+// Verify old PIN endpoint
+app.post('/api/verify-pin', async (req, res) => {
+    const { userId, pin } = req.body;
+
+    try {
+        const userRef = db.ref(`users/${userId}`);
+        const snapshot = await userRef.once('value');
+
+        if (snapshot.exists()) {
+            const user = snapshot.val();
+            if (user.pin === pin) {
+                res.json({ valid: true });
+            } else {
+                res.json({ valid: false });
+            }
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error verifying PIN', error });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
