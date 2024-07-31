@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -18,6 +19,7 @@ const db = admin.database();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the 'public' directory
 
 // Login endpoint
 app.post('/api/login', async (req, res) => {
@@ -170,6 +172,46 @@ app.get('/api/user-details/:userId', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Error fetching user details', error });
+    }
+});
+
+// Fetch user first name endpoint
+app.get('/api/user-first-name/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const snapshot = await db.ref(`users/${userId}`).once('value');
+        
+        if (snapshot.exists()) {
+            const user = snapshot.val();
+            res.json({
+                firstName: user.firstName
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user details', error });
+    }
+});
+
+// Fetch user balance endpoint
+app.get('/api/user-balance/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const snapshot = await db.ref(`users/${userId}`).once('value');
+        
+        if (snapshot.exists()) {
+            const user = snapshot.val();
+            res.json({
+                balance: user.balance
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user balance', error });
     }
 });
 
