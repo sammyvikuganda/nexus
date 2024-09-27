@@ -99,25 +99,6 @@ app.post('/api/register', async (req, res) => {
 });
 
 
-// Fetch user sponsor code endpoint
-app.get('/api/user-sponsor-code/:userId', async (req, res) => {
-    const { userId } = req.params;
-
-    try {
-        const snapshot = await db.ref(`users/${userId}`).once('value');
-        
-        if (snapshot.exists()) {
-            const user = snapshot.val();
-            res.json({
-                sponsorCode: user.sponsorCode // Return only the sponsor code
-            });
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching sponsor code', error });
-    }
-});
 
 
 
@@ -188,7 +169,8 @@ app.get('/api/user-details/:userId', async (req, res) => {
                 fullName: `${user.firstName} ${user.lastName}`,
                 phoneNumber: user.phoneNumber,
                 email: user.email,
-                kyc: user.kyc
+                kyc: user.kyc,
+                sponsorCode: user.sponsorCode
             });
         } else {
             res.status(404).json({ message: 'User not found' });
@@ -197,6 +179,7 @@ app.get('/api/user-details/:userId', async (req, res) => {
         res.status(500).json({ message: 'Error fetching user details', error });
     }
 });
+
 
 // Fetch user first name endpoint
 app.get('/api/user-first-name/:userId', async (req, res) => {
