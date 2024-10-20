@@ -80,17 +80,19 @@ app.post('/api/register', async (req, res) => {
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
         await db.ref(`users/${userId}`).set({
-            phoneNumber: phoneNumber,
-            firstName: firstName,
-            lastName: lastName,
-            dob: dob,
-            nin: nin,
-            email: email,
-            sponsorCode: sponsorCode,
-            pin: pin,
-            balance: 0, // Set initial balance to 0
-            kyc: 'Pending' // Set initial KYC status to Pending
-        });
+    phoneNumber: phoneNumber,
+    firstName: firstName,
+    lastName: lastName,
+    dob: dob,
+    nin: nin,
+    email: email,
+    sponsorCode: sponsorCode,
+    pin: pin,
+    balance: 0, // Set initial balance to 0
+    cryptoBalance: 0, // Set initial crypto balance to 0
+    kyc: 'Pending' // Set initial KYC status to Pending
+});
+
 
         res.json({ message: 'User registered successfully', userId: userId });
     } catch (error) {
@@ -243,6 +245,57 @@ app.post('/api/verify-pin', async (req, res) => {
         res.status(500).json({ message: 'Error verifying PIN', error });
     }
 });
+
+
+
+// Update crypto balance endpoint
+app.patch('/api/update-crypto-balance', async (req, res) => {
+    const { userId, cryptoBalance } = req.body;
+
+    if (!userId || cryptoBalance === undefined) {
+        return res.status(400).json({ message: 'User ID and crypto balance are required' });
+    }
+
+    try {
+        const userRef = db.ref(`users/${userId}`);
+        const snapshot = await userRef.once('value');
+
+        if (snapshot.exists()) {
+            await userRef.update({ cryptoBalance: cryptoBalance });
+            res.json({ message: 'Crypto balance updated successfully', newCryptoBalance: cryptoBalance });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating crypto balance', error: error.message });
+    }
+});
+
+
+
+// Fetch user crypto balance endpoint
+app.get('/api/user-crypto-balance/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const snapshot = await db.ref(`users/${userId}`).once('value');
+
+        if (snapshot.exists()) {
+            const user = snapshot.val();
+            res.json({
+                cryptoBalance: user.cryptoBalance
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user crypto balance', error });
+    }
+});
+
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
