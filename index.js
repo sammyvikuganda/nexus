@@ -80,19 +80,25 @@ app.post('/api/register', async (req, res) => {
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
         await db.ref(`users/${userId}`).set({
-    phoneNumber: phoneNumber,
-    firstName: firstName,
-    lastName: lastName,
-    dob: dob,
-    nin: nin,
-    email: email,
-    sponsorCode: sponsorCode,
-    pin: pin,
-    balance: 0, // Set initial balance to 0
-    cryptoBalance: 0, // Set initial crypto balance to 0
-    kyc: 'Pending' // Set initial KYC status to Pending
-});
-
+    phoneNumber,
+            firstName,
+            lastName,
+            dob,
+            nin,
+            email,
+            sponsorCode,
+            pin,
+            balance: 0, // Set initial balance to 0
+            cryptoBalance: 0, // Set initial crypto balance to 0
+            kyc: 'Pending', // Set initial KYC status to Pending
+            paymentMethods: {
+                Airtel: "",
+                "MTN Mobile Money": "",
+                "Chipper Cash": "",
+                "Bank Transfer": "",
+                "Crypto Transfer": ""
+            } // Initialize paymentMethods with all options empty
+        });
 
         res.json({ message: 'User registered successfully', userId: userId });
     } catch (error) {
@@ -172,7 +178,14 @@ app.get('/api/user-details/:userId', async (req, res) => {
                 phoneNumber: user.phoneNumber,
                 email: user.email,
                 kyc: user.kyc,
-                sponsorCode: user.sponsorCode
+                sponsorCode: user.sponsorCode,
+                paymentMethods: user.paymentMethods || {
+                    Airtel: "",
+                    "MTN Mobile Money": "",
+                    "Chipper Cash": "",
+                    "Bank Transfer": "",
+                    "Crypto Transfer": ""
+                }
             });
         } else {
             res.status(404).json({ message: 'User not found' });
@@ -295,6 +308,63 @@ app.get('/api/user-crypto-balance/:userId', async (req, res) => {
 
 
 
+
+// Fetch user payment methods endpoint
+app.get('/api/user-payment-methods/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const snapshot = await db.ref(`users/${userId}`).once('value');
+
+        if (snapshot.exists()) {
+            const user = snapshot.val();
+            res.json({
+                paymentMethods: user.paymentMethods || {
+                    Airtel: "",
+                    "MTN Mobile Money": "",
+                    "Chipper Cash": "",
+                    "Bank Transfer": "",
+                    "Crypto Transfer": ""
+                }
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user payment methods', error });
+    }
+});
+
+
+
+// Update payment methods endpoint
+app.patch('/api/update-payment-methods', async (req, res) => {
+    const { userId, paymentMethods } = req.body;
+
+    // Ensure user ID and payment methods are provided
+    if (!userId || typeof paymentMethods !== 'object') {
+        return res.status(400).json({ message: 'User ID and payment methods object are required' });
+    }
+
+    try {
+        const userRef = db.ref(`users/${userId}`);
+        const snapshot = await userRef.once('value');
+
+        if (snapshot.exists()) {
+            // Merge existing payment methods with new ones
+            const existingPaymentMethods = snapshot.val().paymentMethods || {};
+            const updatedPaymentMethods = { ...existingPaymentMethods, ...paymentMethods };
+
+            // Update the user's payment methods
+            await userRef.update({ paymentMethods: updatedPaymentMethods });
+            res.json({ message: 'Payment methods updated successfully', updatedPaymentMethods });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating payment methods', error: error.message });
+    }
+});
 
 
 app.listen(PORT, () => {
