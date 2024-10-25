@@ -370,3 +370,4 @@ app.patch('/api/update-payment-methods', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
