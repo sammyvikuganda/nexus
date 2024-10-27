@@ -92,7 +92,7 @@ app.post('/api/register', async (req, res) => {
             cryptoBalance: 0, // Set initial crypto balance to 0
             kyc: 'Pending', // Set initial KYC status to Pending
             paymentMethods: {
-                Airtel Money: "",
+                "Airtel Money": "",
                 "MTN Mobile Money": "",
                 "Chipper Cash": "",
                 "Bank Transfer": "",
@@ -180,7 +180,7 @@ app.get('/api/user-details/:userId', async (req, res) => {
                 kyc: user.kyc,
                 sponsorCode: user.sponsorCode,
                 paymentMethods: user.paymentMethods || {
-                    Airtel Money: "",
+                    "Airtel Money": "",
                     "MTN Mobile Money": "",
                     "Chipper Cash": "",
                     "Bank Transfer": "",
@@ -320,7 +320,7 @@ app.get('/api/user-payment-methods/:userId', async (req, res) => {
             const user = snapshot.val();
             res.json({
                 paymentMethods: user.paymentMethods || {
-                    Airtel Money: "",
+                    "Airtel Money": "",
                     "MTN Mobile Money": "",
                     "Chipper Cash": "",
                     "Bank Transfer": "",
