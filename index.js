@@ -292,13 +292,18 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
             const transactionId = `txn_${Date.now()}`; // Unique transaction ID
             const transactionLogRef = db.ref(`users/${userId}/transactions/${transactionId}`);
 
-            await transactionLogRef.set({
+            // Create the transaction log entry conditionally
+            const transactionData = {
                 timestamp: Date.now(),
-                from: from,
-                to: to,
-                reason: reason,
                 newCryptoBalance: cryptoBalance,
-            });
+            };
+
+            // Include optional fields if they are provided
+            if (from) transactionData.from = from;
+            if (to) transactionData.to = to;
+            if (reason) transactionData.reason = reason;
+
+            await transactionLogRef.set(transactionData);
 
             res.json({ message: 'Crypto balance updated successfully', newCryptoBalance: cryptoBalance });
         } else {
@@ -308,6 +313,7 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
         res.status(500).json({ message: 'Error updating crypto balance', error: error.message });
     }
 });
+
 
 
 
