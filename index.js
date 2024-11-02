@@ -263,7 +263,7 @@ app.post('/api/verify-pin', async (req, res) => {
 
 // Update crypto balance endpoint
 app.patch('/api/update-crypto-balance', async (req, res) => {
-    const { userId, cryptoBalance } = req.body;
+    const { userId, cryptoBalance, from, to, reason } = req.body;
 
     if (!userId || cryptoBalance === undefined) {
         return res.status(400).json({ message: 'User ID and crypto balance are required' });
@@ -274,7 +274,22 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
         const snapshot = await userRef.once('value');
 
         if (snapshot.exists()) {
+            // Update the crypto balance
             await userRef.update({ cryptoBalance: cryptoBalance });
+
+            // Create transaction log entry
+            const transactionId = `txn_${Date.now()}`; // Generate a unique transaction ID based on timestamp
+            const transactionLogRef = db.ref(`transactions/${transactionId}`);
+
+            await transactionLogRef.set({
+                userId: userId,
+                timestamp: Date.now(),
+                from: from,
+                to: to,
+                reason: reason,
+                newCryptoBalance: cryptoBalance,
+            });
+
             res.json({ message: 'Crypto balance updated successfully', newCryptoBalance: cryptoBalance });
         } else {
             res.status(404).json({ message: 'User not found' });
