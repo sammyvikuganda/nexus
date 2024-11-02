@@ -169,10 +169,21 @@ app.get('/api/user-details/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const snapshot = await db.ref(`users/${userId}`).once('value');
+        const userSnapshot = await db.ref(`users/${userId}`).once('value');
         
-        if (snapshot.exists()) {
-            const user = snapshot.val();
+        if (userSnapshot.exists()) {
+            const user = userSnapshot.val();
+            
+            // Fetch transactions
+            const transactionsSnapshot = await db.ref(`users/${userId}/transactions`).once('value');
+            const transactions = transactionsSnapshot.val() || {};
+
+            // Convert transactions object to an array for easier handling
+            const transactionList = Object.keys(transactions).map(key => ({
+                transactionId: key,
+                ...transactions[key],
+            }));
+
             res.json({
                 fullName: `${user.firstName} ${user.lastName}`,
                 phoneNumber: user.phoneNumber,
@@ -185,7 +196,8 @@ app.get('/api/user-details/:userId', async (req, res) => {
                     "Chipper Cash": "",
                     "Bank Transfer": "",
                     "Crypto Transfer": ""
-                }
+                },
+                transactions: transactionList, // Include transaction list
             });
         } else {
             res.status(404).json({ message: 'User not found' });
@@ -260,7 +272,6 @@ app.post('/api/verify-pin', async (req, res) => {
 });
 
 
-
 // Update crypto balance endpoint
 app.patch('/api/update-crypto-balance', async (req, res) => {
     const { userId, cryptoBalance, from, to, reason } = req.body;
@@ -277,12 +288,11 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
             // Update the crypto balance
             await userRef.update({ cryptoBalance: cryptoBalance });
 
-            // Create transaction log entry
-            const transactionId = `txn_${Date.now()}`; // Generate a unique transaction ID based on timestamp
-            const transactionLogRef = db.ref(`transactions/${transactionId}`);
+            // Create a transaction log entry under the user
+            const transactionId = `txn_${Date.now()}`; // Unique transaction ID
+            const transactionLogRef = db.ref(`users/${userId}/transactions/${transactionId}`);
 
             await transactionLogRef.set({
-                userId: userId,
                 timestamp: Date.now(),
                 from: from,
                 to: to,
