@@ -274,10 +274,10 @@ app.post('/api/verify-pin', async (req, res) => {
 
 // Update crypto balance endpoint
 app.patch('/api/update-crypto-balance', async (req, res) => {
-    const { userId, cryptoBalance, from, to, reason } = req.body;
+    const { userId, amount, from, to, reason } = req.body; // Changed 'cryptoBalance' to 'amount'
 
-    if (!userId || cryptoBalance === undefined) {
-        return res.status(400).json({ message: 'User ID and crypto balance are required' });
+    if (!userId || amount === undefined) {
+        return res.status(400).json({ message: 'User ID and amount are required' });
     }
 
     try {
@@ -285,27 +285,34 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
         const snapshot = await userRef.once('value');
 
         if (snapshot.exists()) {
-            // Update the crypto balance
-            await userRef.update({ cryptoBalance: cryptoBalance });
+            const user = snapshot.val();
+            
+            // Calculate the new crypto balance by adding the specified amount
+            const newCryptoBalance = (user.cryptoBalance || 0) + amount;
 
-            // Create a transaction log entry under the user
-            const transactionId = `txn_${Date.now()}`; // Unique transaction ID
+            // Update the crypto balance in the database
+            await userRef.update({ cryptoBalance: newCryptoBalance });
+
+            // Create a unique transaction ID with 'NXS' prefix
+            const transactionId = `NXS${Date.now()}`;
             const transactionLogRef = db.ref(`users/${userId}/transactions/${transactionId}`);
 
-            // Create the transaction log entry conditionally
+            // Create the transaction log entry to reflect the updated amount
             const transactionData = {
                 timestamp: Date.now(),
-                newCryptoBalance: cryptoBalance,
+                amount: amount, // Log the updated amount
             };
 
-            // Include optional fields if they are provided
+            // Include optional fields if provided
             if (from) transactionData.from = from;
             if (to) transactionData.to = to;
             if (reason) transactionData.reason = reason;
 
+            // Save the transaction log
             await transactionLogRef.set(transactionData);
 
-            res.json({ message: 'Crypto balance updated successfully', newCryptoBalance: cryptoBalance });
+            // Respond with a success message and the updated amount
+            res.json({ message: 'Amount updated successfully', amount: amount });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -313,6 +320,7 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
         res.status(500).json({ message: 'Error updating crypto balance', error: error.message });
     }
 });
+
 
 
 
