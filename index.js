@@ -92,7 +92,7 @@ app.post('/api/register', async (req, res) => {
             balance: 0, // Set initial balance to 0
             cryptoBalance: 0, // Set initial crypto balance to 0
             monthlyCommission: 0, // Set initial monthly commission to 0
-            kyc: 'Pending', // Set initial KYC status to Pending
+            kyc: 'Approved', // Set initial KYC status to Approved
             registeredAt: Date.now(), // Store the registration timestamp
             paymentMethods: {
                 "Airtel Money": "",
@@ -277,10 +277,13 @@ app.post('/api/verify-pin', async (req, res) => {
 
 // Update crypto balance endpoint
 app.patch('/api/update-crypto-balance', async (req, res) => {
-    const { userId, amount, from, to, reason } = req.body; // Changed 'cryptoBalance' to 'amount'
+    const { userId, amount, from, to, reason } = req.body;
 
-    if (!userId || amount === undefined) {
-        return res.status(400).json({ message: 'User ID and amount are required' });
+    // Parse `amount` to ensure it's a number
+    const parsedAmount = Number(amount);
+
+    if (!userId || isNaN(parsedAmount)) {
+        return res.status(400).json({ message: 'User ID and a valid numeric amount are required' });
     }
 
     try {
@@ -289,9 +292,9 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
 
         if (snapshot.exists()) {
             const user = snapshot.val();
-            
-            // Calculate the new crypto balance by adding the specified amount
-            const newCryptoBalance = (user.cryptoBalance || 0) + amount;
+
+            // Calculate the new crypto balance by adding the parsed amount
+            const newCryptoBalance = (user.cryptoBalance || 0) + parsedAmount;
 
             // Update the crypto balance in the database
             await userRef.update({ cryptoBalance: newCryptoBalance });
@@ -303,7 +306,7 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
             // Create the transaction log entry to reflect the updated amount
             const transactionData = {
                 timestamp: Date.now(),
-                amount: amount, // Log the updated amount
+                amount: parsedAmount, // Log the parsed amount
             };
 
             // Include optional fields if provided
@@ -314,8 +317,8 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
             // Save the transaction log
             await transactionLogRef.set(transactionData);
 
-            // Respond with a success message and the updated amount
-            res.json({ message: 'Amount updated successfully', amount: amount });
+            // Respond with a success message and the updated balance
+            res.json({ message: 'Amount updated successfully', newCryptoBalance });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -323,6 +326,7 @@ app.patch('/api/update-crypto-balance', async (req, res) => {
         res.status(500).json({ message: 'Error updating crypto balance', error: error.message });
     }
 });
+
 
 
 
