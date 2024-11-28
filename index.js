@@ -57,12 +57,13 @@ const checkIfExists = async (phoneNumber, email, nin) => {
 
     for (const userId in users) {
         const user = users[userId];
-        if (user.phoneNumber === phoneNumber || user.email === email || user.nin === nin) {
+        if (user.phoneNumber === phoneNumber || user.email === email || (nin && user.nin === nin)) {
             return true;
         }
     }
     return false;
 };
+
 
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
@@ -73,24 +74,26 @@ app.post('/api/register', async (req, res) => {
         const userExists = await checkIfExists(phoneNumber, email, nin);
 
         if (userExists) {
-            return res.status(400).json({ message: 'Some of the credentials you provided are already registered. If you have registered previously, please log in to your account. ' });
+            return res.status(400).json({ message: 'Some of the credentials you provided are already registered. If you have registered previously, please log in to your account.' });
         }
 
         // Generate a unique 6-digit user ID
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
         await db.ref(`users/${userId}`).set({
-    phoneNumber,
+            phoneNumber,
             firstName,
             lastName,
             dob,
-            nin,
+            nin: nin || null,  // If NIN is not provided, set it as null
             email,
             sponsorCode,
             pin,
             balance: 0, // Set initial balance to 0
             cryptoBalance: 0, // Set initial crypto balance to 0
+            monthlyCommission: 0, // Set initial monthly commission to 0
             kyc: 'Pending', // Set initial KYC status to Pending
+            registeredAt: Date.now(), // Store the registration timestamp
             paymentMethods: {
                 "Airtel Money": "",
                 "MTN Mobile Money": "",
