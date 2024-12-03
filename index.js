@@ -110,7 +110,9 @@ app.post('/api/register', async (req, res) => {
                 userId: userId,
             });
 
-            if (response.data.success) {
+            // Check if userId exists in the response from the secondary database
+            if (response.data.userId) {
+                // Successfully created in both databases
                 res.json({ message: 'User registered successfully and replicated in the secondary database', userId: userId });
             } else {
                 // Handle failure from the secondary database
@@ -125,6 +127,7 @@ app.post('/api/register', async (req, res) => {
         res.status(500).json({ message: 'Error registering user', error });
     }
 });
+
 
 
 
