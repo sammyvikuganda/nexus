@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const path = require('path');
+const axios = require('axios'); // Import axios
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -64,7 +65,6 @@ const checkIfExists = async (phoneNumber, email, nin) => {
     return false;
 };
 
-
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
     const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode, pin } = req.body;
@@ -80,6 +80,7 @@ app.post('/api/register', async (req, res) => {
         // Generate a unique 6-digit user ID
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
+        // Save user to the primary database (Firebase)
         await db.ref(`users/${userId}`).set({
             phoneNumber,
             firstName,
@@ -103,13 +104,27 @@ app.post('/api/register', async (req, res) => {
             } // Initialize paymentMethods with all options empty
         });
 
-        res.json({ message: 'User registered successfully', userId: userId });
+        // After creating the user in Firebase, send the userId to another database
+        try {
+            const response = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
+                userId: userId,
+            });
+
+            if (response.data.success) {
+                res.json({ message: 'User registered successfully and replicated in the secondary database', userId: userId });
+            } else {
+                // Handle failure from the secondary database
+                res.status(500).json({ message: 'User registered in the primary database, but failed in the secondary database', userId: userId });
+            }
+        } catch (secondaryError) {
+            console.error('Error creating user in secondary database:', secondaryError);
+            res.status(500).json({ message: 'User registered in the primary database, but failed in the secondary database', userId: userId });
+        }
     } catch (error) {
+        console.error('Error registering user:', error);
         res.status(500).json({ message: 'Error registering user', error });
     }
 });
-
-
 
 
 
