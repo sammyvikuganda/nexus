@@ -104,6 +104,37 @@ app.post('/api/register', async (req, res) => {
             } // Initialize paymentMethods with all options empty
         });
 
+        // If a sponsor code is provided, link the new user as a referral to the sponsor
+        if (sponsorCode) {
+            // Check if the sponsor exists in the database
+            const sponsorSnapshot = await db.ref('users').orderByChild('sponsorCode').equalTo(sponsorCode).once('value');
+            const sponsorData = sponsorSnapshot.val();
+
+            if (sponsorData) {
+                // Sponsor exists, get the sponsor's userId
+                const sponsorUserId = Object.keys(sponsorData)[0];  // Get the sponsor's userId
+
+                // Send the referral data to the secondary database (upay)
+                try {
+                    const referralResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/add-referral', {
+                        userId: sponsorUserId,  // Sponsor's userId
+                        referralId: userId,      // New user's userId
+                    });
+
+                    // Check if the referral was successfully created
+                    if (referralResponse.data.success) {
+                        console.log(`Referral relationship established: ${sponsorUserId} -> ${userId}`);
+                    } else {
+                        console.error('Referral registration failed in secondary database');
+                    }
+                } catch (referralError) {
+                    console.error('Error adding referral:', referralError);
+                }
+            } else {
+                console.error('Sponsor code not found');
+            }
+        }
+
         // After creating the user in Firebase, send the userId to another database
         try {
             const response = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
