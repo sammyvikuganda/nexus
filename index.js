@@ -173,10 +173,10 @@ app.get('/api/user-details/:userId', async (req, res) => {
 
     try {
         const userSnapshot = await db.ref(`users/${userId}`).once('value');
-        
+
         if (userSnapshot.exists()) {
             const user = userSnapshot.val();
-            
+
             // Fetch transactions
             const transactionsSnapshot = await db.ref(`users/${userId}/transactions`).once('value');
             const transactions = transactionsSnapshot.val() || {};
@@ -193,6 +193,7 @@ app.get('/api/user-details/:userId', async (req, res) => {
                 email: user.email,
                 kyc: user.kyc,
                 sponsorCode: user.sponsorCode,
+                registeredAt: user.registeredAt, // Include the registration date
                 paymentMethods: user.paymentMethods || {
                     "Airtel Money": "",
                     "MTN Mobile Money": "",
@@ -209,6 +210,7 @@ app.get('/api/user-details/:userId', async (req, res) => {
         res.status(500).json({ message: 'Error fetching user details', error });
     }
 });
+
 
 
 // Fetch user first name endpoint
