@@ -104,58 +104,77 @@ app.post('/api/register', async (req, res) => {
             } // Initialize paymentMethods with all options empty
         });
 
-        // If a sponsor code is provided, link the new user as a referral to the sponsor
-        if (sponsorCode) {
-            // Check if the sponsor exists in the database
-            const sponsorSnapshot = await db.ref('users').orderByChild('sponsorCode').equalTo(sponsorCode).once('value');
-            const sponsorData = sponsorSnapshot.val();
-
-            if (sponsorData) {
-                // Sponsor exists, get the sponsor's userId
-                const sponsorUserId = Object.keys(sponsorData)[0];  // Get the sponsor's userId
-
-                // Send the referral data to the secondary database (upay)
-                try {
-                    const referralResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/add-referral', {
-                        userId: sponsorUserId,  // Sponsor's userId
-                        referralId: userId,      // New user's userId
-                    });
-
-                    // Check if the referral was successfully created
-                    if (referralResponse.data.success) {
-                        console.log(`Referral relationship established: ${sponsorUserId} -> ${userId}`);
-                    } else {
-                        console.error('Referral registration failed in secondary database');
-                    }
-                } catch (referralError) {
-                    console.error('Error adding referral:', referralError);
-                }
-            } else {
-                console.error('Sponsor code not found');
-            }
-        }
-
         // After creating the user in Firebase, send the userId to another database
         try {
-            const response = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
+            const secondaryResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
                 userId: userId,
             });
 
-            // Check if userId exists in the response from the secondary database
-            if (response.data.userId) {
-                // Successfully created in both databases
-                res.json({ message: 'User registered successfully and replicated in the secondary database', userId: userId });
+            if (secondaryResponse.data.userId) {
+                // If a sponsor code was provided, add the referral relationship
+                if (sponsorCode) {
+                    try {
+                        const sponsorSnapshot = await db.ref(`users/${sponsorCode}`).once('value');
+                        if (sponsorSnapshot.exists()) {
+                            // Add referral relationship in the secondary database
+                            const referralResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/add-referral', {
+                                userId: sponsorCode, // Sponsor's user ID
+                                referralId: userId, // Newly registered user's ID
+                            });
+
+                            if (referralResponse.data.success) {
+                                return res.json({ 
+                                    message: 'User registered successfully, replicated in secondary database, and referral added', 
+                                    userId: userId 
+                                });
+                            } else {
+                                console.error('Referral addition failed in secondary database.');
+                                return res.json({ 
+                                    message: 'User registered successfully, replicated in secondary database, but referral addition failed', 
+                                    userId: userId 
+                                });
+                            }
+                        } else {
+                            console.error('Invalid sponsor code provided.');
+                            return res.json({ 
+                                message: 'User registered successfully, replicated in secondary database, but sponsor code invalid', 
+                                userId: userId 
+                            });
+                        }
+                    } catch (referralError) {
+                        console.error('Error adding referral:', referralError);
+                        return res.status(500).json({ 
+                            message: 'User registered successfully, but referral addition failed', 
+                            userId: userId 
+                        });
+                    }
+                } else {
+                    // No sponsor code was provided
+                    return res.json({ 
+                        message: 'User registered successfully and replicated in secondary database', 
+                        userId: userId 
+                    });
+                }
             } else {
                 // Handle failure from the secondary database
-                res.status(500).json({ message: 'User registered in the primary database, but failed in the secondary database', userId: userId });
+                return res.status(500).json({ 
+                    message: 'User registered in the primary database, but failed in the secondary database', 
+                    userId: userId 
+                });
             }
         } catch (secondaryError) {
             console.error('Error creating user in secondary database:', secondaryError);
-            res.status(500).json({ message: 'User registered in the primary database, but failed in the secondary database', userId: userId });
+            return res.status(500).json({ 
+                message: 'User registered in the primary database, but failed in the secondary database', 
+                userId: userId 
+            });
         }
     } catch (error) {
         console.error('Error registering user:', error);
-        res.status(500).json({ message: 'Error registering user', error });
+        return res.status(500).json({ 
+            message: 'Error registering user', 
+            error 
+        });
     }
 });
 
