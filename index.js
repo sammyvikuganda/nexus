@@ -67,7 +67,7 @@ const checkIfExists = async (phoneNumber, email, nin) => {
 
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
-    const { phoneNumber, firstName, lastName, dob, nin, email, sponsorCode, pin } = req.body;
+    const { phoneNumber, country, firstName, lastName, dob, nin, email, sponsorCode, pin } = req.body;
 
     try {
         // Check for existing user details
@@ -83,6 +83,7 @@ app.post('/api/register', async (req, res) => {
         // Save user to the primary database (Firebase)
         await db.ref(`users/${userId}`).set({
             phoneNumber,
+            country,
             firstName,
             lastName,
             dob,
@@ -258,6 +259,7 @@ app.get('/api/user-details/:userId', async (req, res) => {
             res.json({
                 fullName: `${user.firstName} ${user.lastName}`,
                 phoneNumber: user.phoneNumber,
+                country: user.country,
                 email: user.email,
                 kyc: user.kyc,
                 sponsorCode: user.sponsorCode,
