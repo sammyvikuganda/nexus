@@ -51,6 +51,29 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+
+
+// Function to generate a unique credit history ID with the format 'CREDITxxxxx'
+const generateCreditId = async () => {
+    // Generate a random number between 10000 and 99999
+    const randomId = Math.floor(Math.random() * 90000) + 10000;
+    const creditId = `CREDIT${randomId}`;
+
+    // Check if the credit ID already exists in the database
+    const creditRef = db.ref('credit-history');
+    const snapshot = await creditRef.orderByKey().equalTo(creditId).once('value');
+    
+    if (snapshot.exists()) {
+        // If it exists, recursively generate a new one
+        return generateCreditId();
+    }
+
+    return creditId;
+};
+
+
+
+
 // Helper function to check for existing user details
 const checkIfExists = async (phoneNumber, email, nin) => {
     const snapshot = await db.ref('users').once('value');
@@ -736,6 +759,104 @@ app.get('/api/countries', (req, res) => {
 ];
 
     res.json(countriesData);
+});
+
+
+
+
+
+
+
+
+
+// Create Credit History Endpoint (without default reason)
+app.post('/api/credit-history', async (req, res) => {
+    const { userId, amount, network, orderStatus } = req.body;
+
+    // Validate input data
+    if (!userId || !amount || !network || !orderStatus) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const timestamp = new Date().toISOString(); // Current timestamp
+    const creditId = await generateCreditId(); // Generate unique credit ID
+
+    try {
+        // Create a new credit record in Firebase without the reason field
+        const creditRef = db.ref('credit-history').child(creditId); // Use the generated credit ID
+        await creditRef.set({
+            userId,
+            amount,
+            timestamp,
+            network,
+            orderStatus,
+            reason: null, // Initially setting reason as null or not adding it
+        });
+
+        // Send a successful response
+        res.status(200).json({ message: 'Credit history added successfully', creditId });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding credit history', error });
+    }
+});
+
+// Update Credit History Endpoint (for updating order status and reason)
+app.put('/api/update-credit-history', async (req, res) => {
+    const { creditHistoryId, orderStatus, reason } = req.body;
+
+    // Validate input data
+    if (!creditHistoryId || !orderStatus || reason === undefined) {  // Check that reason is included if needed
+        return res.status(400).json({ message: 'Missing required fields (creditHistoryId, orderStatus, reason)' });
+    }
+
+    try {
+        // Get reference to the credit history record in Firebase
+        const creditRef = db.ref(`credit-history/${creditHistoryId}`);
+
+        // Check if credit history exists
+        const snapshot = await creditRef.once('value');
+        if (!snapshot.exists()) {
+            return res.status(404).json({ message: 'Credit history not found' });
+        }
+
+        // Update the order status and reason for the credit history
+        await creditRef.update({
+            orderStatus,
+            reason,  // Updating the reason as per the request
+        });
+
+        // Send a successful response
+        res.status(200).json({ message: 'Credit history updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating credit history', error });
+    }
+});
+
+// Fetch Credit History Endpoint
+app.get('/api/credit-history', async (req, res) => {
+    try {
+        // Get all credit histories from Firebase
+        const creditHistorySnapshot = await db.ref('credit-history').once('value');
+        
+        // Check if there are any credit histories
+        if (!creditHistorySnapshot.exists()) {
+            return res.status(404).json({ message: 'No credit histories found' });
+        }
+
+        // Extract credit history data
+        const creditHistories = creditHistorySnapshot.val();
+
+        // Format the response as an array of credit history records
+        const creditHistoryList = Object.keys(creditHistories).map(creditHistoryId => ({
+            creditHistoryId,
+            ...creditHistories[creditHistoryId],
+        }));
+
+        // Send the credit history list in the response
+        res.status(200).json(creditHistoryList);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching credit history', error });
+    }
 });
 
 
