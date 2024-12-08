@@ -769,12 +769,12 @@ app.get('/api/countries', (req, res) => {
 
 
 
-// Create Credit History Endpoint (without default reason)
+// Create Credit History Endpoint (with currency)
 app.post('/api/credit-history', async (req, res) => {
-    const { userId, amount, network, orderStatus } = req.body;
+    const { userId, amount, network, orderStatus, currency } = req.body;
 
     // Validate input data
-    if (!userId || !amount || !network || !orderStatus) {
+    if (!userId || !amount || !network || !orderStatus || !currency) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -782,14 +782,15 @@ app.post('/api/credit-history', async (req, res) => {
     const creditId = await generateCreditId(); // Generate unique credit ID
 
     try {
-        // Create a new credit record in Firebase without the reason field
+        // Create a new credit record in Firebase with currency field
         const creditRef = db.ref('credit-history').child(creditId); // Use the generated credit ID
         await creditRef.set({
             userId,
             amount,
-            timestamp,
             network,
             orderStatus,
+            timestamp,
+            currency,  // Add the currency field to the record
             reason: null, // Initially setting reason as null or not adding it
         });
 
@@ -799,6 +800,7 @@ app.post('/api/credit-history', async (req, res) => {
         res.status(500).json({ message: 'Error adding credit history', error });
     }
 });
+
 
 // Update Credit History Endpoint (for updating order status and reason)
 app.put('/api/update-credit-history', async (req, res) => {
