@@ -862,6 +862,35 @@ app.get('/api/credit-history', async (req, res) => {
 });
 
 
+// Update incomplete orders endpoint
+app.put('/api/updateIncompleteOrders', async (req, res) => {
+    const { userId, incompleteOrders } = req.body;
+
+    try {
+        if (!userId || incompleteOrders === undefined) {
+            return res.status(400).json({ message: 'User ID and incompleteOrders value are required.' });
+        }
+
+        // Update the user's incompleteOrders field in the database
+        const userRef = db.ref(`users/${userId}`);
+        const userSnapshot = await userRef.once('value');
+
+        if (!userSnapshot.exists()) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        await userRef.update({ incompleteOrders });
+
+        return res.status(200).json({ message: 'Incomplete orders updated successfully.' });
+    } catch (error) {
+        console.error('Error updating incomplete orders:', error);
+        return res.status(500).json({ message: 'An error occurred while updating incomplete orders.', error });
+    }
+});
+
+
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
