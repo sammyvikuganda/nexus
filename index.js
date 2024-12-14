@@ -73,6 +73,26 @@ const generateCreditId = async () => {
 
 
 
+// Function to generate a unique withdrawal history ID with the format 'WITHDRAWxxxxx'
+const generateWithdrawalId = async () => {
+    const randomId = Math.floor(Math.random() * 90000) + 10000;
+    const withdrawalId = `WITHDRAW${randomId}`;
+
+    // Check if the withdrawal ID already exists in the database
+    const withdrawalRef = db.ref('withdrawal-history');
+    const snapshot = await withdrawalRef.orderByKey().equalTo(withdrawalId).once('value');
+
+    if (snapshot.exists()) {
+        // If it exists, recursively generate a new one
+        return generateWithdrawalId();
+    }
+
+    return withdrawalId;
+};
+
+
+
+
 
 // Helper function to check for existing user details
 const checkIfExists = async (phoneNumber, email, nin) => {
@@ -885,6 +905,108 @@ app.put('/api/updateIncompleteOrders', async (req, res) => {
     } catch (error) {
         console.error('Error updating incomplete orders:', error);
         return res.status(500).json({ message: 'An error occurred while updating incomplete orders.', error });
+    }
+});
+
+
+
+
+
+
+
+
+// Create Withdrawal History Endpoint
+app.post('/api/withdrawal-history', async (req, res) => {
+    const { userId, amount, network, orderStatus, reason } = req.body;
+
+    // Validate input data
+    if (!userId || !amount || !network || !orderStatus) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const timestamp = new Date().toISOString(); // Current timestamp
+    const withdrawalId = await generateWithdrawalId(); // Generate unique withdrawal ID
+
+    try {
+        // Create a new withdrawal record in Firebase
+        const withdrawalRef = db.ref('withdrawal-history').child(withdrawalId);
+        await withdrawalRef.set({
+            userId,
+            amount,
+            network,
+            orderStatus,
+            timestamp,
+            reason: reason || null, // If reason is not provided, set it as null
+        });
+
+        // Send a successful response
+        res.status(200).json({ message: 'Withdrawal history added successfully', withdrawalId });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding withdrawal history', error });
+    }
+});
+
+
+
+
+// Update Withdrawal History Endpoint
+app.put('/api/update-withdrawal-history', async (req, res) => {
+    const { withdrawalHistoryId, orderStatus, reason } = req.body;
+
+    // Validate input data
+    if (!withdrawalHistoryId || !orderStatus || reason === undefined) {
+        return res.status(400).json({ message: 'Missing required fields (withdrawalHistoryId, orderStatus, reason)' });
+    }
+
+    try {
+        // Get reference to the withdrawal history record in Firebase
+        const withdrawalRef = db.ref(`withdrawal-history/${withdrawalHistoryId}`);
+
+        // Check if withdrawal history exists
+        const snapshot = await withdrawalRef.once('value');
+        if (!snapshot.exists()) {
+            return res.status(404).json({ message: 'Withdrawal history not found' });
+        }
+
+        // Update the order status and reason for the withdrawal history
+        await withdrawalRef.update({
+            orderStatus,
+            reason, // Update reason if provided
+        });
+
+        // Send a successful response
+        res.status(200).json({ message: 'Withdrawal history updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating withdrawal history', error });
+    }
+});
+
+
+
+// Fetch Withdrawal History Endpoint
+app.get('/api/withdrawal-history', async (req, res) => {
+    try {
+        // Get all withdrawal histories from Firebase
+        const withdrawalHistorySnapshot = await db.ref('withdrawal-history').once('value');
+        
+        // Check if there are any withdrawal histories
+        if (!withdrawalHistorySnapshot.exists()) {
+            return res.status(404).json({ message: 'No withdrawal histories found' });
+        }
+
+        // Extract withdrawal history data
+        const withdrawalHistories = withdrawalHistorySnapshot.val();
+
+        // Format the response as an array of withdrawal history records
+        const withdrawalHistoryList = Object.keys(withdrawalHistories).map(withdrawalHistoryId => ({
+            withdrawalHistoryId,
+            ...withdrawalHistories[withdrawalHistoryId],
+        }));
+
+        // Send the withdrawal history list in the response
+        res.status(200).json(withdrawalHistoryList);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching withdrawal history', error });
     }
 });
 
