@@ -99,18 +99,25 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
     const snapshot = await db.ref('users').once('value');
     const users = snapshot.val();
 
+    let credentialsExist = false;
+    let deviceExists = false;
+
+    // Iterate through each user to check for conflicts
     for (const userId in users) {
         const user = users[userId];
         if (
             user.phoneNumber === phoneNumber || 
             user.email === email || 
-            (nin && user.nin === nin) || 
-            (deviceDetails && user.deviceDetails && user.deviceDetails.userAgent === deviceDetails.userAgent)
+            (nin && user.nin === nin)
         ) {
-            return true;
+            credentialsExist = true;
+        }
+        if (deviceDetails && user.deviceDetails && user.deviceDetails.userAgent === deviceDetails.userAgent) {
+            deviceExists = true;
         }
     }
-    return false;
+
+    return { credentialsExist, deviceExists };
 };
 
 // Register user endpoint
@@ -119,11 +126,26 @@ app.post('/api/register', async (req, res) => {
 
     try {
         // Check for existing user details, including device information
-        const userExists = await checkIfExists(phoneNumber, email, nin, deviceDetails);
+        const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
 
-        if (userExists) {
+        // If both credentials and device details exist, send the appropriate message
+        if (credentialsExist && deviceExists) {
             return res.status(400).json({
-                message: 'Some of the credentials or device details you provided are already registered. If you have registered previously, please log in to your account.'
+                message: 'Some of the credentials you provided are already registered, and you cannot register another account using this device. We only accept one account per device.'
+            });
+        }
+
+        // If only credentials exist
+        if (credentialsExist) {
+            return res.status(400).json({
+                message: 'Some of the credentials you provided already exist. If you have registered previously, please log in to your account.'
+            });
+        }
+
+        // If only device details exist
+        if (deviceExists) {
+            return res.status(400).json({
+                message: 'You cannot register another account using this device. We only accept one account per device.'
             });
         }
 
@@ -238,6 +260,7 @@ app.post('/api/register', async (req, res) => {
         });
     }
 });
+
 
 
 
