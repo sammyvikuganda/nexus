@@ -94,31 +94,24 @@ const generateWithdrawalId = async () => {
 
 
 
-// Helper function to check for existing user details, including device information
+// Helper function to check for existing user details, including device info
 const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
     const snapshot = await db.ref('users').once('value');
     const users = snapshot.val();
 
     for (const userId in users) {
         const user = users[userId];
-        // Check if the phone number, email, or NIN already exists
         if (
-            user.phoneNumber === phoneNumber ||
-            user.email === email ||
-            (nin && user.nin === nin)
+            user.phoneNumber === phoneNumber || 
+            user.email === email || 
+            (nin && user.nin === nin) || 
+            (deviceDetails && user.deviceDetails && user.deviceDetails.userAgent === deviceDetails.userAgent)
         ) {
-            return true;
-        }
-
-        // Check if the device is already registered
-        if (user.deviceDetails && user.deviceDetails.userAgent === deviceDetails.userAgent) {
             return true;
         }
     }
     return false;
 };
-
-
 
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
@@ -130,7 +123,7 @@ app.post('/api/register', async (req, res) => {
 
         if (userExists) {
             return res.status(400).json({
-                message: 'Some of the credentials or device details you provided are already registered. Please log in or use a different device.',
+                message: 'Some of the credentials or device details you provided are already registered. If you have registered previously, please log in to your account.'
             });
         }
 
@@ -144,7 +137,7 @@ app.post('/api/register', async (req, res) => {
             firstName,
             lastName,
             dob,
-            nin: nin || null, // If NIN is not provided, set it as null
+            nin: nin || null,  // If NIN is not provided, set it as null
             email,
             sponsorCode,
             pin,
@@ -156,29 +149,96 @@ app.post('/api/register', async (req, res) => {
             kyc: 'Pending', // Set initial KYC status to Pending
             registeredAt: Date.now(), // Store the registration timestamp
             paymentMethods: {
-                'Airtel Money': '',
-                'MTN Mobile Money': '',
-                'Chipper Cash': '',
-                'Bank Transfer': '',
-                'Crypto Transfer': '',
-            },
-            deviceDetails, // Save the device information
+                "Airtel Money": "",
+                "MTN Mobile Money": "",
+                "Chipper Cash": "",
+                "Bank Transfer": "",
+                "Crypto Transfer": ""
+            }, // Initialize paymentMethods with all options empty
+            deviceDetails: {
+                userAgent: deviceDetails?.userAgent || null,
+                platform: deviceDetails?.platform || null,
+                screenWidth: deviceDetails?.screenWidth || null,
+                screenHeight: deviceDetails?.screenHeight || null,
+                colorDepth: deviceDetails?.colorDepth || null,
+                devicePixelRatio: deviceDetails?.devicePixelRatio || null
+            } // Save device details
         });
 
-        // Additional logic for sponsorCode and replication to secondary database (unchanged)...
+        // After creating the user in Firebase, send the userId to another database
+        try {
+            const secondaryResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
+                userId: userId,
+            });
 
-        return res.json({
-            message: 'User registered successfully',
-            userId: userId,
-        });
+            if (secondaryResponse.data.userId) {
+                // If a sponsor code was provided, add the referral relationship
+                if (sponsorCode) {
+                    try {
+                        const sponsorSnapshot = await db.ref(`users/${sponsorCode}`).once('value');
+                        if (sponsorSnapshot.exists()) {
+                            // Add referral relationship in the secondary database
+                            const referralResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/add-referral', {
+                                userId: sponsorCode, // Sponsor's user ID
+                                referralId: userId, // Newly registered user's ID
+                            });
+
+                            if (referralResponse.data.success) {
+                                return res.json({
+                                    message: 'User registered successfully, replicated in secondary database, and referral added',
+                                    userId: userId
+                                });
+                            } else {
+                                console.error('Referral addition failed in secondary database.');
+                                return res.json({
+                                    message: 'User registered successfully, replicated in secondary database, but referral addition failed',
+                                    userId: userId
+                                });
+                            }
+                        } else {
+                            console.error('Invalid sponsor code provided.');
+                            return res.json({
+                                message: 'User registered successfully, replicated in secondary database, but sponsor code invalid',
+                                userId: userId
+                            });
+                        }
+                    } catch (referralError) {
+                        console.error('Error adding referral:', referralError);
+                        return res.status(500).json({
+                            message: 'User registered successfully, but referral addition failed',
+                            userId: userId
+                        });
+                    }
+                } else {
+                    // No sponsor code was provided
+                    return res.json({
+                        message: 'User registered successfully and replicated in secondary database',
+                        userId: userId
+                    });
+                }
+            } else {
+                // Handle failure from the secondary database
+                return res.status(500).json({
+                    message: 'User registered in the primary database, but failed in the secondary database',
+                    userId: userId
+                });
+            }
+        } catch (secondaryError) {
+            console.error('Error creating user in secondary database:', secondaryError);
+            return res.status(500).json({
+                message: 'User registered in the primary database, but failed in the secondary database',
+                userId: userId
+            });
+        }
     } catch (error) {
         console.error('Error registering user:', error);
         return res.status(500).json({
             message: 'Error registering user',
-            error,
+            error
         });
     }
 });
+
 
 
 
