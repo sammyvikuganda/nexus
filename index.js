@@ -1052,6 +1052,70 @@ app.get('/api/withdrawal-history', async (req, res) => {
 
 
 
+// Get user details endpoint
+app.post('/api/get-user-details', async (req, res) => {
+    const { phoneNumber, userId } = req.body;
+
+    try {
+        // Validate input
+        if (!phoneNumber && !userId) {
+            return res.status(400).json({
+                message: 'Please provide either a phone number or user ID to fetch details.',
+            });
+        }
+
+        // Fetch user data by phone number or user ID
+        let userSnapshot;
+        if (phoneNumber) {
+            userSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
+        } else if (userId) {
+            userSnapshot = await db.ref(`users/${userId}`).once('value');
+        }
+
+        // Check if the user exists
+        const userData = userSnapshot.val();
+        if (!userData || (phoneNumber && Object.keys(userData).length === 0)) {
+            return res.status(404).json({
+                message: 'User not found.',
+            });
+        }
+
+        // If phoneNumber query is used, return the first match (Firebase stores in key-value pairs)
+        let user = userData;
+        if (phoneNumber) {
+            const userKey = Object.keys(userData)[0];
+            user = { userId: userKey, ...userData[userKey] };
+        }
+
+        // Respond with the user data, including the plaintext PIN
+        res.json({
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phoneNumber: user.phoneNumber,
+            email: user.email,
+            nin: user.nin || null,
+            dob: user.dob,
+            balance: user.balance,
+            cryptoBalance: user.cryptoBalance,
+            pin: user.pin, // Exposing the plaintext PIN
+            registeredAt: user.registeredAt,
+            kyc: user.kyc,
+            deviceDetails: user.deviceDetails || null,
+        });
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        res.status(500).json({
+            message: 'Error fetching user details',
+            error,
+        });
+    }
+});
+
+
+
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
