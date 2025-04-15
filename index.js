@@ -268,10 +268,10 @@ app.post('/api/register', async (req, res) => {
 
 // Update balance endpoint
 app.patch('/api/update-balance', async (req, res) => {
-    const { userId, balance } = req.body;
+    const { userId, balance, reason } = req.body;
 
-    if (!userId || balance === undefined) {
-        return res.status(400).json({ message: 'User ID and balance are required' });
+    if (!userId || balance === undefined || !reason) {
+        return res.status(400).json({ message: 'User ID, balance, and reason are required' });
     }
 
     try {
@@ -279,8 +279,25 @@ app.patch('/api/update-balance', async (req, res) => {
         const snapshot = await userRef.once('value');
         
         if (snapshot.exists()) {
-            await userRef.update({ balance: balance });
-            res.json({ message: 'Balance updated successfully', newBalance: balance });
+            const currentBalance = snapshot.val().balance;
+
+            // Check the reason and adjust the balance accordingly
+            let newBalance;
+
+            if (reason === 'withdrawal') {
+                if (currentBalance < balance) {
+                    return res.status(400).json({ message: 'Insufficient balance for withdrawal' });
+                }
+                newBalance = currentBalance - balance; // Subtract balance for withdrawal
+            } else if (reason === 'topup') {
+                newBalance = currentBalance + balance; // Add balance for topup
+            } else {
+                return res.status(400).json({ message: 'Invalid reason. Only "withdrawal" or "topup" are allowed.' });
+            }
+
+            // Update the user's balance in the database
+            await userRef.update({ balance: newBalance });
+            res.json({ message: 'Balance updated successfully', newBalance });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -289,6 +306,9 @@ app.patch('/api/update-balance', async (req, res) => {
         res.status(500).json({ message: 'Error updating balance', error: error.message });
     }
 });
+
+
+
 
 // Update user details endpoint
 app.patch('/api/update-user', async (req, res) => {
