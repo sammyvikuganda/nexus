@@ -10,42 +10,74 @@ export default async function handler(req, res) {
   // Log the webhook data for debugging purposes
   console.log("Webhook received:", req.body);
 
-  // Parse the reference to extract userId and amount
+  // Parse the reference to extract userId (and amount, though we will fetch amount from database)
   const parts = reference_id.split('-');
   const userId = parts[1];  // Extracting userId from the reference
-  const amount = parseFloat(parts[2]);  // Extracting amount from the reference
 
+  // Reference to the user's data in Firebase
+  const userRef = db.ref(`users/${userId}`);
+
+  // Fetch the current balance of the user
+  const snapshot = await userRef.once('value');
+  const userData = snapshot.val();
+
+  if (!userData) {
+    console.log(`User ${userId} not found in database`);
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  // Reference to the user's transactions
+  const transactionsRef = userRef.child('transactions');
+
+  // Find the transaction by transaction_id (using 'transactionId' field)
+  const transactionSnapshot = await transactionsRef
+    .orderByChild('transactionId')
+    .equalTo(transaction_id)
+    .once('value');
+
+  if (!transactionSnapshot.exists()) {
+    console.log(`Transaction ${transaction_id} not found in user's transactions.`);
+    return res.status(404).json({ error: 'Transaction not found' });
+  }
+
+  const transactionKey = Object.keys(transactionSnapshot.val())[0]; // Get the first match
+  const transaction = transactionSnapshot.val()[transactionKey];
+
+  // Handle Approved status
   if (status === 'Approved') {
-    // Reference to the user's balance field in Firebase
-    const userRef = db.ref(`users/${userId}`);
+    let newBalance = userData.balance || 0;
+    const amount = transaction.amount;  // Fetch the amount from the database transaction
 
-    // Fetch the current balance of the user
-    const snapshot = await userRef.once('value');
-    const userData = snapshot.val();
-
-    if (userData) {
-      // Calculate the new balance (existing balance + new amount)
-      const newBalance = (userData.balance || 0) + amount;
-
-      // Update the user's balance
-      await userRef.update({
-        balance: newBalance,
-      });
-
-      // Push the transaction data to the transactions field
-      const transactionsRef = userRef.child('transactions');
-      await transactionsRef.push({
-        transactionId: transaction_id,
-        amount: amount,
-        status: 'completed',
-        reason: 'Top Up',  // Add the reason here
-        timestamp: new Date().toISOString()
-      });
-
-      console.log(`Credited UGX ${amount} to user ${userId}, new balance: UGX ${newBalance}`);
-    } else {
-      console.log(`User ${userId} not found in database`);
+    // Handle credit or debit based on the reason of the transaction
+    if (transaction.reason === 'Top Up') {
+      newBalance += amount;  // Credit amount if reason is 'Top Up'
+      console.log(`Transaction ${transaction_id} approved, credited UGX ${amount} to user ${userId}.`);
+    } else if (transaction.reason === 'Withdrawal') {
+      newBalance -= amount;  // Debit amount if reason is 'Withdrawal'
+      console.log(`Transaction ${transaction_id} approved, debited UGX ${amount} from user ${userId}.`);
     }
+
+    // Update the user's balance in the database
+    await userRef.update({
+      balance: newBalance,
+    });
+
+    // Update the transaction status to 'completed'
+    await transactionsRef.child(transactionKey).update({
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+    });
+
+    console.log(`New balance for user ${userId}: UGX ${newBalance}`);
+
+  } else if (status === 'Failed') {
+    // If the status is 'Failed', just mark the transaction as failed
+    await transactionsRef.child(transactionKey).update({
+      status: 'failed',
+      timestamp: new Date().toISOString(),
+    });
+
+    console.log(`Transaction ${transaction_id} failed.`);
   }
 
   // Acknowledge receipt of the webhook
