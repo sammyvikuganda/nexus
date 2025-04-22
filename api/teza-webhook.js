@@ -49,9 +49,11 @@ export default async function handler(req, res) {
     if (transaction.reason === 'Top Up') {
       newBalance += amount;  // Credit amount if reason is 'Top Up'
       console.log(`Transaction with reference ${reference_id} approved, credited UGX ${amount} to user ${userId}.`);
-    } else if (transaction.reason === 'Withdraw') {
-      newBalance -= amount;  // Debit amount if reason is 'Withdraw'
-      console.log(`Transaction with reference ${reference_id} approved, debited UGX ${amount} from user ${userId}.`);
+    } 
+    // Withdrawal is not handled here because the deduction is already done in the server side before Teza request
+    else if (transaction.reason === 'Withdraw') {
+      // No deduction here, as it's handled earlier
+      console.log(`Transaction with reference ${reference_id} approved for Withdrawal, no deduction needed.`);
     }
 
     // Update the user's balance in the database
@@ -70,7 +72,7 @@ export default async function handler(req, res) {
   } else if (status === 'Failed') {
     const amount = transaction.amount;  // Fetch the amount from the database transaction
 
-    // If the transaction reason is 'Withdraw', credit the user back
+    // If the transaction reason is 'Withdraw', credit the user back (refund)
     if (transaction.reason === 'Withdraw') {
       let newBalance = userData.balance || 0;
       newBalance += amount;  // Credit the amount back to the user
@@ -80,7 +82,7 @@ export default async function handler(req, res) {
         balance: newBalance,
       });
 
-      console.log(`Transaction with reference ${reference_id} failed, credited UGX ${amount} back to user ${userId}.`);
+      console.log(`Transaction with reference ${reference_id} failed, refunded UGX ${amount} back to user ${userId}.`);
     }
 
     // Mark the transaction as failed
