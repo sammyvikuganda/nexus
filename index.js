@@ -332,10 +332,10 @@ app.patch('/api/update-balance', async (req, res) => {
         await newTransactionRef.set({
           amount: amount,
           reason: reason,
-          transactionId: transaction_id,
+          transactionId: transaction_id, // Transaction ID from Teza
           reference: reference,
           phone: phone,
-          status: 'pending',
+          status: 'pending', // Initial status as 'pending'
           timestamp: new Date().toISOString()
         });
 

@@ -10,14 +10,11 @@ export default async function handler(req, res) {
   // Log the webhook data for debugging purposes
   console.log("Webhook received:", req.body);
 
-  // Parse the reference to extract userId (and amount, though we will fetch amount from database)
-  const parts = reference_id.split('-');
-  const userId = parts[1];  // Extracting userId from the reference
-
   // Reference to the user's data in Firebase
+  const userId = reference_id.split('-')[1]; // Extracting userId from the reference
   const userRef = db.ref(`users/${userId}`);
 
-  // Fetch the current balance of the user
+  // Fetch the current user data from Firebase
   const snapshot = await userRef.once('value');
   const userData = snapshot.val();
 
@@ -29,14 +26,14 @@ export default async function handler(req, res) {
   // Reference to the user's transactions
   const transactionsRef = userRef.child('transactions');
 
-  // Find the transaction by transaction_id (using 'transactionId' field)
+  // Find the transaction by reference_id (using 'reference' field)
   const transactionSnapshot = await transactionsRef
-    .orderByChild('transactionId')
-    .equalTo(transaction_id)
+    .orderByChild('reference')
+    .equalTo(reference_id) // Look for the transaction using the reference field
     .once('value');
 
   if (!transactionSnapshot.exists()) {
-    console.log(`Transaction ${transaction_id} not found in user's transactions.`);
+    console.log(`Transaction with reference ${reference_id} not found in user's transactions.`);
     return res.status(404).json({ error: 'Transaction not found' });
   }
 
@@ -51,10 +48,10 @@ export default async function handler(req, res) {
     // Handle credit or debit based on the reason of the transaction
     if (transaction.reason === 'Top Up') {
       newBalance += amount;  // Credit amount if reason is 'Top Up'
-      console.log(`Transaction ${transaction_id} approved, credited UGX ${amount} to user ${userId}.`);
-    } else if (transaction.reason === 'Withdrawal') {
-      newBalance -= amount;  // Debit amount if reason is 'Withdrawal'
-      console.log(`Transaction ${transaction_id} approved, debited UGX ${amount} from user ${userId}.`);
+      console.log(`Transaction with reference ${reference_id} approved, credited UGX ${amount} to user ${userId}.`);
+    } else if (transaction.reason === 'Withdraw') {
+      newBalance -= amount;  // Debit amount if reason is 'Withdraw'
+      console.log(`Transaction with reference ${reference_id} approved, debited UGX ${amount} from user ${userId}.`);
     }
 
     // Update the user's balance in the database
@@ -73,8 +70,8 @@ export default async function handler(req, res) {
   } else if (status === 'Failed') {
     const amount = transaction.amount;  // Fetch the amount from the database transaction
 
-    // If the transaction reason is 'Withdrawal', credit the user back
-    if (transaction.reason === 'Withdrawal') {
+    // If the transaction reason is 'Withdraw', credit the user back
+    if (transaction.reason === 'Withdraw') {
       let newBalance = userData.balance || 0;
       newBalance += amount;  // Credit the amount back to the user
 
@@ -83,7 +80,7 @@ export default async function handler(req, res) {
         balance: newBalance,
       });
 
-      console.log(`Transaction ${transaction_id} failed, credited UGX ${amount} back to user ${userId}.`);
+      console.log(`Transaction with reference ${reference_id} failed, credited UGX ${amount} back to user ${userId}.`);
     }
 
     // Mark the transaction as failed
@@ -92,7 +89,7 @@ export default async function handler(req, res) {
       timestamp: new Date().toISOString(),
     });
 
-    console.log(`Transaction ${transaction_id} failed.`);
+    console.log(`Transaction with reference ${reference_id} failed.`);
   }
 
   // Acknowledge receipt of the webhook
