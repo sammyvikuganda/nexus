@@ -71,7 +71,22 @@ export default async function handler(req, res) {
     console.log(`New balance for user ${userId}: UGX ${newBalance}`);
 
   } else if (status === 'Failed') {
-    // If the status is 'Failed', just mark the transaction as failed
+    const amount = transaction.amount;  // Fetch the amount from the database transaction
+
+    // If the transaction reason is 'Withdrawal', credit the user back
+    if (transaction.reason === 'Withdrawal') {
+      let newBalance = userData.balance || 0;
+      newBalance += amount;  // Credit the amount back to the user
+
+      // Update the user's balance in the database
+      await userRef.update({
+        balance: newBalance,
+      });
+
+      console.log(`Transaction ${transaction_id} failed, credited UGX ${amount} back to user ${userId}.`);
+    }
+
+    // Mark the transaction as failed
     await transactionsRef.child(transactionKey).update({
       status: 'failed',
       timestamp: new Date().toISOString(),
