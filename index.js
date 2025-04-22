@@ -367,6 +367,71 @@ app.patch('/api/update-balance', async (req, res) => {
 
 
 
+// Endpoint to manually process all failed logs
+app.post('/api/process-failed-logs', async (req, res) => {
+  try {
+    const usersSnapshot = await db.ref('users').once('value');
+    
+    if (!usersSnapshot.exists()) {
+      return res.status(404).json({ message: 'No users found' });
+    }
+
+    const users = usersSnapshot.val();
+
+    // Loop through each user
+    for (let userId in users) {
+      const userRef = db.ref(`users/${userId}`);
+      const transactionsRef = userRef.child('transactions');
+
+      // Get failed logs for the user
+      const failedLogsSnapshot = await userRef.child('failed_logs').once('value');
+
+      if (failedLogsSnapshot.exists()) {
+        const failedLogs = failedLogsSnapshot.val();
+
+        // Loop through each failed log and process
+        for (let logId in failedLogs) {
+          const failedLog = failedLogs[logId];
+          const reference_id = failedLog.reference_id;
+          const transaction_id = failedLog.transaction_id;
+          const failedStatus = failedLog.status;  // Get the status from the failed log ('Approved' or 'Failed')
+
+          // Look for the transaction by reference_id
+          const transactionSnapshot = await transactionsRef
+            .orderByChild('reference')
+            .equalTo(reference_id)
+            .once('value');
+
+          if (transactionSnapshot.exists()) {
+            // Find the transaction
+            const transactionKey = Object.keys(transactionSnapshot.val())[0];
+            const transaction = transactionSnapshot.val()[transactionKey];
+
+            // Update the transaction status based on the failed log's status
+            const updatedStatus = (failedStatus === 'Approved') ? 'completed' : failedStatus;
+
+            await transactionsRef.child(transactionKey).update({
+              status: updatedStatus,  // Update status to 'completed' if Approved, or keep it 'Failed'
+              timestamp: new Date().toISOString(),
+            });
+
+            // Delete the failed log after processing
+            await userRef.child('failed_logs').child(logId).remove();
+
+            console.log(`Transaction with reference ${reference_id} processed and status updated to ${updatedStatus}.`);
+          } else {
+            console.log(`Transaction with reference ${reference_id} not found for user ${userId}.`);
+          }
+        }
+      }
+    }
+
+    return res.status(200).json({ message: 'All failed logs processed successfully.' });
+  } catch (error) {
+    console.error('Error processing failed logs:', error);
+    return res.status(500).json({ message: 'Failed to process logs', error: error.message });
+  }
+});
 
 
 
