@@ -268,129 +268,107 @@ app.post('/api/register', async (req, res) => {
 
 
 
-
-
-
-
-
 // Endpoint to handle both Top Up and Withdraw
 app.patch('/api/update-balance', async (req, res) => {
-    const { userId, amount, reason, phone } = req.body;
+  const { userId, amount, reason, phone } = req.body;
 
-    // Validate required fields
-    if (!userId || amount === undefined || !reason || !phone) {
-        return res.status(400).json({ message: 'User ID, amount, reason, and phone are required' });
+  if (!userId || amount === undefined || !reason || !phone) {
+    return res.status(400).json({ message: 'User ID, amount, reason, and phone are required' });
+  }
+
+  try {
+    const userRef = db.ref(`users/${userId}`);
+    const snapshot = await userRef.once('value');
+
+    if (!snapshot.exists()) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
+    const currentBalance = snapshot.val().balance || 0;
+    const reference = `ref-${userId}-${Date.now()}`;
+    const transactionsRef = userRef.child('transactions');
+
+    let tezaApiUrl = '';
+    let tezaApiData = {
+      apikey: publicKey,
+      reference: reference,
+      phone: phone,
+      amount: amount,
+      description: `${reason} request for user: ${userId}`
+    };
+
+    // Withdrawal: Check balance before submission
+    if (reason === 'Withdraw') {
+      if (currentBalance < amount) {
+        return res.status(400).json({ message: 'Insufficient balance for withdrawal' });
+      }
+      tezaApiUrl = 'https://tezanetwork.com/api/v1/withdraw';
+    } else if (reason === 'Top Up') {
+      tezaApiUrl = 'https://tezanetwork.com/api/v1/deposit';
+    } else {
+      return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
+    }
+
+    // Submit to Teza
     try {
-        const userRef = db.ref(`users/${userId}`);
-        const snapshot = await userRef.once('value');
-        
-        if (snapshot.exists()) {
-            const currentBalance = snapshot.val().balance;
-
-            // Generate a unique reference ID (can be based on the current time)
-            const uniqueId = Date.now(); // You can replace this with a more sophisticated unique ID generator
-            const reference = `ref-${userId}-${uniqueId}`;
-
-            let newBalance;
-            let tezaApiUrl, tezaApiData, description;
-
-            // Handle Withdraw (reason: 'Withdraw')
-            if (reason === 'Withdraw') {
-                if (currentBalance < amount) {
-                    return res.status(400).json({ message: 'Insufficient balance for withdrawal' });
-                }
-
-                // Set up the Teza withdrawal request
-                tezaApiUrl = 'https://tezanetwork.com/api/v1/withdraw';
-                tezaApiData = {
-                    apikey: publicKey,
-                    reference: reference,
-                    phone: phone,
-                    amount: amount,
-                    description: `Withdraw request for user: ${userId}`
-                };
-
-                // Send request to Teza for withdrawal
-                let tezaResponse;
-                try {
-                    tezaResponse = await axios.post(tezaApiUrl, tezaApiData, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${secretKey}`
-                        }
-                    });
-
-                    // If the Teza request is successful (2XX), update the balance
-                    if (tezaResponse.status >= 200 && tezaResponse.status < 300) {
-                        newBalance = currentBalance - amount; // Subtract balance for withdrawal
-                        await userRef.update({ balance: newBalance }); // Update balance after successful withdrawal
-                        return res.status(200).json({ message: 'Withdrawal successful', newBalance });
-                    } else {
-                        // If Teza returns a 4XX error
-                        return res.status(422).json({
-                            message: 'Failed to initiate withdrawal with Teza',
-                            details: tezaResponse.data.message || 'No additional error message from Teza'
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error processing withdrawal with Teza:', error);
-                    return res.status(500).json({
-                        message: 'Error processing withdrawal with Teza',
-                        error: error.message || 'Unknown error'
-                    });
-                }
-            }
-            // Handle Top Up (reason: 'Top Up')
-            else if (reason === 'Top Up') {
-                // Set up the Teza deposit (top-up) request without modifying the balance
-                tezaApiUrl = 'https://tezanetwork.com/api/v1/deposit';
-                tezaApiData = {
-                    apikey: publicKey,
-                    reference: reference,
-                    phone: phone,
-                    amount: amount,
-                    description: `Top Up request for user: ${userId}`
-                };
-
-                // Send request to Teza for top-up without modifying balance
-                try {
-                    const tezaResponse = await axios.post(tezaApiUrl, tezaApiData, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${secretKey}`
-                        }
-                    });
-
-                    // If the Teza request is successful (2XX)
-                    if (tezaResponse.status >= 200 && tezaResponse.status < 300) {
-                        return res.status(200).json({ message: 'Top Up successful' });
-                    } else {
-                        // If Teza returns a 4XX error
-                        return res.status(422).json({
-                            message: 'Failed to initiate top-up with Teza',
-                            details: tezaResponse.data.message || 'No additional error message from Teza'
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error processing top-up with Teza:', error);
-                    return res.status(500).json({
-                        message: 'Error processing top-up with Teza',
-                        error: error.message || 'Unknown error'
-                    });
-                }
-            } else {
-                return res.status(400).json({ message: 'Invalid reason. Only "Withdraw" or "Top Up" are allowed.' });
-            }
-        } else {
-            return res.status(404).json({ message: 'User not found' });
+      const tezaResponse = await axios.post(tezaApiUrl, tezaApiData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${secretKey}`
         }
+      });
+
+      if (tezaResponse.status >= 200 && tezaResponse.status < 300) {
+        const { transaction_id } = tezaResponse.data;
+
+        // For Withdrawals, deduct balance immediately
+        if (reason === 'Withdraw') {
+          const newBalance = currentBalance - amount;
+          await userRef.update({ balance: newBalance });
+        }
+
+        // Log transaction in Firebase
+        const newTransactionRef = transactionsRef.push();
+        await newTransactionRef.set({
+          amount: amount,
+          reason: reason,
+          transactionId: transaction_id,
+          reference: reference,
+          phone: phone,
+          status: 'pending',
+          timestamp: new Date().toISOString()
+        });
+
+        return res.status(200).json({
+          message: `${reason} initiated successfully`,
+          transactionId: transaction_id,
+          reference
+        });
+      } else {
+        return res.status(422).json({
+          message: `Failed to initiate ${reason.toLowerCase()} with Teza`,
+          details: tezaResponse.data.message || 'Unknown error'
+        });
+      }
     } catch (error) {
-        console.error('Error processing request:', error);
-        return res.status(500).json({ message: 'Error processing request', error: error.message });
+      console.error(`Error during Teza ${reason.toLowerCase()} submission:`, error);
+      return res.status(500).json({
+        message: `Failed to submit ${reason.toLowerCase()} to Teza`,
+        error: error.message
+      });
     }
+
+  } catch (error) {
+    console.error('Server error:', error);
+    return res.status(500).json({ message: 'Error processing request', error: error.message });
+  }
 });
+
+
+
+
+
+
 
 
 
