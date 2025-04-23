@@ -484,12 +484,15 @@ app.all('/api/process-failed-logs/:userId', async (req, res) => {
 
             const updatedStatus = failedStatus === 'Approved' ? 'completed' : failedStatus;
 
+            // Use the original timestamp from the transaction, not the current time
+            const transactionTimestamp = transaction.timestamp || new Date().toISOString();
+
             await transactionsRef.child(transactionKey).update({
               status: updatedStatus,
-              timestamp: new Date().toISOString(),
+              timestamp: transactionTimestamp,  // Keep the original timestamp
             });
 
-            console.log(`Transaction ${reference_id} updated to ${updatedStatus}.`);
+            console.log(`Transaction ${reference_id} updated to ${updatedStatus} with original timestamp.`);
 
             // Only delete log after successful processing
             await userRef.child('failed_logs').child(logId).remove();
