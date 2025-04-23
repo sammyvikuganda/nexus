@@ -464,6 +464,7 @@ app.all('/api/process-failed-logs/:userId', async (req, res) => {
 
       const failedLogs = failedLogsSnapshot.val();
       let processedCount = 0;
+      let skippedCount = 0;
       let failedToProcess = 0;
 
       // Process each failed log independently
@@ -489,14 +490,15 @@ app.all('/api/process-failed-logs/:userId', async (req, res) => {
             });
 
             console.log(`Transaction ${reference_id} updated to ${updatedStatus}.`);
-          } else {
-            console.log(`Transaction ${reference_id} not found, skipping status update.`);
-          }
 
-          // Delete the log regardless of transaction existence
-          await userRef.child('failed_logs').child(logId).remove();
-          console.log(`Failed log ${logId} deleted.`);
-          processedCount++;
+            // Only delete log after successful processing
+            await userRef.child('failed_logs').child(logId).remove();
+            console.log(`Processed and deleted log ${logId}.`);
+            processedCount++;
+          } else {
+            console.log(`Transaction ${reference_id} not found. Log ${logId} kept for retry.`);
+            skippedCount++;
+          }
 
         } catch (logErr) {
           console.error(`Error processing log ${logId}:`, logErr);
@@ -505,7 +507,9 @@ app.all('/api/process-failed-logs/:userId', async (req, res) => {
       }
 
       return res.status(200).json({
-        message: `Processed ${processedCount} logs for user ${userId}.`,
+        message: `Logs processed for user ${userId}.`,
+        processedLogs: processedCount,
+        skippedLogs: skippedCount,
         failedLogs: failedToProcess,
       });
 
