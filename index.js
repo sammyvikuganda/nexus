@@ -288,11 +288,14 @@ app.patch('/api/update-balance', async (req, res) => {
     const reference = `ref-${userId}-${Date.now()}`;
     const transactionsRef = userRef.child('transactions');
 
+    // Sanitize phone number for Teza
+    const formattedPhone = phone.replace(/\s+/g, '').replace(/^\+/, '');
+
     let tezaApiUrl = '';
     let tezaApiData = {
       apikey: publicKey,
       reference: reference,
-      phone: phone,
+      phone: formattedPhone,
       amount: amount,
       description: `${reason} request for user: ${userId}`
     };
@@ -363,6 +366,7 @@ app.patch('/api/update-balance', async (req, res) => {
     return res.status(500).json({ message: 'Error processing request', error: error.message });
   }
 });
+
 
 
 
