@@ -321,33 +321,51 @@ app.patch('/api/update-balance', async (req, res) => {
         }
       });
 
+      // Check if Teza response is successful
       if (tezaResponse.status >= 200 && tezaResponse.status < 300) {
-        const { transaction_id } = tezaResponse.data;
+        const { status, transaction_id } = tezaResponse.data;
 
-        // For Withdrawals, deduct balance immediately
-        if (reason === 'Withdraw') {
-          const newBalance = currentBalance - amount;
-          await userRef.update({ balance: newBalance });
+        // Only proceed to deduct balance if Teza response status is "success"
+        if (status === 'success') {
+          // For Withdrawals, deduct balance immediately
+          if (reason === 'Withdraw') {
+            const newBalance = currentBalance - amount;
+            await userRef.update({ balance: newBalance });
+          }
+
+          // Log transaction in Firebase
+          const newTransactionRef = transactionsRef.push();
+          await newTransactionRef.set({
+            amount: amount,
+            reason: reason,
+            transactionId: transaction_id, // Transaction ID from Teza
+            reference: reference,
+            phone: phone,
+            status: 'pending', // Initial status as 'pending'
+            timestamp: new Date().toISOString()
+          });
+
+          return res.status(200).json({
+            message: `${reason} initiated successfully`,
+            transactionId: transaction_id,
+            reference
+          });
+        } else {
+          return res.status(422).json({
+            message: `Failed to initiate ${reason.toLowerCase()} with Teza`,
+            details: tezaResponse.data.message || 'Unknown error'
+          });
+        }
+      } else {
+        // Handle Teza error message for insufficient funds
+        if (tezaResponse.data.message === 'Insufficient funds available for withdrawal') {
+          return res.status(422).json({
+            message: 'Insufficient funds available for withdrawal',
+            details: tezaResponse.data.message
+          });
         }
 
-        // Log transaction in Firebase
-        const newTransactionRef = transactionsRef.push();
-        await newTransactionRef.set({
-          amount: amount,
-          reason: reason,
-          transactionId: transaction_id, // Transaction ID from Teza
-          reference: reference,
-          phone: phone,
-          status: 'pending', // Initial status as 'pending'
-          timestamp: new Date().toISOString()
-        });
-
-        return res.status(200).json({
-          message: `${reason} initiated successfully`,
-          transactionId: transaction_id,
-          reference
-        });
-      } else {
+        // Handle other errors from Teza
         return res.status(422).json({
           message: `Failed to initiate ${reason.toLowerCase()} with Teza`,
           details: tezaResponse.data.message || 'Unknown error'
