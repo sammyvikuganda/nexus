@@ -689,9 +689,8 @@ app.get('/api/fetchInvestment/:userId', async (req, res) => {
 
 
 
-
 // Withdraw payout or capital
-app.post('/withdraw', async (req, res) => {
+app.post('/api/withdraw', async (req, res) => {
     try {
         const { userId, amount, reason } = req.body;
 
@@ -748,6 +747,11 @@ app.post('/withdraw', async (req, res) => {
         updates['/investment/payout'] = newPayout;
         updates['/investment/lastUpdated'] = now;
 
+        // Also update the user's balance field
+        const currentBalance = userSnapshot.val().balance || 0;
+        const newBalance = currentBalance + amount; // Add the withdrawn amount to the balance
+        updates['/balance'] = newBalance;
+
         await userRef.update(updates);
 
         res.status(200).json({ message: 'Withdrawal successful' });
@@ -756,6 +760,7 @@ app.post('/withdraw', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
 
 
 
