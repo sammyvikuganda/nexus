@@ -46,6 +46,7 @@ export default async function handler(req, res) {
   const transactionKey = Object.keys(transactionSnapshot.val())[0];
   const transaction = transactionSnapshot.val()[transactionKey];
   const amount = transaction.amount;
+  const originalTimestamp = transaction.timestamp; // Retain original timestamp
   let newBalance = userData.balance || 0;
 
   if (status === 'Approved') {
@@ -60,10 +61,11 @@ export default async function handler(req, res) {
       console.log(`Withdraw approved: No balance change for user ${userId}, already deducted client-side.`);
     }
 
+    // Update the transaction status without changing the original timestamp
     await transactionsRef.child(transactionKey).update({
       status: 'completed',
       transaction_id,
-      timestamp: new Date().toISOString(),
+      timestamp: originalTimestamp, // Keep the original timestamp
     });
 
   } else if (status === 'Failed') {
@@ -73,10 +75,11 @@ export default async function handler(req, res) {
       console.log(`Withdraw failed: UGX ${amount} refunded to user ${userId}`);
     }
 
+    // Update the transaction status without changing the original timestamp
     await transactionsRef.child(transactionKey).update({
       status: 'failed',
       transaction_id,
-      timestamp: new Date().toISOString(),
+      timestamp: originalTimestamp, // Keep the original timestamp
     });
 
     console.log(`Transaction with reference ${reference_id} marked as failed.`);
