@@ -441,6 +441,76 @@ app.all('/api/process-failed-logs', async (req, res) => {
 
 
 
+// Endpoint to process failed logs for a specific user by userId
+app.all('/api/process-failed-logs/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  if (req.method === 'POST' || req.method === 'GET') {
+    try {
+      const userRef = db.ref(`users/${userId}`);
+      const transactionsRef = userRef.child('transactions');
+
+      // Check if the user exists
+      const userSnapshot = await userRef.once('value');
+      if (!userSnapshot.exists()) {
+        return res.status(404).json({ message: `User with ID ${userId} not found` });
+      }
+
+      // Get the failed logs for the specific user
+      const failedLogsSnapshot = await userRef.child('failed_logs').once('value');
+      if (!failedLogsSnapshot.exists()) {
+        return res.status(404).json({ message: `No failed logs found for user ${userId}` });
+      }
+
+      const failedLogs = failedLogsSnapshot.val();
+
+      // Loop through each failed log and process
+      for (let logId in failedLogs) {
+        const failedLog = failedLogs[logId];
+        const reference_id = failedLog.reference_id;
+        const transaction_id = failedLog.transaction_id;
+        const failedStatus = failedLog.status;  // Get the status from the failed log ('Approved' or 'Failed')
+
+        // Look for the transaction by reference_id
+        const transactionSnapshot = await transactionsRef
+          .orderByChild('reference')
+          .equalTo(reference_id)
+          .once('value');
+
+        if (transactionSnapshot.exists()) {
+          // Find the transaction
+          const transactionKey = Object.keys(transactionSnapshot.val())[0];
+          const transaction = transactionSnapshot.val()[transactionKey];
+
+          // Update the transaction status based on the failed log's status
+          const updatedStatus = (failedStatus === 'Approved') ? 'completed' : failedStatus;
+
+          await transactionsRef.child(transactionKey).update({
+            status: updatedStatus,  // Update status to 'completed' if Approved, or keep it 'Failed'
+            timestamp: new Date().toISOString(),
+          });
+
+          // Delete the failed log after processing
+          await userRef.child('failed_logs').child(logId).remove();
+
+          console.log(`Transaction with reference ${reference_id} processed and status updated to ${updatedStatus}.`);
+        } else {
+          console.log(`Transaction with reference ${reference_id} not found for user ${userId}.`);
+        }
+      }
+
+      return res.status(200).json({ message: `Failed logs for user ${userId} processed successfully.` });
+    } catch (error) {
+      console.error('Error processing failed logs:', error);
+      return res.status(500).json({ message: 'Failed to process logs', error: error.message });
+    }
+  } else {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+});
+
+
+
 
 // Update user details endpoint
 app.patch('/api/update-user', async (req, res) => {
