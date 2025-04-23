@@ -706,7 +706,8 @@ app.post('/api/withdraw', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const investment = userSnapshot.val().investment;
+        const userData = userSnapshot.val();
+        const investment = userData.investment;
 
         if (!investment) {
             return res.status(404).json({ message: 'No investment found for this user' });
@@ -715,6 +716,7 @@ app.post('/api/withdraw', async (req, res) => {
         const { amount: currentInvestmentAmount, payout } = investment;
         let newAmount = currentInvestmentAmount;
         let newPayout = payout || 0;
+        let updateTotalGained = false;
 
         // Process withdrawal based on reason
         if (reason === 'Withdraw profits') {
@@ -722,6 +724,7 @@ app.post('/api/withdraw', async (req, res) => {
                 return res.status(400).json({ message: 'Insufficient profits for withdrawal' });
             }
             newPayout -= amount; // Deduct from payout
+            updateTotalGained = true;
         } else if (reason === 'Withdraw capital') {
             if (amount > currentInvestmentAmount) {
                 return res.status(400).json({ message: 'Insufficient capital for withdrawal' });
@@ -741,16 +744,22 @@ app.post('/api/withdraw', async (req, res) => {
             reason,
         });
 
-        // Update investment with new amount and payout
+        // Update investment fields
         const updates = {};
         updates['/investment/amount'] = newAmount;
         updates['/investment/payout'] = newPayout;
         updates['/investment/lastUpdated'] = now;
 
-        // Also update the user's balance field
-        const currentBalance = userSnapshot.val().balance || 0;
-        const newBalance = currentBalance + amount; // Add the withdrawn amount to the balance
+        // Update balance
+        const currentBalance = userData.balance || 0;
+        const newBalance = currentBalance + amount;
         updates['/balance'] = newBalance;
+
+        // Update totalGained only if withdrawing profits
+        if (updateTotalGained) {
+            const currentGained = userData.totalGained || 0;
+            updates['/totalGained'] = currentGained + amount;
+        }
 
         await userRef.update(updates);
 
