@@ -30,7 +30,6 @@ export default async function handler(req, res) {
   if (!transactionSnapshot.exists()) {
     console.log(`Transaction with reference ${reference_id} not found in user's transactions.`);
 
-    // Log the failed transaction in failed_logs
     const failedLogRef = userRef.child('failed_logs').push();
     await failedLogRef.set({
       userId,
@@ -46,46 +45,41 @@ export default async function handler(req, res) {
 
   const transactionKey = Object.keys(transactionSnapshot.val())[0];
   const transaction = transactionSnapshot.val()[transactionKey];
+  const amount = transaction.amount;
+  let newBalance = userData.balance || 0;
 
   if (status === 'Approved') {
-    let newBalance = userData.balance || 0;
-    const amount = transaction.amount;
-
     if (transaction.reason === 'Top Up') {
       newBalance += amount;
-      console.log(`Transaction with reference ${reference_id} approved, credited UGX ${amount} to user ${userId}.`);
-    } else if (transaction.reason === 'Withdraw') {
-      newBalance -= amount;
-      console.log(`Transaction with reference ${reference_id} approved, debited UGX ${amount} from user ${userId}.`);
+      await userRef.update({ balance: newBalance });
+      console.log(`Top Up approved: UGX ${amount} credited to user ${userId}`);
     }
 
-    await userRef.update({ balance: newBalance });
+    // No balance change for Withdraw on Approved since it was already deducted client-side
+    if (transaction.reason === 'Withdraw') {
+      console.log(`Withdraw approved: No balance change for user ${userId}, already deducted client-side.`);
+    }
 
     await transactionsRef.child(transactionKey).update({
       status: 'completed',
+      transaction_id,
       timestamp: new Date().toISOString(),
     });
 
-    console.log(`New balance for user ${userId}: UGX ${newBalance}`);
-
   } else if (status === 'Failed') {
-    const amount = transaction.amount;
-
     if (transaction.reason === 'Withdraw') {
-      let newBalance = userData.balance || 0;
       newBalance += amount;
-
       await userRef.update({ balance: newBalance });
-
-      console.log(`Transaction with reference ${reference_id} failed, credited UGX ${amount} back to user ${userId}.`);
+      console.log(`Withdraw failed: UGX ${amount} refunded to user ${userId}`);
     }
 
     await transactionsRef.child(transactionKey).update({
       status: 'failed',
+      transaction_id,
       timestamp: new Date().toISOString(),
     });
 
-    console.log(`Transaction with reference ${reference_id} failed.`);
+    console.log(`Transaction with reference ${reference_id} marked as failed.`);
   }
 
   res.status(200).json({ status: "received" });
