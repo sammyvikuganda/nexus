@@ -580,7 +580,7 @@ app.post('/api/verify-pin', async (req, res) => {
 
 
 // Store or update investment
-app.post('/storeInvestment', async (req, res) => {
+app.post('/api/storeInvestment', async (req, res) => {
     try {
         const { userId, amount, premium = 0 } = req.body;  // Default premium is 0 if not provided
         if (!userId || !amount) {
@@ -627,7 +627,7 @@ app.post('/storeInvestment', async (req, res) => {
 
 
 // Fetch and update investment
-app.get('/fetchInvestment/:userId', async (req, res) => {
+app.get('/api/fetchInvestment/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
         const investmentRef = db.ref(`users/${userId}/investment`);
