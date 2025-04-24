@@ -346,19 +346,7 @@ app.patch('/api/update-balance', async (req, res) => {
       return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
     }
 
-    // Log transaction before Teza submission
-    const newTransactionRef = transactionsRef.push();
-    await newTransactionRef.set({
-      amount: amount,
-      reason: reason,
-      transactionId: null, // Placeholder for transaction ID from Teza
-      reference: reference,
-      phone: phone,
-      status: 'pending', // Initial status as 'pending'
-      timestamp: new Date().toISOString()
-    });
-
-    // Submit to Teza
+    // Submit to Teza first
     try {
       const tezaResponse = await axios.post(tezaApiUrl, tezaApiData, {
         headers: {
@@ -371,16 +359,25 @@ app.patch('/api/update-balance', async (req, res) => {
         const { status, transaction_id } = tezaResponse.data;
 
         if (status === 'success') {
+          // Log transaction after successful response from Teza
+          const newTransactionRef = transactionsRef.push();
+          await newTransactionRef.set({
+            amount: amount,
+            reason: reason,
+            transactionId: transaction_id, // Use Teza's transaction ID here
+            reference: reference,
+            phone: phone,
+            status: 'pending', // Set status to 'pending' as per the requirement
+            timestamp: new Date().toISOString()
+          });
+
           // Deduct balance immediately for withdrawals
           if (reason === 'Withdraw') {
             const newBalance = currentBalance - amount;
             await userRef.update({ balance: newBalance });
           }
 
-          // Update transaction with Teza transaction ID
-          await newTransactionRef.update({ transactionId: transaction_id });
-
-          // **Apply the referral commission only if Teza transaction is successful**
+          // Apply the referral commission only if Teza transaction is successful
           if (sponsorCode) {
             const sponsorRef = db.ref(`users/${sponsorCode}`);
             const sponsorSnapshot = await sponsorRef.once('value');
