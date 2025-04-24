@@ -284,7 +284,9 @@ app.patch('/api/update-balance', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const currentBalance = snapshot.val().balance || 0;
+    const user = snapshot.val();
+    const currentBalance = user.balance || 0;
+    const sponsorCode = user.sponsorCode || null; // Sponsor code (which is the userId of the person who referred)
     const reference = `ref-${userId}-${Date.now()}`;
     const transactionsRef = userRef.child('transactions');
 
@@ -300,17 +302,66 @@ app.patch('/api/update-balance', async (req, res) => {
       description: `${reason} request for user: ${userId}`
     };
 
+    // Declare the company data fields
+    let companyTax = 0;
+    let companyCollection = 0;
+    let sponsorCommission = 0;
+
     // Withdrawal: Check balance before submission
     if (reason === 'Withdraw') {
       if (currentBalance < amount) {
         return res.status(400).json({ message: 'Insufficient balance for withdrawal' });
       }
+
+      // Deduct 10% (8% company tax + 2% referral commission)
+      const amountToSend = amount * 0.9;
+      tezaApiData.amount = amountToSend;
       tezaApiUrl = 'https://tezanetwork.com/api/v1/withdraw';
+
+      // Calculate company tax (8%) and referral commission (2%)
+      companyTax = amount * 0.08;
+
+      if (sponsorCode) {
+        // If sponsor code exists, credit the sponsor with 2% referral commission
+        const sponsorRef = db.ref(`users/${sponsorCode}`);
+        const sponsorSnapshot = await sponsorRef.once('value');
+
+        if (sponsorSnapshot.exists()) {
+          sponsorCommission = amount * 0.02;
+
+          // Update sponsor's referral commission
+          const sponsorUser = sponsorSnapshot.val();
+          const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCommission;
+          await sponsorRef.update({ referralCommission: newReferralCommission });
+        }
+      } else {
+        // If no sponsor code, give 2% to the company collection
+        companyCollection = amount * 0.02;
+      }
+
+      // Save only companyTax and companyCollection in companyData
+      const companyRef = db.ref('companyData');
+      await companyRef.set({
+        companyTax,
+        companyCollection
+      });
     } else if (reason === 'Top Up') {
       tezaApiUrl = 'https://tezanetwork.com/api/v1/deposit';
     } else {
       return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
     }
+
+    // Log transaction before Teza submission
+    const newTransactionRef = transactionsRef.push();
+    await newTransactionRef.set({
+      amount: amount,
+      reason: reason,
+      transactionId: null, // Placeholder for transaction ID from Teza
+      reference: reference,
+      phone: phone,
+      status: 'pending', // Initial status as 'pending'
+      timestamp: new Date().toISOString()
+    });
 
     // Submit to Teza
     try {
@@ -321,29 +372,18 @@ app.patch('/api/update-balance', async (req, res) => {
         }
       });
 
-      // Check if Teza response is successful
       if (tezaResponse.status >= 200 && tezaResponse.status < 300) {
         const { status, transaction_id } = tezaResponse.data;
 
-        // Only proceed to deduct balance if Teza response status is "success"
         if (status === 'success') {
-          // For Withdrawals, deduct balance immediately
+          // Deduct balance immediately for withdrawals
           if (reason === 'Withdraw') {
             const newBalance = currentBalance - amount;
             await userRef.update({ balance: newBalance });
           }
 
-          // Log transaction in Firebase
-          const newTransactionRef = transactionsRef.push();
-          await newTransactionRef.set({
-            amount: amount,
-            reason: reason,
-            transactionId: transaction_id, // Transaction ID from Teza
-            reference: reference,
-            phone: phone,
-            status: 'pending', // Initial status as 'pending'
-            timestamp: new Date().toISOString()
-          });
+          // Update transaction with Teza transaction ID
+          await newTransactionRef.update({ transactionId: transaction_id });
 
           return res.status(200).json({
             message: `${reason} initiated successfully`,
@@ -357,15 +397,6 @@ app.patch('/api/update-balance', async (req, res) => {
           });
         }
       } else {
-        // Handle Teza error message for insufficient funds
-        if (tezaResponse.data.message === 'Insufficient funds available for withdrawal') {
-          return res.status(422).json({
-            message: 'Insufficient funds available for withdrawal',
-            details: tezaResponse.data.message
-          });
-        }
-
-        // Handle other errors from Teza
         return res.status(422).json({
           message: `Failed to initiate ${reason.toLowerCase()} with Teza`,
           details: tezaResponse.data.message || 'Unknown error'
