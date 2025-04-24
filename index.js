@@ -268,6 +268,32 @@ app.post('/api/register', async (req, res) => {
 
 
 
+// Endpoint to update server status
+app.patch('/api/update-server-status', async (req, res) => {
+  const { status } = req.body; // Expecting 'status' to be either 'busy' or 'available'
+
+  if (!status || (status !== 'busy' && status !== 'available')) {
+    return res.status(400).json({ message: 'Invalid status. Must be either "busy" or "available".' });
+  }
+
+  try {
+    const serverStatusRef = db.ref('serverStatus');
+    
+    // Set the new status
+    await serverStatusRef.set(status);
+
+    return res.status(200).json({
+      message: `Server status updated to ${status}`,
+    });
+  } catch (error) {
+    console.error('Error updating server status:', error);
+    return res.status(500).json({ message: 'Error updating server status', error: error.message });
+  }
+});
+
+
+
+
 // Endpoint to handle both Top Up and Withdraw
 app.patch('/api/update-balance', async (req, res) => {
   const { userId, amount, reason, phone } = req.body;
