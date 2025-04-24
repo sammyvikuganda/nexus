@@ -277,6 +277,16 @@ app.patch('/api/update-balance', async (req, res) => {
   }
 
   try {
+    // Check server status before processing the request
+    const serverStatusRef = db.ref('serverStatus');
+    const serverStatusSnapshot = await serverStatusRef.once('value');
+    const serverStatus = serverStatusSnapshot.val();
+
+    // If server status is busy, only allow Top Up
+    if (serverStatus === 'busy' && reason !== 'Top Up') {
+      return res.status(403).json({ message: 'Server is currently busy. Only Top Up operations are allowed.' });
+    }
+
     const userRef = db.ref(`users/${userId}`);
     const snapshot = await userRef.once('value');
 
