@@ -286,10 +286,9 @@ app.patch('/api/update-balance', async (req, res) => {
 
     const user = snapshot.val();
     const currentBalance = user.balance || 0;
-    const sponsorCode = user.sponsorCode || null; // Sponsor code (which is the userId of the person who referred)
+    const sponsorCode = user.sponsorCode || null;
     const reference = `ref-${userId}-${Date.now()}`;
 
-    // Sanitize phone number for Teza
     const formattedPhone = phone.replace(/\s+/g, '').replace(/^\+/, '');
 
     let tezaApiUrl = '';
@@ -301,51 +300,36 @@ app.patch('/api/update-balance', async (req, res) => {
       description: `${reason} request for user: ${userId}`
     };
 
-    // Declare the company data fields
     let companyTax = 0;
     let companyCollection = 0;
     let sponsorCommission = 0;
 
-    // Withdrawal: Check balance before submission
     if (reason === 'Withdraw') {
       if (currentBalance < amount) {
         return res.status(400).json({ message: 'Insufficient balance for withdrawal' });
       }
 
-      // Deduct 10% (8% company tax + 2% referral commission)
       const amountToSend = amount * 0.9;
       tezaApiData.amount = amountToSend;
       tezaApiUrl = 'https://tezanetwork.com/api/v1/withdraw';
 
-      // Calculate company tax (8%) and referral commission (2%)
       companyTax = amount * 0.08;
 
       if (sponsorCode) {
-        // If sponsor code exists, credit the sponsor with 2% referral commission
         const sponsorRef = db.ref(`users/${sponsorCode}`);
         const sponsorSnapshot = await sponsorRef.once('value');
-
         if (sponsorSnapshot.exists()) {
           sponsorCommission = amount * 0.02;
         }
       } else {
-        // If no sponsor code, give 2% to the company collection
         companyCollection = amount * 0.02;
       }
-
-      // Save only companyTax and companyCollection in companyData
-      const companyRef = db.ref('companyData');
-      await companyRef.set({
-        companyTax,
-        companyCollection
-      });
     } else if (reason === 'Top Up') {
       tezaApiUrl = 'https://tezanetwork.com/api/v1/deposit';
     } else {
       return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
     }
 
-    // Submit to Teza first, but don't log the transaction yet
     try {
       const tezaResponse = await axios.post(tezaApiUrl, tezaApiData, {
         headers: {
@@ -358,33 +342,38 @@ app.patch('/api/update-balance', async (req, res) => {
         const { status, transaction_id } = tezaResponse.data;
 
         if (status === 'success') {
-          // Log transaction only after Teza response is successful
           const transactionsRef = userRef.child('transactions');
           const newTransactionRef = transactionsRef.push();
-          
+
           await newTransactionRef.set({
             amount: amount,
             reason: reason,
-            transactionId: transaction_id, // Use Teza's transaction ID here
+            transactionId: transaction_id,
             reference: reference,
             phone: phone,
-            status: 'pending', // Status remains pending
+            status: 'pending',
             timestamp: new Date().toISOString()
           });
 
-          // Deduct balance immediately for withdrawals
           if (reason === 'Withdraw') {
             const newBalance = currentBalance - amount;
             await userRef.update({ balance: newBalance });
+
+            // Update company tax and collection by adding to existing values
+            const companyRef = db.ref('companyData');
+            const companySnapshot = await companyRef.once('value');
+            const companyData = companySnapshot.val() || {};
+            await companyRef.update({
+              companyTax: (companyData.companyTax || 0) + companyTax,
+              companyCollection: (companyData.companyCollection || 0) + companyCollection
+            });
           }
 
-          // **Apply the referral commission only if Teza transaction is successful**
-          if (sponsorCode) {
+          // Update sponsor referral commission if valid
+          if (sponsorCode && sponsorCommission > 0) {
             const sponsorRef = db.ref(`users/${sponsorCode}`);
             const sponsorSnapshot = await sponsorRef.once('value');
-
             if (sponsorSnapshot.exists()) {
-              // Update sponsor's referral commission
               const sponsorUser = sponsorSnapshot.val();
               const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCommission;
               await sponsorRef.update({ referralCommission: newReferralCommission });
