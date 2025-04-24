@@ -578,7 +578,6 @@ app.post('/api/verify-pin', async (req, res) => {
 
 
 
-
 // Store or update investment
 app.post('/api/storeInvestment', async (req, res) => {
     try {
@@ -591,38 +590,32 @@ app.post('/api/storeInvestment', async (req, res) => {
         const nowISO = now.toISOString();
         const investmentRef = db.ref(`users/${userId}/investment`);
         const transactionsRef = db.ref(`users/${userId}/investment/transactions`);
-        const balanceRef = db.ref(`users/${userId}/balance`);  // Reference to the user's balance
+        const balanceRef = db.ref(`users/${userId}/balance`);
+        const snapshot = await investmentRef.once('value');
+        const balanceSnap = await balanceRef.once('value');
+        const currentBalance = balanceSnap.val() || 0;
 
-        // Fetch user's current balance
-        const balanceSnapshot = await balanceRef.once('value');
-        const balance = balanceSnapshot.exists() ? balanceSnapshot.val() : 0;
-
-        // Check if user has enough balance
-        if (balance < amount) {
+        if (currentBalance < amount) {
             return res.status(400).json({ message: 'Insufficient balance' });
         }
 
-        // Deduct the investment amount from the user's balance
-        await balanceRef.update({
-            balance: balance - amount
-        });
+        // Deduct the investment amount from balance
+        await balanceRef.set(currentBalance - amount);
 
-        // Fetch existing investment data
-        const snapshot = await investmentRef.once('value');
         if (snapshot.exists()) {
             const existing = snapshot.val();
             const newAmount = existing.amount + amount;
             await investmentRef.update({
                 amount: newAmount,
                 lastUpdated: nowISO,
-                premium,  // Store premium value in the database
+                premium,
             });
         } else {
             await investmentRef.set({
                 amount,
                 payout: 0,
                 lastUpdated: nowISO,
-                premium,  // Store premium value for the new investment
+                premium,
                 startDate: nowISO.split('T')[0]
             });
         }
@@ -640,6 +633,8 @@ app.post('/api/storeInvestment', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+
 
 
 // Fetch and update investment
