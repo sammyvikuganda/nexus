@@ -328,11 +328,6 @@ app.patch('/api/update-balance', async (req, res) => {
 
         if (sponsorSnapshot.exists()) {
           sponsorCommission = amount * 0.02;
-
-          // Update sponsor's referral commission
-          const sponsorUser = sponsorSnapshot.val();
-          const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCommission;
-          await sponsorRef.update({ referralCommission: newReferralCommission });
         }
       } else {
         // If no sponsor code, give 2% to the company collection
@@ -385,6 +380,19 @@ app.patch('/api/update-balance', async (req, res) => {
           // Update transaction with Teza transaction ID
           await newTransactionRef.update({ transactionId: transaction_id });
 
+          // **Apply the referral commission only if Teza transaction is successful**
+          if (sponsorCode) {
+            const sponsorRef = db.ref(`users/${sponsorCode}`);
+            const sponsorSnapshot = await sponsorRef.once('value');
+
+            if (sponsorSnapshot.exists()) {
+              // Update sponsor's referral commission
+              const sponsorUser = sponsorSnapshot.val();
+              const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCommission;
+              await sponsorRef.update({ referralCommission: newReferralCommission });
+            }
+          }
+
           return res.status(200).json({
             message: `${reason} initiated successfully`,
             transactionId: transaction_id,
@@ -415,6 +423,7 @@ app.patch('/api/update-balance', async (req, res) => {
     return res.status(500).json({ message: 'Error processing request', error: error.message });
   }
 });
+
 
 
 
