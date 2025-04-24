@@ -641,6 +641,68 @@ app.post('/api/storeInvestment', async (req, res) => {
 });
 
 
+// Fetch and update investment
+app.get('/api/fetchInvestment/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const investmentRef = db.ref(`users/${userId}/investment`);
+        const snapshot = await investmentRef.once('value');
+
+        if (!snapshot.exists()) {
+            return res.status(404).json({ message: 'No investment found for this user' });
+        }
+
+        const investment = snapshot.val();
+        const currentTime = new Date();
+        let lastUpdated = new Date(investment.lastUpdated);
+        const transactionsRef = db.ref(`users/${userId}/investment/transactions`);
+        let totalPayout = investment.payout || 0;
+        const premium = investment.premium || 0;  // Default premium is 0 if not found
+
+        // Calculate how many full 24-hour periods have passed
+        let payoutCount = 0;
+        while ((currentTime - lastUpdated) >= 24 * 60 * 60 * 1000) {
+            payoutCount++;
+            lastUpdated = new Date(lastUpdated.getTime() + 24 * 60 * 60 * 1000);
+
+            // If premium is 0, use 1% (0.01) for the daily income calculation
+            const dailyIncome = parseFloat((investment.amount * (premium > 0 ? premium / 100 : 0.01)).toFixed(2));
+            totalPayout = parseFloat((totalPayout + dailyIncome).toFixed(2));
+
+            await transactionsRef.push({
+                amount: dailyIncome,
+                time: lastUpdated.toISOString(),
+                reason: "Commission paid"
+            });
+        }
+
+        // Only update if there was a payout
+        if (payoutCount > 0) {
+            await investmentRef.update({
+                payout: totalPayout,
+                lastUpdated: lastUpdated.toISOString()
+            });
+        }
+
+        const txSnapshot = await transactionsRef.once('value');
+        const txHistory = txSnapshot.exists() ? Object.values(txSnapshot.val()) : [];
+
+        res.status(200).json({
+            userId,
+            amount: investment.amount,
+            payout: totalPayout,
+            startDate: investment.startDate,
+            lastUpdated: investment.lastUpdated,  // Include lastUpdated
+            premium,  // Include premium in the response
+            transactions: txHistory
+        });
+    } catch (error) {
+        console.error('Error fetching investment:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
 
 // Withdraw payout or capital
 app.post('/api/withdraw', async (req, res) => {
