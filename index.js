@@ -597,11 +597,12 @@ app.post('/api/storeInvestment', async (req, res) => {
         const balanceSnapshot = await balanceRef.once('value');
         const balance = balanceSnapshot.exists() ? balanceSnapshot.val() : 0;
 
+        // Check if user has enough balance
         if (balance < amount) {
             return res.status(400).json({ message: 'Insufficient balance' });
         }
 
-        // Deduct the amount from the user's balance
+        // Deduct the investment amount from the user's balance
         await balanceRef.update({
             balance: balance - amount
         });
