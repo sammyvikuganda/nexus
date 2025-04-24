@@ -288,7 +288,6 @@ app.patch('/api/update-balance', async (req, res) => {
     const currentBalance = user.balance || 0;
     const sponsorCode = user.sponsorCode || null; // Sponsor code (which is the userId of the person who referred)
     const reference = `ref-${userId}-${Date.now()}`;
-    const transactionsRef = userRef.child('transactions');
 
     // Sanitize phone number for Teza
     const formattedPhone = phone.replace(/\s+/g, '').replace(/^\+/, '');
@@ -346,7 +345,7 @@ app.patch('/api/update-balance', async (req, res) => {
       return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
     }
 
-    // Submit to Teza first
+    // Submit to Teza first, but don't log the transaction yet
     try {
       const tezaResponse = await axios.post(tezaApiUrl, tezaApiData, {
         headers: {
@@ -359,15 +358,17 @@ app.patch('/api/update-balance', async (req, res) => {
         const { status, transaction_id } = tezaResponse.data;
 
         if (status === 'success') {
-          // Log transaction after successful response from Teza
+          // Log transaction only after Teza response is successful
+          const transactionsRef = userRef.child('transactions');
           const newTransactionRef = transactionsRef.push();
+          
           await newTransactionRef.set({
             amount: amount,
             reason: reason,
             transactionId: transaction_id, // Use Teza's transaction ID here
             reference: reference,
             phone: phone,
-            status: 'pending', // Set status to 'pending' as per the requirement
+            status: 'pending', // Status remains pending
             timestamp: new Date().toISOString()
           });
 
@@ -377,7 +378,7 @@ app.patch('/api/update-balance', async (req, res) => {
             await userRef.update({ balance: newBalance });
           }
 
-          // Apply the referral commission only if Teza transaction is successful
+          // **Apply the referral commission only if Teza transaction is successful**
           if (sponsorCode) {
             const sponsorRef = db.ref(`users/${sponsorCode}`);
             const sponsorSnapshot = await sponsorRef.once('value');
@@ -420,6 +421,7 @@ app.patch('/api/update-balance', async (req, res) => {
     return res.status(500).json({ message: 'Error processing request', error: error.message });
   }
 });
+
 
 
 
