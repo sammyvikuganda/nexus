@@ -285,16 +285,44 @@ app.get('/api/register', (req, res) => {
 
                 <div class="content">
             <form action="/api/register?sponsorid=${sponsorId}" method="POST">
-                <input name="firstName" placeholder="First Name" required /><br/>
-                <input name="lastName" placeholder="Last Name" required /><br/>
-                <input name="phoneNumber" placeholder="Phone Number" required /><br/>
-                <input name="country" placeholder="Country" required /><br/>
-                <input name="dob" placeholder="Date of Birth (YYYY-MM-DD)" required /><br/>
-                <input name="nin" placeholder="NIN (optional)" /><br/>
-                <input name="email" placeholder="Email" required /><br/>
-                <input name="pin" type="password" placeholder="PIN" required /><br/>
-                <input name="deviceDetails" placeholder='Device Details (optional JSON)' /><br/>
-                <button type="submit">Register</button>
+                <label for="firstName">First Name</label>
+          <input name="firstName" id="firstName" placeholder="First Name" required />
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input name="lastName" id="lastName" placeholder="Last Name" required />
+        </div>
+
+        <div class="form-group-inline">
+  <div class="form-group country">
+    <label for="country">Country</label>
+    <select name="country" id="country" required>
+      <option value="">Select a country</option>
+    </select>
+  </div>
+  <div class="form-group phone">
+    <label for="phoneNumber">Phone Number</label>
+    <div style="display: flex; width: 100%; align-items: center;">
+      <input type="tel" id="countryCode" readonly placeholder="+Code" style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
+      <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
+    </div>
+    <p id="phoneError" class="error" style="display: none;"></p>
+  </div>
+</div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input name="email" id="email" placeholder="example@domain.com" required />
+        </div>
+        <div class="form-group">
+  <label for="pin">Set App login PIN</label>
+  <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
+  <p id="pinError" class="error" style="display: none;"></p> <!-- PIN error message -->
+</div>
+<div class="form-group">
+  <input type="submit" value="Get Started" />
+</div>
+                
             </form>
         </body>
         </html>
