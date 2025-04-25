@@ -105,17 +105,19 @@ const generateWithdrawalId = async () => {
 
 
 
+
 // Serve registration form with sponsor ID
 app.get('/api/register', (req, res) => {
     const sponsorId = req.query.sponsorid || '';
     res.send(`
         <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome to Nexus - Register</title>
-         <style>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <title>Welcome to Nexus - Register</title>
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+            <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
 
     * {
@@ -274,7 +276,7 @@ app.get('/api/register', (req, res) => {
       }
     }
   </style>
-</head>
+        </head>
         <body>
             <div class="app-container">
                 <header>
@@ -284,51 +286,60 @@ app.get('/api/register', (req, res) => {
                 </header>
 
                 <div class="content">
-            <form action="/api/register?sponsorid=${sponsorId}" method="POST">
-                <label for="firstName">First Name</label>
-          <input name="firstName" id="firstName" placeholder="First Name" required />
-        </div>
-        <div class="form-group">
-          <label for="lastName">Last Name</label>
-          <input name="lastName" id="lastName" placeholder="Last Name" required />
-        </div>
+                    <form action="/api/register?sponsorid=${sponsorId}" method="POST">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input name="firstName" id="firstName" placeholder="First Name" required />
+                        </div>
 
-        <div class="form-group-inline">
-  <div class="form-group country">
-    <label for="country">Country</label>
-    <select name="country" id="country" required>
-      <option value="">Select a country</option>
-    </select>
-  </div>
-  <div class="form-group phone">
-    <label for="phoneNumber">Phone Number</label>
-    <div style="display: flex; width: 100%; align-items: center;">
-      <input type="tel" id="countryCode" readonly placeholder="+Code" style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
-      <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
-    </div>
-    <p id="phoneError" class="error" style="display: none;"></p>
-  </div>
-</div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input name="lastName" id="lastName" placeholder="Last Name" required />
+                        </div>
 
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input name="email" id="email" placeholder="example@domain.com" required />
-        </div>
-        <div class="form-group">
-  <label for="pin">Set App login PIN</label>
-  <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
-  <p id="pinError" class="error" style="display: none;"></p> <!-- PIN error message -->
-</div>
-<div class="form-group">
-  <input type="submit" value="Get Started" />
-</div>
-                
-            </form>
+                        <div class="form-group-inline">
+                            <div class="form-group country">
+                                <label for="country">Country</label>
+                                <select name="country" id="country" required>
+                                    <option value="">Select a country</option>
+                                    <!-- Option values to be dynamically filled or hardcoded -->
+                                </select>
+                            </div>
+                            <div class="form-group phone">
+                                <label for="phoneNumber">Phone Number</label>
+                                <div style="display: flex; width: 100%; align-items: center;">
+                                    <input type="tel" id="countryCode" readonly placeholder="+Code" style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
+                                    <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
+                                </div>
+                                <p id="phoneError" class="error" style="display: none;"></p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input name="email" id="email" placeholder="example@domain.com" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pin">Set App Login PIN</label>
+                            <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
+                            <p id="pinError" class="error" style="display: none;"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="submit" value="Get Started" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="footer">
+                    <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
+                </div>
+            </div>
         </body>
         </html>
     `);
 });
-
 
 
 
