@@ -27,6 +27,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the 'public' directory
 
+app.use(express.urlencoded({ extended: true }));
+
+
+
 // Login endpoint
 app.post('/api/login', async (req, res) => {
     const { phoneNumber, pin } = req.body;
@@ -95,6 +99,33 @@ const generateWithdrawalId = async () => {
     return withdrawalId;
 };
 
+
+
+
+// Serve registration form with sponsor ID
+app.get('/api/register', (req, res) => {
+    const sponsorId = req.query.sponsorid || '';
+    res.send(`
+        <html>
+        <head><title>Register</title></head>
+        <body>
+            <h2>Register</h2>
+            <form action="/api/register?sponsorid=${sponsorId}" method="POST">
+                <input name="firstName" placeholder="First Name" required /><br/>
+                <input name="lastName" placeholder="Last Name" required /><br/>
+                <input name="phoneNumber" placeholder="Phone Number" required /><br/>
+                <input name="country" placeholder="Country" required /><br/>
+                <input name="dob" placeholder="Date of Birth (YYYY-MM-DD)" required /><br/>
+                <input name="nin" placeholder="NIN (optional)" /><br/>
+                <input name="email" placeholder="Email" required /><br/>
+                <input name="pin" type="password" placeholder="PIN" required /><br/>
+                <input name="deviceDetails" placeholder='Device Details (optional JSON)' /><br/>
+                <button type="submit">Register</button>
+            </form>
+        </body>
+        </html>
+    `);
+});
 
 
 
@@ -821,30 +852,7 @@ app.post('/api/withdraw', async (req, res) => {
 
 
 
-// Serve registration form with sponsor ID
-app.get('/api/register', (req, res) => {
-    const sponsorId = req.query.sponsorid || '';
-    res.send(`
-        <html>
-        <head><title>Register</title></head>
-        <body>
-            <h2>Register</h2>
-            <form action="/api/register?sponsorid=${sponsorId}" method="POST">
-                <input name="firstName" placeholder="First Name" required /><br/>
-                <input name="lastName" placeholder="Last Name" required /><br/>
-                <input name="phoneNumber" placeholder="Phone Number" required /><br/>
-                <input name="country" placeholder="Country" required /><br/>
-                <input name="dob" placeholder="Date of Birth (YYYY-MM-DD)" required /><br/>
-                <input name="nin" placeholder="NIN (optional)" /><br/>
-                <input name="email" placeholder="Email" required /><br/>
-                <input name="pin" type="password" placeholder="PIN" required /><br/>
-                <input name="deviceDetails" placeholder='Device Details (optional JSON)' /><br/>
-                <button type="submit">Register</button>
-            </form>
-        </body>
-        </html>
-    `);
-});
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
