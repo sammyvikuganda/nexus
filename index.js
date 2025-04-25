@@ -398,7 +398,7 @@ app.get('/api/register', (req, res) => {
         }
         phoneError.style.display = 'block';
       } else {
-        // Format the phone number with the country code before submission
+        // Format the phone number with country code before submission
         const formattedPhone = selected.dataset.code + ' ' + phoneInput.value.trim();
         phoneInput.value = formattedPhone; // Submit formatted phone number
       }
