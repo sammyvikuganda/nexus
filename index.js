@@ -125,6 +125,8 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
     return { credentialsExist, deviceExists };
 };
 
+
+
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
     const { phoneNumber, country, firstName, lastName, dob, nin, email, pin, deviceDetails } = req.body;
@@ -182,14 +184,7 @@ app.post('/api/register', async (req, res) => {
                 "Bank Transfer": "",
                 "Crypto Transfer": ""
             }, // Initialize paymentMethods with all options empty
-            deviceDetails: {
-                userAgent: deviceDetails?.userAgent || null,
-                platform: deviceDetails?.platform || null,
-                screenWidth: deviceDetails?.screenWidth || null,
-                screenHeight: deviceDetails?.screenHeight || null,
-                colorDepth: deviceDetails?.colorDepth || null,
-                devicePixelRatio: deviceDetails?.devicePixelRatio || null
-            }, // Save device details
+            deviceDetails: deviceDetails || null, // Save device details if provided, otherwise set to null
             sponsorId: sponsorId || null // Save sponsor ID if provided, otherwise set to null
         });
 
