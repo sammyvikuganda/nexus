@@ -160,6 +160,21 @@ app.post('/api/register', async (req, res) => {
         // Generate a unique 6-digit user ID
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
+        // If a sponsorId is provided, increment the sponsor's referral count
+        if (sponsorId) {
+            // Check if the sponsor exists
+            const sponsorRef = await db.ref(`users/${sponsorId}`).once('value');
+            if (sponsorRef.exists()) {
+                const sponsorData = sponsorRef.val();
+                const newReferralCount = (sponsorData.referralCount || 0) + 1;
+
+                // Increment the sponsor's referral count
+                await db.ref(`users/${sponsorId}`).update({
+                    referralCount: newReferralCount
+                });
+            }
+        }
+
         // Save user to the primary database (Firebase)
         await db.ref(`users/${userId}`).set({
             phoneNumber,
@@ -185,7 +200,8 @@ app.post('/api/register', async (req, res) => {
                 "Crypto Transfer": ""
             }, // Initialize paymentMethods with all options empty
             deviceDetails: deviceDetails || null, // Save device details if provided, otherwise set to null
-            sponsorId: sponsorId || null // Save sponsor ID if provided, otherwise set to null
+            sponsorId: sponsorId || null, // Save sponsor ID if provided, otherwise set to null
+            referralCount: 0 // Initial referral count for this user is 0
         });
 
         // After creating the user in Firebase, send the userId to another database
@@ -221,6 +237,7 @@ app.post('/api/register', async (req, res) => {
         });
     }
 });
+
 
 
 
