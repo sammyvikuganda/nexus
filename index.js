@@ -338,12 +338,8 @@ app.get('/api/register', (req, res) => {
                 </div>
             </div>
 
-
-   <script src="/register.js"></script>
-
-
-
-
+            <!-- Add the script link here -->
+            <script src="/register.js"></script>
         </body>
         </html>
     `);
