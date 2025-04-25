@@ -111,7 +111,165 @@ app.get('/api/register', (req, res) => {
     res.send(`
         <html>
         <head><title>Register</title>
+         <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #1A7EB1;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      flex-shrink: 0;
+    }
+
+    .header-logo {
+      height: 36px;
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group-inline {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .form-group-inline .country {
+      flex: 0.4;
+    }
+
+    .form-group-inline .phone {
+      flex: 0.6;
+    }
+
+    label {
+      font-weight: 500;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background-color: #f9fafc;
+      height: 48px;
+    }
+
+    input:focus, select:focus {
+      border-color: #1A7EB1;
+      outline: none;
+      box-shadow: 0 0 8px rgba(26, 126, 177, 0.2);
+      background-color: #ffffff;
+    }
+
+    input::placeholder {
+      color: #a0aec0;
+    }
+
+    input[type="submit"] {
+      background-color: #1A7EB1;
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #15608B;
+      box-shadow: 0 4px 10px rgba(26, 126, 177, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #555;
+      padding: 20px 10px;
+    }
+
+    .footer a {
+      color: #1A7EB1;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .footer a:hover {
+      color: #15608B;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.8rem;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 480px) {
+      .header-logo {
+        height: 28px;
+      }
+
+      .header-title {
+        font-size: 1rem;
+      }
+
+      input {
+        padding: 0.7rem;
+      }
+    }
+  </style>
 </head>
         <body>
             <h2>Register</h2>
