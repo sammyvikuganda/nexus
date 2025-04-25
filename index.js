@@ -338,60 +338,68 @@ app.get('/api/register', (req, res) => {
             </div>
 
             <script>
-              document.addEventListener('DOMContentLoaded', () => {
-                const countrySelect = document.getElementById('country');
-                const codeInput = document.getElementById('countryCode');
-                const phoneInput = document.getElementById('phoneNumber');
-                const phoneError = document.getElementById('phoneError');
-                const pinInput = document.getElementById('pin');
-                const pinError = document.getElementById('pinError');
-                let countries = [], selected = null;
+  document.addEventListener('DOMContentLoaded', () => {
+    const countrySelect = document.getElementById('country');
+    const codeInput = document.getElementById('countryCode');
+    const phoneInput = document.getElementById('phoneNumber');
+    const phoneError = document.getElementById('phoneError');
+    const pinInput = document.getElementById('pin');
+    const pinError = document.getElementById('pinError');
+    let countries = [], selected = null;
 
-                fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
-                  .then(res => res.json())
-                  .then(data => {
-                    countries = data;
-                    data.forEach(({ country, country_code, flag, phone_length }) => {
-                      const opt = new Option(flag + ' ' + country, country_code);
-                      opt.dataset.len = phone_length;
-                      countrySelect.add(opt);
-                    });
-                  });
+    // Fetch countries data and populate the select options
+    fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
+      .then(res => res.json())
+      .then(data => {
+        countries = data;
+        data.forEach(({ country, country_code, flag, phone_length }) => {
+          const opt = new Option(flag + ' ' + country, country); // Country name as value
+          opt.dataset.code = country_code;  // Store country code
+          opt.dataset.len = phone_length;   // Store phone number length
+          countrySelect.add(opt);
+        });
+      });
 
-                countrySelect.onchange = () => {
-                  selected = countries.find(c => c.country_code === countrySelect.value);
-                  codeInput.value = selected ? selected.country_code : '';
-                  phoneInput.value = '';
-                  phoneError.style.display = 'none';
-                };
+    // Handle country selection
+    countrySelect.onchange = () => {
+      selected = countries.find(c => c.country === countrySelect.value);
+      codeInput.value = selected ? selected.country_code : ''; // Display the country code in the input
+      phoneInput.value = '';  // Reset the phone input
+      phoneError.style.display = 'none';
+    };
 
-                phoneInput.oninput = () => {
-                  if (selected && phoneInput.value.length === selected.phone_length) {
-                    phoneError.style.display = 'none';
-                  }
-                };
+    // Validate phone number input length
+    phoneInput.oninput = () => {
+      if (selected && phoneInput.value.length === selected.phone_length) {
+        phoneError.style.display = 'none';
+      }
+    };
 
-                document.getElementById('registerForm').onsubmit = e => {
-                  pinError.style.display = 'none';
-                  phoneError.style.display = 'none';
+    // Handle form submission
+    document.getElementById('registerForm').onsubmit = e => {
+      pinError.style.display = 'none';
+      phoneError.style.display = 'none';
 
-                  if (!selected || phoneInput.value.length !== selected.phone_length || pinInput.value.length < 5) {
-                    e.preventDefault();
-                    if (!selected) {
-                      phoneError.textContent = 'Please select a valid country.';
-                    } else if (phoneInput.value.length !== selected.phone_length) {
-                      phoneError.textContent = 'Phone number must be exactly ' + selected.phone_length + ' digits for ' + selected.country + '.';
-                    } else {
-                      pinError.textContent = 'PIN must be at least 5 characters long.';
-                      pinError.style.display = 'block';
-                    }
-                    phoneError.style.display = 'block';
-                  } else {
-                    phoneInput.value = selected.country_code + ' ' + phoneInput.value.trim();
-                  }
-                };
-              });
-            </script>
+      // Validation checks
+      if (!selected || phoneInput.value.length !== selected.phone_length || pinInput.value.length < 5) {
+        e.preventDefault(); // Prevent form submission if validation fails
+        if (!selected) {
+          phoneError.textContent = 'Please select a valid country.';
+        } else if (phoneInput.value.length !== selected.phone_length) {
+          phoneError.textContent = 'Phone number must be exactly ' + selected.phone_length + ' digits for ' + selected.country + '.';
+        } else {
+          pinError.textContent = 'PIN must be at least 5 characters long.';
+          pinError.style.display = 'block';
+        }
+        phoneError.style.display = 'block';
+      } else {
+        // Format the phone number with country code before submission
+        phoneInput.value = selected.dataset.code + ' ' + phoneInput.value.trim();
+      }
+    };
+  });
+</script>
+
         </body>
         </html>
     `);
