@@ -29,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // Serve static files f
 
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static('public'));
 
 
 // Login endpoint
