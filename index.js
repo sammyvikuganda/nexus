@@ -105,7 +105,174 @@ const generateWithdrawalId = async () => {
 
 
 
+// Serve registration form with sponsor ID
+app.get('/api/register', (req, res) => {
+    const sponsorId = req.query.sponsorid || '';
+    res.send(`
+        <html>
+        <head><title>Register</title>
 
+</head>
+        <body>
+            <h2>Register</h2>
+            <form action="/api/register?sponsorid=${sponsorId}" method="POST">
+                <input name="firstName" placeholder="First Name" required /><br/>
+                <input name="lastName" placeholder="Last Name" required /><br/>
+                <input name="phoneNumber" placeholder="Phone Number" required /><br/>
+                <input name="country" placeholder="Country" required /><br/>
+                <input name="dob" placeholder="Date of Birth (YYYY-MM-DD)" required /><br/>
+                <input name="nin" placeholder="NIN (optional)" /><br/>
+                <input name="email" placeholder="Email" required /><br/>
+                <input name="pin" type="password" placeholder="PIN" required /><br/>
+                <input name="deviceDetails" placeholder='Device Details (optional JSON)' /><br/>
+                <button type="submit">Register</button>
+            </form>
+        </body>
+        </html>
+    `);
+});
+
+
+
+
+// Helper function to check for existing user details, including device info
+const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
+    const snapshot = await db.ref('users').once('value');
+    const users = snapshot.val();
+
+    let credentialsExist = false;
+    let deviceExists = false;
+
+    // Iterate through each user to check for conflicts
+    for (const userId in users) {
+        const user = users[userId];
+        if (
+            user.phoneNumber === phoneNumber || 
+            user.email === email || 
+            (nin && user.nin === nin)
+        ) {
+            credentialsExist = true;
+        }
+        if (deviceDetails && user.deviceDetails && user.deviceDetails.userAgent === deviceDetails.userAgent) {
+            deviceExists = true;
+        }
+    }
+
+    return { credentialsExist, deviceExists };
+};
+
+
+
+// Register user endpoint
+app.post('/api/register', async (req, res) => {
+    const { phoneNumber, country, firstName, lastName, dob, nin, email, pin, deviceDetails } = req.body;
+    const sponsorId = req.query.sponsorid; // Get sponsor ID from query string if provided
+
+    try {
+        // Check for existing user details, including device information
+        const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
+
+        // If both credentials and device details exist, send the appropriate message
+        if (credentialsExist && deviceExists) {
+            return res.status(400).json({
+                message: 'Some of the credentials you provided are already registered, and you cannot register another account using this device. We only accept one account per device.'
+            });
+        }
+
+        // If only credentials exist
+        if (credentialsExist) {
+            return res.status(400).json({
+                message: 'Some of the credentials you provided already exist. If you have registered previously, please log in to your account.'
+            });
+        }
+
+        // If only device details exist
+        if (deviceExists) {
+            return res.status(400).json({
+                message: 'You cannot register another account using this device. We only accept one account per device.'
+            });
+        }
+
+        // Generate a unique 6-digit user ID
+        const userId = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // If a sponsorId is provided, increment the sponsor's referral count
+        if (sponsorId) {
+            // Check if the sponsor exists
+            const sponsorRef = await db.ref(`users/${sponsorId}`).once('value');
+            if (sponsorRef.exists()) {
+                const sponsorData = sponsorRef.val();
+                const newReferralCount = (sponsorData.referralCount || 0) + 1;
+
+                // Increment the sponsor's referral count
+                await db.ref(`users/${sponsorId}`).update({
+                    referralCount: newReferralCount
+                });
+            }
+        }
+
+        // Save user to the primary database (Firebase)
+        await db.ref(`users/${userId}`).set({
+            phoneNumber,
+            country,
+            firstName,
+            lastName,
+            dob,
+            nin: nin || null,  // If NIN is not provided, set it as null
+            email,
+            pin,
+            balance: 0, // Set initial balance to 0
+            cryptoBalance: 0, // Set initial crypto balance to 0
+            robotCredit: 0,
+            incompleteOrders: 0,
+            monthlyCommission: 0, // Set initial monthly commission to 0
+            kyc: 'Pending', // Set initial KYC status to Pending
+            registeredAt: Date.now(), // Store the registration timestamp
+            paymentMethods: {
+                "Airtel Money": "",
+                "MTN Mobile Money": "",
+                "Chipper Cash": "",
+                "Bank Transfer": "",
+                "Crypto Transfer": ""
+            }, // Initialize paymentMethods with all options empty
+            deviceDetails: deviceDetails || null, // Save device details if provided, otherwise set to null
+            sponsorId: sponsorId || null, // Save sponsor ID if provided, otherwise set to null
+            referralCount: 0 // Initial referral count for this user is 0
+        });
+
+        // After creating the user in Firebase, send the userId to another database
+        try {
+            const secondaryResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
+                userId: userId,
+            });
+
+            if (secondaryResponse.data.userId) {
+                return res.json({
+                    message: 'User registered successfully and replicated in secondary database',
+                    userId: userId
+                });
+            } else {
+                // Handle failure from the secondary database
+                return res.status(500).json({
+                    message: 'User registered in the primary database, but failed in the secondary database',
+                    userId: userId
+                });
+            }
+        } catch (secondaryError) {
+            console.error('Error creating user in secondary database:', secondaryError);
+            return res.status(500).json({
+                message: 'User registered in the primary database, but failed in the secondary database',
+                userId: userId
+            });
+        }
+    } catch (error) {
+        console.error('Error registering user:', error);
+        return res.status(500).json({
+            message: 'Error registering user',
+            error
+        });
+    }
+});
 
 
 
