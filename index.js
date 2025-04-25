@@ -347,15 +347,14 @@ app.get('/api/register', (req, res) => {
     const pinError = document.getElementById('pinError');
     let countries = [], selected = null;
 
-    // Fetch the countries data
+    // Fetch countries data and populate the select options
     fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
       .then(res => res.json())
       .then(data => {
         countries = data;
         data.forEach(({ country, country_code, flag, phone_length }) => {
-          // Populate the select options with country name and country code
-          const opt = new Option(flag + ' ' + country, country); // Use country name as value
-          opt.dataset.code = country_code;  // Store the country code
+          const opt = new Option(flag + ' ' + country, country); // Country name as value
+          opt.dataset.code = country_code;  // Store country code
           opt.dataset.len = phone_length;   // Store phone number length
           countrySelect.add(opt);
         });
@@ -364,11 +363,11 @@ app.get('/api/register', (req, res) => {
     // Handle country selection
     countrySelect.onchange = () => {
       selected = countries.find(c => c.country === countrySelect.value);
-      codeInput.value = selected ? selected.country_code : '';  // Display country code in input
-      phoneInput.value = '';  // Reset the phone number input
+      codeInput.value = selected ? selected.country_code : ''; // Display the country code in the input
+      phoneInput.value = '';  // Reset the phone input
       phoneError.style.display = 'none';
 
-      // Set the country code in phone number input placeholder
+      // Set the country code in phone number input
       if (selected) {
         phoneInput.placeholder = `${selected.country_code}  `;
       }
@@ -399,16 +398,14 @@ app.get('/api/register', (req, res) => {
         }
         phoneError.style.display = 'block';
       } else {
-        // Format the phone number with the country code
+        // Format the phone number with the country code before submission
         const formattedPhone = selected.dataset.code + ' ' + phoneInput.value.trim();
-        phoneInput.value = formattedPhone; // Set the phone number with the country code
-
-        // Submit the form with country name and formatted phone number
-        document.querySelector('[name="country"]').value = selected.country; // Set country name in the hidden input
+        phoneInput.value = formattedPhone; // Submit formatted phone number
       }
     };
   });
 </script>
+
 
         </body>
         </html>
