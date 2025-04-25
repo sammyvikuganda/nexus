@@ -107,11 +107,10 @@ app.get('/api/register', (req, res) => {
     const sponsorId = req.query.sponsorid || '';
     res.send(`
         <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-           
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Welcome to Nexus - Register</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
@@ -275,14 +274,15 @@ app.get('/api/register', (req, res) => {
 </head>
 <body>
   <div class="app-container">
-    <header>
-      <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Left Logo" />
-      <h1 class="header-title">Create Nexus Account</h1>
-      <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Right Logo" />
-    </header>
+                <header>
+                    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Left Logo" />
+                    <h1 class="header-title">Create Nexus Account</h1>
+                    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Right Logo" />
+                </header>
 
-    <div class="content">
-      <form id="registerForm" action="/api/register?sponsorid=${sponsorId}" method="POST">
+                <div class="content">
+                    <form id="registerForm" action="/api/register?sponsorid=${sponsorId}" method="POST">
+                      
         <div class="form-group">
           <label for="firstName">First Name</label>
           <input name="firstName" id="firstName" placeholder="First Name" required />
@@ -378,7 +378,6 @@ app.get('/api/register', (req, res) => {
     }
   };
 </script>
-
 
 </body>
 </html>
