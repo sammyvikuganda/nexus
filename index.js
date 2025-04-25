@@ -127,7 +127,8 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
 
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
-    const { phoneNumber, country, firstName, lastName, dob, nin, email, sponsorCode, pin, deviceDetails } = req.body;
+    const { phoneNumber, country, firstName, lastName, dob, nin, email, pin, deviceDetails } = req.body;
+    const sponsorId = req.query.sponsorid; // Get sponsor ID from query string if provided
 
     try {
         // Check for existing user details, including device information
@@ -166,7 +167,6 @@ app.post('/api/register', async (req, res) => {
             dob,
             nin: nin || null,  // If NIN is not provided, set it as null
             email,
-            sponsorCode,
             pin,
             balance: 0, // Set initial balance to 0
             cryptoBalance: 0, // Set initial crypto balance to 0
@@ -189,7 +189,8 @@ app.post('/api/register', async (req, res) => {
                 screenHeight: deviceDetails?.screenHeight || null,
                 colorDepth: deviceDetails?.colorDepth || null,
                 devicePixelRatio: deviceDetails?.devicePixelRatio || null
-            } // Save device details
+            }, // Save device details
+            sponsorId: sponsorId || null // Save sponsor ID if provided, otherwise set to null
         });
 
         // After creating the user in Firebase, send the userId to another database
@@ -199,50 +200,10 @@ app.post('/api/register', async (req, res) => {
             });
 
             if (secondaryResponse.data.userId) {
-                // If a sponsor code was provided, add the referral relationship
-                if (sponsorCode) {
-                    try {
-                        const sponsorSnapshot = await db.ref(`users/${sponsorCode}`).once('value');
-                        if (sponsorSnapshot.exists()) {
-                            // Add referral relationship in the secondary database
-                            const referralResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/add-referral', {
-                                userId: sponsorCode, // Sponsor's user ID
-                                referralId: userId, // Newly registered user's ID
-                            });
-
-                            if (referralResponse.data.success) {
-                                return res.json({
-                                    message: 'User registered successfully, replicated in secondary database, and referral added',
-                                    userId: userId
-                                });
-                            } else {
-                                console.error('Referral addition failed in secondary database.');
-                                return res.json({
-                                    message: 'User registered successfully, replicated in secondary database, but referral addition failed',
-                                    userId: userId
-                                });
-                            }
-                        } else {
-                            console.error('Invalid sponsor code provided.');
-                            return res.json({
-                                message: 'User registered successfully, replicated in secondary database, but sponsor code invalid',
-                                userId: userId
-                            });
-                        }
-                    } catch (referralError) {
-                        console.error('Error adding referral:', referralError);
-                        return res.status(500).json({
-                            message: 'User registered successfully, but referral addition failed',
-                            userId: userId
-                        });
-                    }
-                } else {
-                    // No sponsor code was provided
-                    return res.json({
-                        message: 'User registered successfully and replicated in secondary database',
-                        userId: userId
-                    });
-                }
+                return res.json({
+                    message: 'User registered successfully and replicated in secondary database',
+                    userId: userId
+                });
             } else {
                 // Handle failure from the secondary database
                 return res.status(500).json({
