@@ -29,7 +29,6 @@ app.use(express.static(path.join(__dirname, 'public'))); // Serve static files f
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static('public'));
 
 
 // Login endpoint
@@ -287,7 +286,7 @@ app.get('/api/register', (req, res) => {
                 </header>
 
                 <div class="content">
-                    <form id="registerForm" action="/api/register?sponsorid=${sponsorId}" method="POST">
+                    <form action="/api/register?sponsorid=${sponsorId}" method="POST">
                         <div class="form-group">
                             <label for="firstName">First Name</label>
                             <input name="firstName" id="firstName" placeholder="First Name" required />
@@ -303,6 +302,7 @@ app.get('/api/register', (req, res) => {
                                 <label for="country">Country</label>
                                 <select name="country" id="country" required>
                                     <option value="">Select a country</option>
+                                    <!-- Option values to be dynamically filled or hardcoded -->
                                 </select>
                             </div>
                             <div class="form-group phone">
@@ -347,47 +347,37 @@ app.get('/api/register', (req, res) => {
     const pinError = document.getElementById('pinError');
     let countries = [], selected = null;
 
-    // Fetch countries data and populate the select options
     fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
       .then(res => res.json())
       .then(data => {
         countries = data;
         data.forEach(({ country, country_code, flag, phone_length }) => {
-          const opt = new Option(flag + ' ' + country, country); // Country name as value
-          opt.dataset.code = country_code;  // Store country code
-          opt.dataset.len = phone_length;   // Store phone number length
+          const opt = new Option(flag + ' ' + country, country); // Set value as country name
+          opt.dataset.code = country_code;
+          opt.dataset.len = phone_length;
           countrySelect.add(opt);
         });
       });
 
-    // Handle country selection
     countrySelect.onchange = () => {
       selected = countries.find(c => c.country === countrySelect.value);
-      codeInput.value = selected ? selected.country_code : ''; // Display the country code in the input
-      phoneInput.value = '';  // Reset the phone input
+      codeInput.value = selected ? selected.country_code : '';
+      phoneInput.value = '';
       phoneError.style.display = 'none';
-
-      // Set the country code in phone number input
-      if (selected) {
-        phoneInput.placeholder = `${selected.country_code}  `;
-      }
     };
 
-    // Validate phone number input length
     phoneInput.oninput = () => {
       if (selected && phoneInput.value.length === selected.phone_length) {
         phoneError.style.display = 'none';
       }
     };
 
-    // Handle form submission
     document.getElementById('registerForm').onsubmit = e => {
       pinError.style.display = 'none';
       phoneError.style.display = 'none';
 
-      // Validation checks
       if (!selected || phoneInput.value.length !== selected.phone_length || pinInput.value.length < 5) {
-        e.preventDefault(); // Prevent form submission if validation fails
+        e.preventDefault();
         if (!selected) {
           phoneError.textContent = 'Please select a valid country.';
         } else if (phoneInput.value.length !== selected.phone_length) {
@@ -398,19 +388,18 @@ app.get('/api/register', (req, res) => {
         }
         phoneError.style.display = 'block';
       } else {
-        // Format the phone number with country code before submission
-        const formattedPhone = selected.dataset.code + ' ' + phoneInput.value.trim();
-        phoneInput.value = formattedPhone; // Submit formatted phone number
+        // Properly prepend country code to phone number
+        phoneInput.value = selected.country_code + ' ' + phoneInput.value.trim();
       }
     };
   });
 </script>
 
-
         </body>
         </html>
     `);
 });
+
 
 
 // Helper function to check for existing user details, including device info
@@ -444,77 +433,81 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
     const { phoneNumber, country, firstName, lastName, dob, nin, email, pin, deviceDetails } = req.body;
-    const sponsorId = req.query.sponsorid;
+    const sponsorId = req.query.sponsorid; // Get sponsor ID from query string if provided
 
     try {
+        // Check for existing user details, including device information
         const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
 
+        // If both credentials and device details exist, send the appropriate message
         if (credentialsExist && deviceExists) {
             return res.status(400).json({
-                message: 'Some of the credentials you provided are already registered, and you cannot register another account using this device.'
+                message: 'Some of the credentials you provided are already registered, and you cannot register another account using this device. We only accept one account per device.'
             });
         }
 
+        // If only credentials exist
         if (credentialsExist) {
             return res.status(400).json({
-                message: 'Some of the credentials you provided already exist. If you have registered previously, please log in.'
+                message: 'Some of the credentials you provided already exist. If you have registered previously, please log in to your account.'
             });
         }
 
+        // If only device details exist
         if (deviceExists) {
             return res.status(400).json({
-                message: 'You cannot register another account using this device.'
+                message: 'You cannot register another account using this device. We only accept one account per device.'
             });
         }
 
+        // Generate a unique 6-digit user ID
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
+        // If a sponsorId is provided, increment the sponsor's referral count
         if (sponsorId) {
+            // Check if the sponsor exists
             const sponsorRef = await db.ref(`users/${sponsorId}`).once('value');
             if (sponsorRef.exists()) {
                 const sponsorData = sponsorRef.val();
                 const newReferralCount = (sponsorData.referralCount || 0) + 1;
 
+                // Increment the sponsor's referral count
                 await db.ref(`users/${sponsorId}`).update({
                     referralCount: newReferralCount
                 });
             }
         }
 
-        const userData = {
+        // Save user to the primary database (Firebase)
+        await db.ref(`users/${userId}`).set({
             phoneNumber,
             country,
             firstName,
             lastName,
-            nin: nin || null,
+            dob,
+            nin: nin || null,  // If NIN is not provided, set it as null
             email,
             pin,
-            balance: 0,
-            cryptoBalance: 0,
+            balance: 0, // Set initial balance to 0
+            cryptoBalance: 0, // Set initial crypto balance to 0
             robotCredit: 0,
             incompleteOrders: 0,
-            monthlyCommission: 0,
-            kyc: 'Pending',
-            registeredAt: Date.now(),
+            monthlyCommission: 0, // Set initial monthly commission to 0
+            kyc: 'Pending', // Set initial KYC status to Pending
+            registeredAt: Date.now(), // Store the registration timestamp
             paymentMethods: {
                 "Airtel Money": "",
                 "MTN Mobile Money": "",
                 "Chipper Cash": "",
                 "Bank Transfer": "",
                 "Crypto Transfer": ""
-            },
-            deviceDetails: deviceDetails || null,
-            sponsorId: sponsorId || null,
-            referralCount: 0
-        };
+            }, // Initialize paymentMethods with all options empty
+            deviceDetails: deviceDetails || null, // Save device details if provided, otherwise set to null
+            sponsorId: sponsorId || null, // Save sponsor ID if provided, otherwise set to null
+            referralCount: 0 // Initial referral count for this user is 0
+        });
 
-        // Only include dob if it's defined
-        if (dob) {
-            userData.dob = dob;
-        }
-
-        await db.ref(`users/${userId}`).set(userData);
-
+        // After creating the user in Firebase, send the userId to another database
         try {
             const secondaryResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
                 userId: userId,
@@ -526,6 +519,7 @@ app.post('/api/register', async (req, res) => {
                     userId: userId
                 });
             } else {
+                // Handle failure from the secondary database
                 return res.status(500).json({
                     message: 'User registered in the primary database, but failed in the secondary database',
                     userId: userId
@@ -546,7 +540,6 @@ app.post('/api/register', async (req, res) => {
         });
     }
 });
-
 
 
 
