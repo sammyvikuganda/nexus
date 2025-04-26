@@ -436,6 +436,9 @@ app.post('/api/register', async (req, res) => {
     const { phoneNumber, country, firstName, lastName, dob, nin, email, pin, deviceDetails } = req.body;
     const sponsorId = req.query.sponsorid;
 
+    // Detect if the request came from a form
+    const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
+
     try {
         const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
 
@@ -498,7 +501,6 @@ app.post('/api/register', async (req, res) => {
             referralCount: 0
         };
 
-        // Only include dob if it's defined
         if (dob) {
             userData.dob = dob;
         }
@@ -511,10 +513,14 @@ app.post('/api/register', async (req, res) => {
             });
 
             if (secondaryResponse.data.userId) {
-                return res.json({
-                    message: 'User registered successfully and replicated in secondary database',
-                    userId: userId
-                });
+                if (isFormRequest) {
+                    return res.redirect('https://www.google.com');
+                } else {
+                    return res.json({
+                        message: 'User registered successfully and replicated in secondary database',
+                        userId: userId
+                    });
+                }
             } else {
                 return res.status(500).json({
                     message: 'User registered in the primary database, but failed in the secondary database',
@@ -536,6 +542,7 @@ app.post('/api/register', async (req, res) => {
         });
     }
 });
+
 
 
 
