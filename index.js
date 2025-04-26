@@ -276,6 +276,16 @@ app.get('/api/register', (req, res) => {
         padding: 0.7rem;
       }
     }
+
+
+
+
+
+
+
+
+
+
   </style>
         </head>
         <body>
@@ -331,6 +341,7 @@ app.get('/api/register', (req, res) => {
                         </div>
                     </form>
                 </div>
+              
 
                 <div class="footer">
                     <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
@@ -431,6 +442,7 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
 
 
 
+
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
     const { phoneNumber, country, firstName, lastName, dob, nin, email, pin, deviceDetails } = req.body;
@@ -443,21 +455,18 @@ app.post('/api/register', async (req, res) => {
         const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
 
         if (credentialsExist && deviceExists) {
-            return res.status(400).json({
-                message: 'Some of the credentials you provided are already registered, and you cannot register another account using this device.'
-            });
+            const errorMessage = 'Some of the credentials you provided are already registered, and you cannot register another account using this device.';
+            return displayErrorModal(res, errorMessage);
         }
 
         if (credentialsExist) {
-            return res.status(400).json({
-                message: 'Some of the credentials you provided already exist. If you have registered previously, please log in.'
-            });
+            const errorMessage = 'Some of the credentials you provided already exist. If you have registered previously, please log in.';
+            return displayErrorModal(res, errorMessage);
         }
 
         if (deviceExists) {
-            return res.status(400).json({
-                message: 'You cannot register another account using this device.'
-            });
+            const errorMessage = 'You cannot register another account using this device.';
+            return displayErrorModal(res, errorMessage);
         }
 
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
@@ -522,26 +531,102 @@ app.post('/api/register', async (req, res) => {
                     });
                 }
             } else {
-                return res.status(500).json({
-                    message: 'User registered in the primary database, but failed in the secondary database',
-                    userId: userId
-                });
+                const errorMessage = 'User registered in the primary database, but failed in the secondary database';
+                return displayErrorModal(res, errorMessage);
             }
         } catch (secondaryError) {
             console.error('Error creating user in secondary database:', secondaryError);
-            return res.status(500).json({
-                message: 'User registered in the primary database, but failed in the secondary database',
-                userId: userId
-            });
+            const errorMessage = 'User registered in the primary database, but failed in the secondary database';
+            return displayErrorModal(res, errorMessage);
         }
     } catch (error) {
         console.error('Error registering user:', error);
-        return res.status(500).json({
-            message: 'Error registering user',
-            error
-        });
+        const errorMessage = 'Error registering user';
+        return displayErrorModal(res, errorMessage);
     }
 });
+
+// Helper function to display error modal
+const displayErrorModal = (res, errorMessage) => {
+    const modalHtml = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <title>Error</title>
+            <style>
+                /* Modal Styles */
+                .error-modal-content {
+                    margin: auto;
+                    padding: 15px;
+                    width: 70%;
+                    max-width: 350px;
+                    text-align: center;
+                    border-radius: 20px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+                    position: absolute;
+                    top: 40%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+
+                #errorTitle {
+                    color: black;
+                    font-weight: normal;
+                    font-size: 18px;
+                    margin-bottom: 8px;
+                }
+
+                #errorMessage {
+                    color: grey;
+                    font-size: 14px;
+                    margin-bottom: 12px;
+                }
+
+                #errorModalCloseButton {
+                    background-color: white;
+                    color: red;
+                    border: 2px solid red;
+                    padding: 12px;
+                    width: 150px;
+                    cursor: pointer;
+                    border-radius: 28px;
+                    font-size: 16px;
+                    display: inline-block;
+                    text-align: center;
+                    transition: background-color 0.3s ease, opacity 0.1s ease;
+                    outline: none;
+                }
+
+                #errorModalCloseButton:hover {
+                    background-color: white;
+                    color: red;
+                }
+
+                #errorModalCloseButton:active {
+                    opacity: 0.1;
+                    transform: scale(0.95);
+                }
+            </style>
+        </head>
+        <body>
+            <div class="error-modal-content">
+                <h2 id="errorTitle">Error</h2>
+                <p id="errorMessage">${errorMessage}</p>
+                <button id="errorModalCloseButton">Close</button>
+            </div>
+
+            <script>
+                document.getElementById('errorModalCloseButton').onclick = function() {
+                    window.location.href = '/';
+                };
+            </script>
+        </body>
+        </html>
+    `;
+    res.send(modalHtml);
+};
 
 
 
