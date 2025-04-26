@@ -605,18 +605,18 @@ app.post('/api/withdraw', async (req, res) => {
   }
 
   // Get environment variables (ensure they are set in Vercel or locally)
-  const API_KEY = process.env.JPESA_API_KEY;
+  const JPESA_API_KEY = process.env.JPESA_API_KEY; // Using JPESA_API_KEY for the JPesa API key
   const CALLBACK_URL = process.env.CALLBACK_URL;
 
   // Check if the environment variables are set
-  if (!API_KEY || !CALLBACK_URL) {
-    return res.status(500).json({ message: 'API Key or Callback URL missing in environment variables.' });
+  if (!JPESA_API_KEY || !CALLBACK_URL) {
+    return res.status(500).json({ message: 'JPesa API Key or Callback URL missing in environment variables.' });
   }
 
   // Construct the XML data using dynamic user inputs
   const DATA = `<?xml version="1.0" encoding="ISO-8859-1"?>
     <g7bill>
-      <_key_>${API_KEY}</_key_>
+      <_key_>${JPESA_API_KEY}</_key_>
       <cmd>account</cmd>
       <action>debit</action>
       <pt>mm</pt>
@@ -646,7 +646,6 @@ app.post('/api/withdraw', async (req, res) => {
     res.status(500).json({ message: 'Error processing withdrawal', error: error.message });
   }
 });
-
 
 
 
