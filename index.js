@@ -458,22 +458,10 @@ app.post('/api/register', async (req, res) => {
         if (credentialsExist && deviceExists) {
             if (isFormRequest) {
                 return res.send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<head>
-            <link rel="stylesheet" type="text/css" href="path/to/styles.css">
-        </head>
-        <body>
-                    <div class="error-modal-background">
-                        <div class="error-modal-content">
-                            <h2 id="errorTitle">Error</h2>
-                            <p id="errorMessage">Some of the credentials you provided are already registered, and you cannot register another account using this device.</p>
-                            <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
-                        </div>
-                    </div>
+                    <script>
+                        alert('Some of the credentials you provided are already registered, and you cannot register another account using this device.');
+                        window.history.back();
+                    </script>
                 `);
             } else {
                 return res.status(400).json({
@@ -485,13 +473,10 @@ app.post('/api/register', async (req, res) => {
         if (credentialsExist) {
             if (isFormRequest) {
                 return res.send(`
-                    <div class="error-modal-background">
-                        <div class="error-modal-content">
-                            <h2 id="errorTitle">Error</h2>
-                            <p id="errorMessage">Some of the credentials you provided already exist. If you have registered previously, please log in.</p>
-                            <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
-                        </div>
-                    </div>
+                    <script>
+                        alert('Some of the credentials you provided already exist. If you have registered previously, please log in.');
+                        window.history.back();
+                    </script>
                 `);
             } else {
                 return res.status(400).json({
@@ -503,13 +488,10 @@ app.post('/api/register', async (req, res) => {
         if (deviceExists) {
             if (isFormRequest) {
                 return res.send(`
-                    <div class="error-modal-background">
-                        <div class="error-modal-content">
-                            <h2 id="errorTitle">Error</h2>
-                            <p id="errorMessage">You cannot register another account using this device.</p>
-                            <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
-                        </div>
-                    </div>
+                    <script>
+                        alert('You cannot register another account using this device.');
+                        window.history.back();
+                    </script>
                 `);
             } else {
                 return res.status(400).json({
@@ -596,13 +578,10 @@ app.post('/api/register', async (req, res) => {
         console.error('Error registering user:', error);
         if (isFormRequest) {
             return res.send(`
-                <div class="error-modal-background">
-                    <div class="error-modal-content">
-                        <h2 id="errorTitle">Error</h2>
-                        <p id="errorMessage">An unexpected error occurred while registering. Please try again later.</p>
-                        <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
-                    </div>
-                </div>
+                <script>
+                    alert('An unexpected error occurred while registering. Please try again later.');
+                    window.history.back();
+                </script>
             `);
         } else {
             return res.status(500).json({
@@ -612,6 +591,62 @@ app.post('/api/register', async (req, res) => {
         }
     }
 });
+
+
+
+// Endpoint to handle withdrawal request
+app.post('/api/withdraw', async (req, res) => {
+  // Destructure the required data from the request body
+  const { mobile, amount, tx, description } = req.body;
+
+  // Validate required fields
+  if (!mobile || !amount || !tx || !description) {
+    return res.status(400).json({ message: 'Mobile number, amount, transaction ID, and description are required.' });
+  }
+
+  // Get environment variables (ensure they are set in Vercel or locally)
+  const API_KEY = process.env.JPESA_API_KEY;
+  const CALLBACK_URL = process.env.CALLBACK_URL;
+
+  // Check if the environment variables are set
+  if (!API_KEY || !CALLBACK_URL) {
+    return res.status(500).json({ message: 'API Key or Callback URL missing in environment variables.' });
+  }
+
+  // Construct the XML data using dynamic user inputs
+  const DATA = `<?xml version="1.0" encoding="ISO-8859-1"?>
+    <g7bill>
+      <_key_>${API_KEY}</_key_>
+      <cmd>account</cmd>
+      <action>debit</action>
+      <pt>mm</pt>
+      <mobile>${mobile}</mobile>
+      <amount>${amount}</amount>
+      <callback>${CALLBACK_URL}</callback>
+      <tx>${tx}</tx>
+      <description>${description}</description>
+    </g7bill>`;
+
+  try {
+    // Send the request to JPesa API
+    const response = await axios.post('https://my.jpesa.com/api/', DATA, {
+      headers: {
+        'Content-Type': 'text/xml',
+      },
+    });
+
+    // Log the response from JPesa API for debugging
+    console.log(response.data);
+
+    // Send success response to the client
+    res.status(200).json({ message: 'Withdrawal request sent successfully!', data: response.data });
+  } catch (error) {
+    // Handle error and send a failure response
+    console.error('Error sending request to JPesa:', error);
+    res.status(500).json({ message: 'Error processing withdrawal', error: error.message });
+  }
+});
+
 
 
 
