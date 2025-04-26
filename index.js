@@ -458,73 +458,22 @@ app.post('/api/register', async (req, res) => {
         if (credentialsExist && deviceExists) {
             if (isFormRequest) {
                 return res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+            <link rel="stylesheet" type="text/css" href="path/to/styles.css">
+        </head>
+        <body>
                     <div class="error-modal-background">
                         <div class="error-modal-content">
                             <h2 id="errorTitle">Error</h2>
                             <p id="errorMessage">Some of the credentials you provided are already registered, and you cannot register another account using this device.</p>
-                            <button id="errorModalCloseButton" onclick="window.history.back()">OK</button>
+                            <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
                         </div>
                     </div>
-                    <style>
-                        /* Error Modal Styles */
-                        .error-modal-background {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0, 0, 0, 0.5);
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        .error-modal-content {
-                            margin: auto;
-                            padding: 15px;
-                            width: 70%;
-                            max-width: 350px;
-                            text-align: center;
-                            border-radius: 20px;
-                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                            position: relative;
-                            background-color: white;
-                        }
-                        #errorTitle {
-                            color: black;
-                            font-weight: normal;
-                            font-size: 18px;
-                            margin-bottom: 8px;
-                        }
-                        #errorMessage {
-                            color: grey;
-                            font-size: 14px;
-                            margin-bottom: 12px;
-                        }
-                        #errorModalCloseButton {
-                            background-color: white;
-                            color: red;
-                            border: 2px solid red;
-                            padding: 12px;
-                            width: 150px;
-                            cursor: pointer;
-                            border-radius: 28px;
-                            font-size: 16px;
-                            display: inline-block;
-                            text-align: center;
-                            transition: background-color 0.3s ease, opacity 0.1s ease;
-                            outline: none;
-                            -webkit-tap-highlight-color: transparent;
-                        }
-                        #errorModalCloseButton:hover {
-                            background-color: white;
-                            color: red;
-                        }
-                        #errorModalCloseButton:active {
-                            opacity: 0.1;
-                            transform: scale(0.95);
-                        }
-                    </style>
                 `);
             } else {
                 return res.status(400).json({
@@ -540,69 +489,9 @@ app.post('/api/register', async (req, res) => {
                         <div class="error-modal-content">
                             <h2 id="errorTitle">Error</h2>
                             <p id="errorMessage">Some of the credentials you provided already exist. If you have registered previously, please log in.</p>
-                            <button id="errorModalCloseButton" onclick="window.history.back()">OK</button>
+                            <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
                         </div>
                     </div>
-                    <style>
-                        /* Error Modal Styles */
-                        .error-modal-background {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0, 0, 0, 0.5);
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        .error-modal-content {
-                            margin: auto;
-                            padding: 15px;
-                            width: 70%;
-                            max-width: 350px;
-                            text-align: center;
-                            border-radius: 20px;
-                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                            position: relative;
-                            background-color: white;
-                        }
-                        #errorTitle {
-                            color: black;
-                            font-weight: normal;
-                            font-size: 18px;
-                            margin-bottom: 8px;
-                        }
-                        #errorMessage {
-                            color: grey;
-                            font-size: 14px;
-                            margin-bottom: 12px;
-                        }
-                        #errorModalCloseButton {
-                            background-color: white;
-                            color: red;
-                            border: 2px solid red;
-                            padding: 12px;
-                            width: 150px;
-                            cursor: pointer;
-                            border-radius: 28px;
-                            font-size: 16px;
-                            display: inline-block;
-                            text-align: center;
-                            transition: background-color 0.3s ease, opacity 0.1s ease;
-                            outline: none;
-                            -webkit-tap-highlight-color: transparent;
-                        }
-                        #errorModalCloseButton:hover {
-                            background-color: white;
-                            color: red;
-                        }
-                        #errorModalCloseButton:active {
-                            opacity: 0.1;
-                            transform: scale(0.95);
-                        }
-                    </style>
                 `);
             } else {
                 return res.status(400).json({
@@ -618,69 +507,9 @@ app.post('/api/register', async (req, res) => {
                         <div class="error-modal-content">
                             <h2 id="errorTitle">Error</h2>
                             <p id="errorMessage">You cannot register another account using this device.</p>
-                            <button id="errorModalCloseButton" onclick="window.history.back()">OK</button>
+                            <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
                         </div>
                     </div>
-                    <style>
-                        /* Error Modal Styles */
-                        .error-modal-background {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0, 0, 0, 0.5);
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        .error-modal-content {
-                            margin: auto;
-                            padding: 15px;
-                            width: 70%;
-                            max-width: 350px;
-                            text-align: center;
-                            border-radius: 20px;
-                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                            position: relative;
-                            background-color: white;
-                        }
-                        #errorTitle {
-                            color: black;
-                            font-weight: normal;
-                            font-size: 18px;
-                            margin-bottom: 8px;
-                        }
-                        #errorMessage {
-                            color: grey;
-                            font-size: 14px;
-                            margin-bottom: 12px;
-                        }
-                        #errorModalCloseButton {
-                            background-color: white;
-                            color: red;
-                            border: 2px solid red;
-                            padding: 12px;
-                            width: 150px;
-                            cursor: pointer;
-                            border-radius: 28px;
-                            font-size: 16px;
-                            display: inline-block;
-                            text-align: center;
-                            transition: background-color 0.3s ease, opacity 0.1s ease;
-                            outline: none;
-                            -webkit-tap-highlight-color: transparent;
-                        }
-                        #errorModalCloseButton:hover {
-                            background-color: white;
-                            color: red;
-                        }
-                        #errorModalCloseButton:active {
-                            opacity: 0.1;
-                            transform: scale(0.95);
-                        }
-                    </style>
                 `);
             } else {
                 return res.status(400).json({
@@ -771,69 +600,9 @@ app.post('/api/register', async (req, res) => {
                     <div class="error-modal-content">
                         <h2 id="errorTitle">Error</h2>
                         <p id="errorMessage">An unexpected error occurred while registering. Please try again later.</p>
-                        <button id="errorModalCloseButton" onclick="window.history.back()">OK</button>
+                        <button id="errorModalCloseButton" onclick="window.history.back();">OK</button>
                     </div>
                 </div>
-                <style>
-                    /* Error Modal Styles */
-                    .error-modal-background {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0, 0, 0, 0.5);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    .error-modal-content {
-                        margin: auto;
-                        padding: 15px;
-                        width: 70%;
-                        max-width: 350px;
-                        text-align: center;
-                        border-radius: 20px;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                        position: relative;
-                        background-color: white;
-                    }
-                    #errorTitle {
-                        color: black;
-                        font-weight: normal;
-                        font-size: 18px;
-                        margin-bottom: 8px;
-                    }
-                    #errorMessage {
-                        color: grey;
-                        font-size: 14px;
-                        margin-bottom: 12px;
-                    }
-                    #errorModalCloseButton {
-                        background-color: white;
-                        color: red;
-                        border: 2px solid red;
-                        padding: 12px;
-                        width: 150px;
-                        cursor: pointer;
-                        border-radius: 28px;
-                        font-size: 16px;
-                        display: inline-block;
-                        text-align: center;
-                        transition: background-color 0.3s ease, opacity 0.1s ease;
-                        outline: none;
-                        -webkit-tap-highlight-color: transparent;
-                    }
-                    #errorModalCloseButton:hover {
-                        background-color: white;
-                        color: red;
-                    }
-                    #errorModalCloseButton:active {
-                        opacity: 0.1;
-                        transform: scale(0.95);
-                    }
-                </style>
             `);
         } else {
             return res.status(500).json({
@@ -843,6 +612,10 @@ app.post('/api/register', async (req, res) => {
         }
     }
 });
+
+
+
+
 
 
 
