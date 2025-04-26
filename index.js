@@ -546,6 +546,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
+
 // Helper function to display error modal
 const displayErrorModal = (res, errorMessage) => {
     const modalHtml = `
@@ -619,7 +620,7 @@ const displayErrorModal = (res, errorMessage) => {
 
             <script>
                 document.getElementById('errorModalCloseButton').onclick = function() {
-                    window.location.href = '/';
+                    window.location.href = '/register';  // Adjust the URL to your form's page
                 };
             </script>
         </body>
@@ -627,7 +628,6 @@ const displayErrorModal = (res, errorMessage) => {
     `;
     res.send(modalHtml);
 };
-
 
 
 
