@@ -25,7 +25,7 @@ const secretKey = process.env.TEZA_SECRET_KEY;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the 'public' directory
+
 
 app.use(express.urlencoded({ extended: true }));
 
