@@ -454,19 +454,17 @@ app.post('/api/register', async (req, res) => {
     try {
         const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
 
+        // Error messages based on conditions
         if (credentialsExist && deviceExists) {
-            const errorMessage = 'Some of the credentials you provided are already registered, and you cannot register another account using this device.';
-            return displayErrorModal(res, errorMessage);
+            return displayErrorModal(res, 'Some of the credentials you provided are already registered, and you cannot register another account using this device.');
         }
 
         if (credentialsExist) {
-            const errorMessage = 'Some of the credentials you provided already exist. If you have registered previously, please log in.';
-            return displayErrorModal(res, errorMessage);
+            return displayErrorModal(res, 'Some of the credentials you provided already exist. If you have registered previously, please log in.');
         }
 
         if (deviceExists) {
-            const errorMessage = 'You cannot register another account using this device.';
-            return displayErrorModal(res, errorMessage);
+            return displayErrorModal(res, 'You cannot register another account using this device.');
         }
 
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
@@ -531,21 +529,17 @@ app.post('/api/register', async (req, res) => {
                     });
                 }
             } else {
-                const errorMessage = 'User registered in the primary database, but failed in the secondary database';
-                return displayErrorModal(res, errorMessage);
+                return displayErrorModal(res, 'User registered in the primary database, but failed in the secondary database');
             }
         } catch (secondaryError) {
             console.error('Error creating user in secondary database:', secondaryError);
-            const errorMessage = 'User registered in the primary database, but failed in the secondary database';
-            return displayErrorModal(res, errorMessage);
+            return displayErrorModal(res, 'User registered in the primary database, but failed in the secondary database');
         }
     } catch (error) {
         console.error('Error registering user:', error);
-        const errorMessage = 'Error registering user';
-        return displayErrorModal(res, errorMessage);
+        return displayErrorModal(res, 'Error registering user');
     }
 });
-
 
 // Helper function to display error modal
 const displayErrorModal = (res, errorMessage) => {
@@ -620,7 +614,7 @@ const displayErrorModal = (res, errorMessage) => {
 
             <script>
                 document.getElementById('errorModalCloseButton').onclick = function() {
-                    window.location.href = '/register';  // Adjust the URL to your form's page
+                    window.location.href = '/';
                 };
             </script>
         </body>
@@ -628,7 +622,6 @@ const displayErrorModal = (res, errorMessage) => {
     `;
     res.send(modalHtml);
 };
-
 
 
 
