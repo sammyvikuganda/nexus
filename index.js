@@ -454,19 +454,31 @@ app.post('/api/register', async (req, res) => {
     try {
         const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
 
-        // Error messages based on conditions
         if (credentialsExist && deviceExists) {
-            return displayErrorModal(res, 'Some of the credentials you provided are already registered, and you cannot register another account using this device.');
+            const message = 'Some credentials already exist, and you cannot register another account using this device.';
+            if (isFormRequest) {
+                return res.send(`<script>alert("${message}"); window.history.back();</script>`);
+            }
+            return res.status(400).json({ message });
         }
 
         if (credentialsExist) {
-            return displayErrorModal(res, 'Some of the credentials you provided already exist. If you have registered previously, please log in.');
+            const message = 'Some credentials you provided already exist. If you have registered previously, please log in.';
+            if (isFormRequest) {
+                return res.send(`<script>alert("${message}"); window.history.back();</script>`);
+            }
+            return res.status(400).json({ message });
         }
 
         if (deviceExists) {
-            return displayErrorModal(res, 'You cannot register another account using this device.');
+            const message = 'You cannot register another account using this device.';
+            if (isFormRequest) {
+                return res.send(`<script>alert("${message}"); window.history.back();</script>`);
+            }
+            return res.status(400).json({ message });
         }
 
+        // Create user
         const userId = Math.floor(100000 + Math.random() * 900000).toString();
 
         if (sponsorId) {
@@ -474,10 +486,7 @@ app.post('/api/register', async (req, res) => {
             if (sponsorRef.exists()) {
                 const sponsorData = sponsorRef.val();
                 const newReferralCount = (sponsorData.referralCount || 0) + 1;
-
-                await db.ref(`users/${sponsorId}`).update({
-                    referralCount: newReferralCount
-                });
+                await db.ref(`users/${sponsorId}`).update({ referralCount: newReferralCount });
             }
         }
 
@@ -521,6 +530,7 @@ app.post('/api/register', async (req, res) => {
 
             if (secondaryResponse.data.userId) {
                 if (isFormRequest) {
+                    // success - redirect to success page
                     return res.redirect('https://www.google.com');
                 } else {
                     return res.json({
@@ -529,99 +539,30 @@ app.post('/api/register', async (req, res) => {
                     });
                 }
             } else {
-                return displayErrorModal(res, 'User registered in the primary database, but failed in the secondary database');
+                const message = 'User registered in the primary database, but failed in the secondary database.';
+                if (isFormRequest) {
+                    return res.send(`<script>alert("${message}"); window.location.href='/';</script>`);
+                }
+                return res.status(500).json({ message, userId });
             }
         } catch (secondaryError) {
             console.error('Error creating user in secondary database:', secondaryError);
-            return displayErrorModal(res, 'User registered in the primary database, but failed in the secondary database');
+            const message = 'User registered in the primary database, but failed in the secondary database.';
+            if (isFormRequest) {
+                return res.send(`<script>alert("${message}"); window.location.href='/';</script>`);
+            }
+            return res.status(500).json({ message, userId });
         }
     } catch (error) {
         console.error('Error registering user:', error);
-        return displayErrorModal(res, 'Error registering user');
+        const message = 'Error registering user. Please try again later.';
+        if (isFormRequest) {
+            return res.send(`<script>alert("${message}"); window.history.back();</script>`);
+        }
+        return res.status(500).json({ message, error });
     }
 });
 
-// Helper function to display error modal
-const displayErrorModal = (res, errorMessage) => {
-    const modalHtml = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <title>Error</title>
-            <style>
-                /* Modal Styles */
-                .error-modal-content {
-                    margin: auto;
-                    padding: 15px;
-                    width: 70%;
-                    max-width: 350px;
-                    text-align: center;
-                    border-radius: 20px;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                    position: absolute;
-                    top: 40%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                }
-
-                #errorTitle {
-                    color: black;
-                    font-weight: normal;
-                    font-size: 18px;
-                    margin-bottom: 8px;
-                }
-
-                #errorMessage {
-                    color: grey;
-                    font-size: 14px;
-                    margin-bottom: 12px;
-                }
-
-                #errorModalCloseButton {
-                    background-color: white;
-                    color: red;
-                    border: 2px solid red;
-                    padding: 12px;
-                    width: 150px;
-                    cursor: pointer;
-                    border-radius: 28px;
-                    font-size: 16px;
-                    display: inline-block;
-                    text-align: center;
-                    transition: background-color 0.3s ease, opacity 0.1s ease;
-                    outline: none;
-                }
-
-                #errorModalCloseButton:hover {
-                    background-color: white;
-                    color: red;
-                }
-
-                #errorModalCloseButton:active {
-                    opacity: 0.1;
-                    transform: scale(0.95);
-                }
-            </style>
-        </head>
-        <body>
-            <div class="error-modal-content">
-                <h2 id="errorTitle">Error</h2>
-                <p id="errorMessage">${errorMessage}</p>
-                <button id="errorModalCloseButton">Close</button>
-            </div>
-
-            <script>
-                document.getElementById('errorModalCloseButton').onclick = function() {
-                    window.location.href = '/';
-                };
-            </script>
-        </body>
-        </html>
-    `;
-    res.send(modalHtml);
-};
 
 
 
