@@ -2,9 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const path = require('path');
-const axios = require('axios'); // Import axios
 const app = express();
+const axios = require('axios'); // Import axios
+const session = require('express-session');
 const PORT = process.env.PORT || 3000;
+const bodyParser = require('body-parser');
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -30,6 +32,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static('public'));
+
+
+
+
+// Session setup
+if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET is not set in environment variables');
+}
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // set to true only if using HTTPS
+}));
 
 
 // Login endpoint
@@ -1222,6 +1239,240 @@ console.error('Error processing withdrawal:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+
+
+
+// ================== LOGIN ==================
+app.post('/api/login', async (req, res) => {
+    const { phoneNumber, pin } = req.body;
+
+    const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
+
+    try {
+        const usersSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
+
+        if (!usersSnapshot.exists()) {
+            if (isFormRequest) {
+                return res.send(`
+                    <script>
+                        alert('User not found');
+                        window.location.href='/api/login';
+                    </script>
+                `);
+            }
+            return res.status(400).send('User not found');
+        }
+
+        const users = usersSnapshot.val();
+        const userId = Object.keys(users)[0];
+        const userData = users[userId];
+
+        if (userData.pin !== pin) {
+            if (isFormRequest) {
+                return res.send(`
+                    <script>
+                        alert('Incorrect PIN');
+                        window.location.href='/api/login';
+                    </script>
+                `);
+            }
+            return res.status(400).send('Incorrect PIN');
+        }
+
+        // Save only the userId in session
+        req.session.userId = userId;
+
+        return res.redirect('/dashboard');
+
+    } catch (error) {
+        console.error('Error logging in:', error);
+        res.status(500).send('Login error');
+    }
+});
+
+
+
+
+// ================== DASHBOARD ==================
+app.get('/dashboard', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/api/login');
+    }
+
+    try {
+        const userRef = db.ref('users/' + req.session.userId);
+        const snapshot = await userRef.once('value');
+
+        if (!snapshot.exists()) {
+            return res.status(404).send('User not found');
+        }
+
+        const userData = snapshot.val();
+
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <title>Dashboard</title>
+            </head>
+            <body>
+                <h1>Welcome back, ${userData.firstName} ${userData.lastName}!</h1>
+                <p>Balance: $${userData.balance}</p>
+                <p>Crypto Balance: $${userData.cryptoBalance}</p>
+                <p>Robot Credit: ${userData.robotCredit}</p>
+                <button onclick="window.location.href='/profile'">Go to Profile</button>
+                <p><a href="/api/logout">Logout</a></p>
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('Error fetching dashboard:', error);
+        res.status(500).send('Dashboard error');
+    }
+});
+
+// ================== LOGIN PAGE ==================
+app.get('/api/login', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <title>Login</title>
+        </head>
+        <body>
+            <h1>Login</h1>
+            <form action="/api/login" method="POST">
+                <input type="text" name="phoneNumber" placeholder="Phone Number" required />
+                <input type="password" name="pin" placeholder="PIN" required maxlength="5"/>
+                <button type="submit">Login</button>
+            </form>
+        </body>
+        </html>
+    `);
+});
+
+
+
+
+
+
+
+
+// ================== PROFILE ==================
+app.get('/profile', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/api/login');
+    }
+
+    try {
+        const userRef = db.ref('users/' + req.session.userId);
+        const snapshot = await userRef.once('value');
+
+        if (!snapshot.exists()) {
+            return res.status(404).send('User not found');
+        }
+
+        const userData = snapshot.val();
+
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <title>Profile</title>
+            </head>
+            <body>
+                <h1>Profile: ${userData.firstName} ${userData.lastName}</h1>
+                <p><strong>Phone Number:</strong> ${userData.phoneNumber}</p>
+                <p><strong>Balance:</strong> $${userData.balance}</p>
+                <p><strong>Crypto Balance:</strong> $${userData.cryptoBalance}</p>
+                <p><strong>Robot Credit:</strong> ${userData.robotCredit}</p>
+
+                <h2>Change PIN</h2>
+                <form action="/api/change-pin" method="POST">
+                    <label for="oldPin">Old PIN:</label>
+                    <input type="password" id="oldPin" name="oldPin" required />
+                    <br />
+                    <label for="newPin">New PIN:</label>
+                    <input type="password" id="newPin" name="newPin" required />
+                    <br />
+                    <label for="confirmPin">Confirm New PIN:</label>
+                    <input type="password" id="confirmPin" name="confirmPin" required />
+                    <br />
+                    <button type="submit">Change PIN</button>
+                </form>
+
+                <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+                <p><a href="/api/logout">Logout</a></p>
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).send('Profile error');
+    }
+});
+
+
+
+
+
+// ================== CHANGE PIN ==================
+app.post('/api/change-pin', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/api/login');
+    }
+
+    const { oldPin, newPin, confirmPin } = req.body;
+
+    if (!oldPin || !newPin || !confirmPin) {
+        return res.status(400).send('All fields are required');
+    }
+
+    if (newPin !== confirmPin) {
+        return res.status(400).send('New PIN and Confirm PIN do not match');
+    }
+
+    try {
+        // Fetch user data from Firebase
+        const userRef = db.ref('users/' + req.session.userId);
+        const snapshot = await userRef.once('value');
+
+        if (!snapshot.exists()) {
+            return res.status(404).send('User not found');
+        }
+
+        const userData = snapshot.val();
+
+        // Check if the old PIN is correct
+        if (userData.pin !== oldPin) {
+            return res.status(400).send('Old PIN is incorrect');
+        }
+
+        // Update the PIN in the database
+        await userRef.update({
+            pin: newPin
+        });
+
+        // Send success response
+        res.send(`
+            <script>
+                alert('PIN changed successfully');
+                window.location.href='/profile';
+            </script>
+        `);
+    } catch (error) {
+        console.error('Error changing PIN:', error);
+        res.status(500).send('Error changing PIN');
+    }
+});
+
+
+
+
 
 
 
