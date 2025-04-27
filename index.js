@@ -1235,6 +1235,570 @@ app.post('/api/withdraw', async (req, res) => {
 
 
 
+
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Nexus - Online Earning Platform</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+        :root {
+          --primary: #6366f1;
+          --primary-dark: #4f46e5;
+          --dark: #1e293b;
+          --light: #f8fafc;
+          --gray: #94a3b8;
+          --success: #10b981;
+        }
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Inter', sans-serif;
+          background-color: #f1f5f9;
+          color: var(--dark);
+          line-height: 1.6;
+        }
+        
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 20px;
+        }
+        
+        header {
+          background-color: white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+        
+        nav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 0;
+        }
+        
+        .logo {
+          font-size: 24px;
+          font-weight: 700;
+          color: var(--primary);
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        
+        .logo i {
+          font-size: 28px;
+        }
+        
+        .nav-links {
+          display: flex;
+          gap: 30px;
+        }
+        
+        .nav-links a {
+          text-decoration: none;
+          color: var(--dark);
+          font-weight: 500;
+          transition: color 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .nav-links a:hover {
+          color: var(--primary);
+        }
+        
+        .nav-links a i {
+          font-size: 14px;
+        }
+        
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          border-radius: 6px;
+          font-weight: 500;
+          text-decoration: none;
+          transition: all 0.3s;
+          cursor: pointer;
+        }
+        
+        .btn i {
+          font-size: 14px;
+        }
+        
+        .btn-primary {
+          background-color: var(--primary);
+          color: white;
+        }
+        
+        .btn-primary:hover {
+          background-color: var(--primary-dark);
+          transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+          border: 1px solid var(--primary);
+          color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+          background-color: var(--primary);
+          color: white;
+          transform: translateY(-2px);
+        }
+        
+        .hero {
+          padding: 100px 0;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .hero::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, rgba(255,255,255,0) 70%);
+          z-index: -1;
+        }
+        
+        .hero h1 {
+          font-size: 48px;
+          font-weight: 700;
+          margin-bottom: 20px;
+          background: linear-gradient(to right, var(--primary), var(--success));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+          font-size: 20px;
+          color: var(--gray);
+          max-width: 700px;
+          margin: 0 auto 40px;
+        }
+        
+        .cta-buttons {
+          display: flex;
+          gap: 15px;
+          justify-content: center;
+        }
+        
+        .stats {
+          display: flex;
+          justify-content: center;
+          gap: 40px;
+          margin-top: 60px;
+          flex-wrap: wrap;
+        }
+        
+        .stat-item {
+          text-align: center;
+        }
+        
+        .stat-number {
+          font-size: 40px;
+          font-weight: 700;
+          color: var(--primary);
+          margin-bottom: 5px;
+        }
+        
+        .stat-label {
+          color: var(--gray);
+          font-size: 14px;
+        }
+        
+        .features {
+          padding: 80px 0;
+          background-color: white;
+        }
+        
+        .section-title {
+          text-align: center;
+          margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+          font-size: 36px;
+          margin-bottom: 15px;
+        }
+        
+        .section-title p {
+          color: var(--gray);
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 30px;
+        }
+        
+        .feature-card {
+          background-color: var(--light);
+          border-radius: 10px;
+          padding: 30px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+          transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+          width: 60px;
+          height: 60px;
+          background-color: rgba(99,102,241,0.1);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+          color: var(--primary);
+          font-size: 24px;
+        }
+        
+        .feature-card h3 {
+          font-size: 20px;
+          margin-bottom: 15px;
+        }
+        
+        .feature-card p {
+          color: var(--gray);
+        }
+        
+        .cta-section {
+          padding: 80px 0;
+          background-color: var(--primary);
+          color: white;
+          text-align: center;
+        }
+        
+        .cta-section h2 {
+          font-size: 36px;
+          margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+          max-width: 600px;
+          margin: 0 auto 30px;
+          opacity: 0.9;
+        }
+        
+        footer {
+          background-color: var(--dark);
+          color: white;
+          padding: 60px 0 20px;
+        }
+        
+        .footer-content {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 40px;
+          margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+          font-size: 18px;
+          margin-bottom: 20px;
+          color: var(--light);
+        }
+        
+        .footer-column ul {
+          list-style: none;
+        }
+        
+        .footer-column ul li {
+          margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+          color: var(--gray);
+          text-decoration: none;
+          transition: color 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .footer-column ul li a i {
+          font-size: 14px;
+          width: 20px;
+        }
+        
+        .footer-column ul li a:hover {
+          color: white;
+        }
+        
+        .social-links {
+          display: flex;
+          gap: 15px;
+          margin-top: 20px;
+        }
+        
+        .social-links a {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: rgba(255,255,255,0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+          background-color: var(--primary);
+          transform: translateY(-3px);
+        }
+        
+        .copyright {
+          text-align: center;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255,255,255,0.1);
+          color: var(--gray);
+          font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+          .nav-links {
+            display: none;
+          }
+          
+          .hero h1 {
+            font-size: 36px;
+          }
+          
+          .hero p {
+            font-size: 18px;
+          }
+          
+          .cta-buttons {
+            flex-direction: column;
+            align-items: center;
+          }
+          
+          .stats {
+            gap: 20px;
+          }
+          
+          .stat-number {
+            font-size: 30px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <header>
+        <div class="container">
+          <nav>
+            <a href="/" class="logo">
+              <i class="fas fa-bolt"></i>
+              <span>Nexus</span>
+            </a>
+            <div class="nav-links">
+              <a href="#features">
+                <i class="fas fa-star"></i>
+                <span>Features</span>
+              </a>
+              <a href="#how-it-works">
+                <i class="fas fa-play-circle"></i>
+                <span>How It Works</span>
+              </a>
+              <a href="#about">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+              </a>
+            </div>
+            <a href="#" class="btn btn-outline">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Sign In</span>
+            </a>
+          </nav>
+        </div>
+      </header>
+      
+      <main>
+        <section class="hero">
+          <div class="container">
+            <h1>Earn Online with Nexus</h1>
+            <p>Join thousands of users earning money through our innovative platform. Whether you're freelancing, selling digital products, or completing tasks, Nexus provides the tools you need to succeed.</p>
+            <div class="cta-buttons">
+              <a href="#" class="btn btn-primary">
+                <i class="fas fa-rocket"></i>
+                <span>Get Started</span>
+              </a>
+              <a href="#" class="btn btn-outline">
+                <i class="fas fa-play"></i>
+                <span>Watch Demo</span>
+              </a>
+            </div>
+            
+            <div class="stats">
+              <div class="stat-item">
+                <div class="stat-number">50K+</div>
+                <div class="stat-label">Active Users</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">$10M+</div>
+                <div class="stat-label">Earned</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">120+</div>
+                <div class="stat-label">Countries</div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section id="features" class="features">
+          <div class="container">
+            <div class="section-title">
+              <h2>Why Choose Nexus?</h2>
+              <p>Our platform offers everything you need to start earning online quickly and securely.</p>
+            </div>
+            
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <h3>Fast Payments</h3>
+                <p>Get paid quickly with our reliable payment system that supports multiple withdrawal methods.</p>
+              </div>
+              
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Growth Tools</h3>
+                <p>Access analytics and marketing tools to help grow your online business.</p>
+              </div>
+              
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Secure Platform</h3>
+                <p>Your data and earnings are protected with bank-level security measures.</p>
+              </div>
+              
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-globe"></i>
+                </div>
+                <h3>Global Reach</h3>
+                <p>Connect with clients and customers from around the world.</p>
+              </div>
+              
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-stream"></i>
+                </div>
+                <h3>Multiple Streams</h3>
+                <p>Diversify your income with various earning opportunities in one platform.</p>
+              </div>
+              
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Mobile Friendly</h3>
+                <p>Manage your earnings on the go with our fully responsive platform.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section class="cta-section">
+          <div class="container">
+            <h2>Ready to Start Earning?</h2>
+            <p>Join Nexus today and unlock your online earning potential. It only takes a few minutes to get started.</p>
+            <a href="#" class="btn btn-primary" style="background-color: white; color: var(--primary);">
+              <i class="fas fa-user-plus"></i>
+              <span>Create Free Account</span>
+            </a>
+          </div>
+        </section>
+      </main>
+      
+      <footer>
+        <div class="container">
+          <div class="footer-content">
+            <div class="footer-column">
+              <h3>Nexus</h3>
+              <p>The premier platform for online earning opportunities.</p>
+              <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+              </div>
+            </div>
+            
+            <div class="footer-column">
+              <h3>Quick Links</h3>
+              <ul>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Home</a></li>
+                <li><a href="#features"><i class="fas fa-chevron-right"></i> Features</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
+              </ul>
+            </div>
+            
+            <div class="footer-column">
+              <h3>Resources</h3>
+              <ul>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Help Center</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Community</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Tutorials</a></li>
+              </ul>
+            </div>
+            
+            <div class="footer-column">
+              <h3>Legal</h3>
+              <ul>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Terms of Service</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="copyright">
+            <p>© ${new Date().getFullYear()} Nexus. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </body>
+    </html>
+  `);
+});
+
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
