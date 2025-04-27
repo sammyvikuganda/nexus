@@ -27,12 +27,15 @@ if (!process.env.SESSION_SECRET) {
 }
 
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET,  // Ensure your secret is set properly in environment variables
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true } // set to true only if using HTTPS
-    maxAge: 60 * 60 * 1000
+    cookie: {
+        secure: true,  // Set to true if using HTTPS
+        maxAge: 60 * 60 * 1000  // Session expires after 1 hour (in milliseconds)
+    }
 }));
+
 
 // ================== REGISTER ==================
 app.post('/api/register', async (req, res) => {
