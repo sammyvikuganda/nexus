@@ -30,8 +30,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true } // set to true only if using HTTPS
+    cookie: { 
+        secure: req.protocol === 'https' // Ensure secure is only true for HTTPS
+    }
 }));
+
 
 // ================== REGISTER ==================
 app.post('/api/register', async (req, res) => {
