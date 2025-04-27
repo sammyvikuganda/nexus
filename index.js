@@ -553,8 +553,23 @@ app.post('/api/register', async (req, res) => {
             });
 
             if (secondaryResponse.data.userId) {
+                // Instead of redirecting, show a success page with the user's name
                 if (isFormRequest) {
-                    return res.redirect('https://www.google.com');
+                    return res.send(`
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8" />
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                            <title>Registration Successful</title>
+                        </head>
+                        <body>
+                            <h1>Registration Successful</h1>
+                            <p>Welcome, ${firstName} ${lastName}!</p>
+                            <p>Your account has been created successfully.</p>
+                        </body>
+                        </html>
+                    `);
                 } else {
                     return res.json({
                         message: 'User registered successfully and replicated in secondary database',
