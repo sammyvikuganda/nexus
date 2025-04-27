@@ -35,10 +35,9 @@ app.use(express.static('public'));
 
 
 
-// Session middleware
-const secretKey = process.env.SESSION_SECRET || 'my-default-secret-key';
+
 app.use(session({
-    secret: secretKey, // Use the secret key from environment variables
+    secret: '766666777', 
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
