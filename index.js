@@ -2230,102 +2230,110 @@ app.use((req, res) => {
 
 
 
+// Serve login page
 app.get('/api/login', (req, res) => {
-    // Serve a simple HTML login page
     res.send(`
-        <html>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <title>Nexus - Login</title>
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+            <style>
+                body { font-family: 'Poppins', sans-serif; padding: 2rem; background: #f5f5f5; }
+                .login-container { max-width: 400px; margin: auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                input { width: 100%; padding: 0.8rem; margin-top: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+                button { width: 100%; padding: 0.8rem; background: #4CAF50; color: white; border: none; margin-top: 1rem; border-radius: 4px; cursor: pointer; }
+                button:hover { background: #45a049; }
+            </style>
+        </head>
         <body>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <input type="email" id="email" placeholder="Email" required/><br/>
-                <input type="password" id="pin" placeholder="PIN" required/><br/>
-                <button type="submit">Login</button>
-            </form>
-
-            <script>
-                document.getElementById('loginForm').addEventListener('submit', async function(event) {
-                    event.preventDefault();
-                    
-                    const email = document.getElementById('email').value;
-                    const pin = document.getElementById('pin').value;
-
-                    const response = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, pin })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        localStorage.setItem('userId', data.userId);
-                        window.location.href = '/dashboard';
-                    } else {
-                        alert(data.message || 'Login failed.');
-                    }
-                });
-            </script>
+            <div class="login-container">
+                <h2>Login to Nexus</h2>
+                <form id="loginForm" method="POST" action="/api/login">
+                    <input type="email" name="email" placeholder="Email" required />
+                    <input type="password" name="pin" placeholder="PIN" required maxlength="5"/>
+                    <button type="submit">Login</button>
+                </form>
+            </div>
         </body>
         </html>
     `);
 });
+
+
+
+
+
+
 
 app.post('/api/login', async (req, res) => {
     const { email, pin } = req.body;
 
     try {
-        const snapshot = await db.ref('users').orderByChild('email').equalTo(email).once('value');
-        if (!snapshot.exists()) {
-            return res.status(400).json({ message: 'User not found.' });
+        // Check if the user exists based on the email
+        const userRef = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+        const userData = userRef.val();
+
+        if (!userData) {
+            return res.send(`
+                <script>
+                    alert('User not found.');
+                    window.history.back();
+                </script>
+            `);
         }
 
-        const user = Object.values(snapshot.val())[0];
+        const user = Object.values(userData)[0]; // Get the first matching user
 
+        // Validate the PIN
         if (user.pin !== pin) {
-            return res.status(400).json({ message: 'Incorrect PIN.' });
+            return res.send(`
+                <script>
+                    alert('Invalid PIN.');
+                    window.history.back();
+                </script>
+            `);
         }
 
-        res.json({
-            message: 'Login successful!',
-            userId: Object.keys(snapshot.val())[0] // return the user ID
-        });
+        const balance = user.balance || 0;
+
+        // Successful login - show balance page
+        return res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                <title>Dashboard - Nexus</title>
+                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+                <style>
+                    body { font-family: 'Poppins', sans-serif; text-align: center; padding: 2rem; background: #f5f5f5; }
+                    .balance-container { background: white; padding: 2rem; margin: auto; max-width: 400px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                    h2 { color: #333; }
+                    .balance { font-size: 2rem; color: green; margin-top: 1rem; }
+                </style>
+            </head>
+            <body>
+                <div class="balance-container">
+                    <h2>Welcome, ${user.firstName}!</h2>
+                    <p>Your balance is:</p>
+                    <div class="balance">$${balance.toFixed(2)}</div>
+                </div>
+            </body>
+            </html>
+        `);
+
     } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
-
-
-
-
-app.get('/dashboard', (req, res) => {
-    res.send(`
-        <html>
-        <body>
-            <h2>User Dashboard</h2>
-            <div id="balance">Loading balance...</div>
-
+        console.error('Error logging in user:', error);
+        res.send(`
             <script>
-                const userId = localStorage.getItem('userId');
-                if (!userId) {
-                    alert('No user ID found, please login.');
-                    window.location.href = '/api/login';
-                } else {
-                    fetch('/api/user?userId=' + userId)
-                        .then(response => response.json())
-                        .then(data => {
-                            document.getElementById('balance').innerText = "Your balance is: $" + data.balance;
-                        })
-                        .catch(error => {
-                            console.error('Error fetching user data:', error);
-                            document.getElementById('balance').innerText = 'Failed to load balance.';
-                        });
-                }
+                alert('Server error. Please try again later.');
+                window.history.back();
             </script>
-        </body>
-        </html>
-    `);
+        `);
+    }
 });
 
 
