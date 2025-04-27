@@ -1319,6 +1319,7 @@ app.get('/api/login', (req, res) => {
 });
 
 // ================== DASHBOARD ==================
+
 app.get('/dashboard', async (req, res) => {
     if (!req.session.userId) {
         return res.redirect('/api/login');
@@ -1339,15 +1340,100 @@ app.get('/dashboard', async (req, res) => {
             <html lang="en">
             <head>
                 <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
                 <title>Dashboard</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                        display: flex;
+                        flex-direction: column;
+                        height: 100vh;
+                    }
+                    header {
+                        padding: 15px;
+                        background: #4CAF50;
+                        color: white;
+                        text-align: center;
+                    }
+                    main {
+                        flex: 1;
+                        padding: 20px;
+                        overflow-y: auto;
+                    }
+                    nav {
+                        display: flex;
+                        justify-content: space-around;
+                        background: #eee;
+                        padding: 10px 0;
+                        position: fixed;
+                        bottom: 0;
+                        width: 100%;
+                        border-top: 1px solid #ccc;
+                    }
+                    nav button {
+                        background: none;
+                        border: none;
+                        font-size: 16px;
+                        color: #555;
+                        cursor: pointer;
+                    }
+                    nav button.active {
+                        color: #4CAF50;
+                        font-weight: bold;
+                    }
+                    section {
+                        display: none;
+                    }
+                    section.active {
+                        display: block;
+                    }
+                </style>
             </head>
             <body>
-                <h1>Welcome back, ${userData.firstName} ${userData.lastName}!</h1>
-                <p>Balance: $${userData.balance}</p>
-                <p>Crypto Balance: $${userData.cryptoBalance}</p>
-                <p>Robot Credit: ${userData.robotCredit}</p>
-                <button onclick="window.location.href='/profile'">Go to Profile</button>
-                <p><a href="/api/logout">Logout</a></p>
+                <header>
+                    <h1>Welcome, ${userData.firstName}!</h1>
+                </header>
+
+                <main>
+                    <section id="home" class="active">
+                        <h2>Home</h2>
+                        <p>Balance: $${userData.balance}</p>
+                        <p>Crypto Balance: $${userData.cryptoBalance}</p>
+                        <p>Robot Credit: ${userData.robotCredit}</p>
+                    </section>
+
+                    <section id="profile">
+                        <h2>Profile</h2>
+                        <p><strong>Name:</strong> ${userData.firstName} ${userData.lastName}</p>
+                        <p><strong>Phone:</strong> ${userData.phoneNumber}</p>
+                    </section>
+
+                    <section id="settings">
+                        <h2>Settings</h2>
+                        <p><a href="/api/logout">Logout</a></p>
+                    </section>
+                </main>
+
+                <nav>
+                    <button onclick="showSection('home')" id="homeBtn" class="active">Home</button>
+                    <button onclick="showSection('profile')" id="profileBtn">Profile</button>
+                    <button onclick="showSection('settings')" id="settingsBtn">Settings</button>
+                </nav>
+
+                <script>
+                    function showSection(sectionId) {
+                        document.querySelectorAll('section').forEach(section => {
+                            section.classList.remove('active');
+                        });
+                        document.querySelectorAll('nav button').forEach(button => {
+                            button.classList.remove('active');
+                        });
+                        document.getElementById(sectionId).classList.add('active');
+                        document.getElementById(sectionId + 'Btn').classList.add('active');
+                    }
+                </script>
             </body>
             </html>
         `);
@@ -1356,6 +1442,10 @@ app.get('/dashboard', async (req, res) => {
         res.status(500).send('Dashboard error');
     }
 });
+
+
+
+
 
 // ================== PROFILE ==================
 app.get('/profile', async (req, res) => {
