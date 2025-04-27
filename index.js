@@ -2212,7 +2212,6 @@ app.get('/', (req, res) => {
 
 
 
-
 // Login user endpoint
 app.post('/api/login', async (req, res) => {
     const { phoneNumber, pin } = req.body;
@@ -2281,9 +2280,6 @@ app.post('/api/login', async (req, res) => {
         }
     }
 });
-
-
-
 
 
 
@@ -2377,7 +2373,6 @@ app.get('/api/login', (req, res) => {
         </html>
     `);
 });
-
 
 
 
