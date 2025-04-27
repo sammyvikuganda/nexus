@@ -24,10 +24,6 @@ const secretKey = process.env.TEZA_SECRET_KEY;
 
 
 
-
-const secretKey = process.env.SESSION_SECRET || 'my-default-secret-key'; 
-
-
 app.use(cors());
 app.use(express.json());
 
@@ -39,14 +35,13 @@ app.use(express.static('public'));
 
 
 
-
-
-
+// Session middleware
+const secretKey = process.env.SESSION_SECRET || 'my-default-secret-key';
 app.use(session({
     secret: secretKey, // Use the secret key from environment variables
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }  // Set 'secure: true' in production if you're using HTTPS
+    cookie: { secure: false }
 }));
 
 
@@ -2218,8 +2213,7 @@ app.get('/', (req, res) => {
 
 
 
-
-// Login user endpoint
+// Login Endpoint (POST)
 app.post('/api/login', async (req, res) => {
     const { phoneNumber, pin } = req.body;
 
@@ -2227,81 +2221,56 @@ app.post('/api/login', async (req, res) => {
     const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
 
     try {
-        // Check if the user exists in the database
+        // Fetch user from Firebase
         const userSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
         
         if (!userSnapshot.exists()) {
-            if (isFormRequest) {
-                return res.send(`
-                    <script>
-                        alert('User not found. Please check your credentials.');
-                        window.history.back();
-                    </script>
-                `);
-            } else {
-                return res.status(400).json({
-                    message: 'User not found. Please check your credentials.'
-                });
-            }
+            return res.status(400).json({ message: 'User not found.' });
         }
 
-        const user = userSnapshot.val();
-        const userData = Object.values(user)[0]; // Get the first (and only) user object
+        const userData = Object.values(userSnapshot.val())[0]; // Get user data
 
         // Validate PIN
         if (userData.pin !== pin) {
-            if (isFormRequest) {
-                return res.send(`
-                    <script>
-                        alert('Incorrect PIN. Please try again.');
-                        window.history.back();
-                    </script>
-                `);
-            } else {
-                return res.status(400).json({
-                    message: 'Incorrect PIN. Please try again.'
-                });
-            }
+            return res.status(400).json({ message: 'Incorrect PIN.' });
         }
 
-        // Successful login - store user ID in session
+        // Store user ID in session for authentication
         req.session.userId = userData.userId;
 
-        // Redirect to the dashboard page
-        return res.redirect('/dashboard');
-
+        // Redirect to dashboard
+        res.redirect('/dashboard');
     } catch (error) {
         console.error('Error logging in user:', error);
-        if (isFormRequest) {
-            return res.send(`
-                <script>
-                    alert('An unexpected error occurred. Please try again later.');
-                    window.history.back();
-                </script>
-            `);
-        } else {
-            return res.status(500).json({
-                message: 'Error logging in user',
-                error
-            });
-        }
+        res.status(500).json({ message: 'Error logging in user', error });
     }
 });
 
+// Serve Login Form (GET)
+app.get('/api/login', (req, res) => {
+    res.send(`
+        <html>
+        <head><title>Login</title></head>
+        <body>
+            <h1>Login to your account</h1>
+            <form action="/api/login" method="POST">
+                <input name="phoneNumber" placeholder="Phone Number" required /><br/>
+                <input name="pin" type="password" placeholder="PIN" required /><br/>
+                <input type="submit" value="Login" />
+            </form>
+        </body>
+        </html>
+    `);
+});
 
-
-
-
-
-// Serve the dashboard page
+// Dashboard Endpoint (GET)
 app.get('/dashboard', async (req, res) => {
     if (!req.session.userId) {
-        // Redirect to login if the user is not authenticated
-        return res.redirect('/api/login');
+        return res.redirect('/api/login'); // Redirect to login if not authenticated
     }
 
     try {
-        // Fetch user details from the database using user ID stored in session
+        // Fetch user data from Firebase
         const userSnapshot = await db.ref(`users/${req.session.userId}`).once('value');
         
         if (!userSnapshot.exists()) {
@@ -2310,22 +2279,16 @@ app.get('/dashboard', async (req, res) => {
 
         const userData = userSnapshot.val();
 
-        // Render the dashboard page with user details
+        // Serve dashboard page with user data
         res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <title>Dashboard - Nexus</title>
-            </head>
+            <html>
+            <head><title>Dashboard</title></head>
             <body>
                 <h1>Welcome back, ${userData.firstName} ${userData.lastName}!</h1>
-                <h2>Your Account Details</h2>
-                <p>Balance: $${userData.balance}</p>
+                <p>Your balance: $${userData.balance}</p>
                 <p>Crypto Balance: $${userData.cryptoBalance}</p>
                 <p>Robot Credit: ${userData.robotCredit}</p>
-                <p><a href="/">Home</a> | <a href="/api/login">Logout</a></p>
+                <p><a href="/api/login">Logout</a></p>
             </body>
             </html>
         `);
@@ -2334,57 +2297,6 @@ app.get('/dashboard', async (req, res) => {
         res.status(500).send('Error fetching user data');
     }
 });
-
-
-
-
-// Serve login form
-app.get('/api/login', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <title>Login to Nexus</title>
-            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
-        </head>
-        <body>
-            <div class="app-container">
-                <header>
-                    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Logo" />
-                    <h1 class="header-title">Login to Nexus Account</h1>
-                </header>
-
-                <div class="content">
-                    <form id="loginForm" action="/api/login" method="POST">
-                        <div class="form-group">
-                            <label for="phoneNumber">Phone Number</label>
-                            <input name="phoneNumber" id="phoneNumber" placeholder="Enter your phone number" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="pin">Enter App Login PIN</label>
-                            <input name="pin" id="pin" type="tel" placeholder="Enter PIN" required maxlength="5" />
-                            <p id="pinError" class="error" style="display: none;"></p>
-                        </div>
-
-                        <div class="form-group">
-                            <input type="submit" value="Login" />
-                        </div>
-                    </form>
-                </div>
-
-                <div class="footer">
-                    <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
-                </div>
-            </div>
-        </body>
-        </html>
-    `);
-});
-
-
 
 
 app.listen(PORT, () => {
