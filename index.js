@@ -2229,6 +2229,39 @@ app.use((req, res) => {
 
 
 
+
+
+app.get('/dashboard', (req, res) => {
+    res.send(`
+        <html>
+        <body>
+            <h2>User Dashboard</h2>
+            <div id="balance">Loading balance...</div>
+
+            <script>
+                const userId = localStorage.getItem('userId');
+                if (!userId) {
+                    alert('No user ID found, please login.');
+                    window.location.href = '/api/login';
+                } else {
+                    fetch('/api/user?userId=' + userId)
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('balance').innerText = "Your balance is: $" + data.balance;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching user data:', error);
+                            document.getElementById('balance').innerText = 'Failed to load balance.';
+                        });
+                }
+            </script>
+        </body>
+        </html>
+    `);
+});
+
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
