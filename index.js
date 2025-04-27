@@ -3,7 +3,6 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const path = require('path');
 const axios = require('axios'); // Import axios
-const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -31,18 +30,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static('public'));
-
-
-
-
-
-app.use(session({
-    secret: 'your-secret-key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Set to true if you're using HTTPS
-}));
-
 
 
 // Login endpoint
@@ -2258,12 +2245,29 @@ app.post('/api/login', async (req, res) => {
             }
         }
 
-        // Successful login - store user ID in session
-        req.session.userId = userData.userId;
-
-        // Redirect to the dashboard page
-        return res.redirect('/dashboard');
-
+        // Successful login response
+        if (isFormRequest) {
+            return res.send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                    <title>Login Successful</title>
+                </head>
+                <body>
+                    <h1>Login Successful</h1>
+                    <p>Welcome back, ${userData.firstName} ${userData.lastName}!</p>
+                    <p>You are now logged in.</p>
+                </body>
+                </html>
+            `);
+        } else {
+            return res.json({
+                message: 'Login successful',
+                userId: userData.userId
+            });
+        }
     } catch (error) {
         console.error('Error logging in user:', error);
         if (isFormRequest) {
@@ -2282,52 +2286,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-
-
-
-
-
-// Serve the dashboard page
-app.get('/dashboard', async (req, res) => {
-    if (!req.session.userId) {
-        // Redirect to login if the user is not authenticated
-        return res.redirect('/api/login');
-    }
-
-    try {
-        // Fetch user details from the database using user ID stored in session
-        const userSnapshot = await db.ref(`users/${req.session.userId}`).once('value');
-        
-        if (!userSnapshot.exists()) {
-            return res.status(404).send('User not found');
-        }
-
-        const userData = userSnapshot.val();
-
-        // Render the dashboard page with user details
-        res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <title>Dashboard - Nexus</title>
-            </head>
-            <body>
-                <h1>Welcome back, ${userData.firstName} ${userData.lastName}!</h1>
-                <h2>Your Account Details</h2>
-                <p>Balance: $${userData.balance}</p>
-                <p>Crypto Balance: $${userData.cryptoBalance}</p>
-                <p>Robot Credit: ${userData.robotCredit}</p>
-                <p><a href="/">Home</a> | <a href="/api/login">Logout</a></p>
-            </body>
-            </html>
-        `);
-    } catch (error) {
-        console.error('Error fetching user data:', error);
-        res.status(500).send('Error fetching user data');
-    }
-});
 
 
 
@@ -2377,6 +2335,7 @@ app.get('/api/login', (req, res) => {
         </html>
     `);
 });
+
 
 
 
