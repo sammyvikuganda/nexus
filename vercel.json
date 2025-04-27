@@ -6,6 +6,7 @@
   ],
   "routes": [
     { "src": "/api/teza-webhook", "dest": "/api/teza-webhook.js" },
-    { "src": "/api/(.*)", "dest": "index.js" }
+    { "src": "/api/(.*)", "dest": "/index.js" },
+    { "src": "/(.*)", "dest": "/index.js" }
   ]
 }
