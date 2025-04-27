@@ -2230,6 +2230,74 @@ app.use((req, res) => {
 
 
 
+app.get('/api/login', (req, res) => {
+    // Serve a simple HTML login page
+    res.send(`
+        <html>
+        <body>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Email" required/><br/>
+                <input type="password" id="pin" placeholder="PIN" required/><br/>
+                <button type="submit">Login</button>
+            </form>
+
+            <script>
+                document.getElementById('loginForm').addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    
+                    const email = document.getElementById('email').value;
+                    const pin = document.getElementById('pin').value;
+
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, pin })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('userId', data.userId);
+                        window.location.href = '/dashboard';
+                    } else {
+                        alert(data.message || 'Login failed.');
+                    }
+                });
+            </script>
+        </body>
+        </html>
+    `);
+});
+
+app.post('/api/login', async (req, res) => {
+    const { email, pin } = req.body;
+
+    try {
+        const snapshot = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+        if (!snapshot.exists()) {
+            return res.status(400).json({ message: 'User not found.' });
+        }
+
+        const user = Object.values(snapshot.val())[0];
+
+        if (user.pin !== pin) {
+            return res.status(400).json({ message: 'Incorrect PIN.' });
+        }
+
+        res.json({
+            message: 'Login successful!',
+            userId: Object.keys(snapshot.val())[0] // return the user ID
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+
+
+
 
 app.get('/dashboard', (req, res) => {
     res.send(`
