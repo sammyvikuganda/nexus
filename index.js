@@ -24,6 +24,10 @@ const secretKey = process.env.TEZA_SECRET_KEY;
 
 
 
+
+const secretKey = process.env.SESSION_SECRET || 'my-default-secret-key'; 
+
+
 app.use(cors());
 app.use(express.json());
 
@@ -36,11 +40,13 @@ app.use(express.static('public'));
 
 
 
+
+
 app.use(session({
-    secret: 'your-secret-key',
+    secret: secretKey, // Use the secret key from environment variables
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // Set to true if you're using HTTPS
+    cookie: { secure: false }  // Set 'secure: true' in production if you're using HTTPS
 }));
 
 
@@ -2212,55 +2218,6 @@ app.get('/', (req, res) => {
 
 
 
-// Serve login form
-app.get('/api/login', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <title>Login to Nexus</title>
-            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
-        </head>
-        <body>
-            <div class="app-container">
-                <header>
-                    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Logo" />
-                    <h1 class="header-title">Login to Nexus Account</h1>
-                </header>
-
-                <div class="content">
-                    <form id="loginForm" action="/api/login" method="POST">
-                        <div class="form-group">
-                            <label for="phoneNumber">Phone Number</label>
-                            <input name="phoneNumber" id="phoneNumber" placeholder="Enter your phone number" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="pin">Enter App Login PIN</label>
-                            <input name="pin" id="pin" type="tel" placeholder="Enter PIN" required maxlength="5" />
-                            <p id="pinError" class="error" style="display: none;"></p>
-                        </div>
-
-                        <div class="form-group">
-                            <input type="submit" value="Login" />
-                        </div>
-                    </form>
-                </div>
-
-                <div class="footer">
-                    <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
-                </div>
-            </div>
-        </body>
-        </html>
-    `);
-});
-
-
-
-
 
 // Login user endpoint
 app.post('/api/login', async (req, res) => {
@@ -2333,6 +2290,9 @@ app.post('/api/login', async (req, res) => {
 
 
 
+
+
+
 // Serve the dashboard page
 app.get('/dashboard', async (req, res) => {
     if (!req.session.userId) {
@@ -2374,6 +2334,56 @@ app.get('/dashboard', async (req, res) => {
         res.status(500).send('Error fetching user data');
     }
 });
+
+
+
+
+// Serve login form
+app.get('/api/login', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <title>Login to Nexus</title>
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+        </head>
+        <body>
+            <div class="app-container">
+                <header>
+                    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Logo" />
+                    <h1 class="header-title">Login to Nexus Account</h1>
+                </header>
+
+                <div class="content">
+                    <form id="loginForm" action="/api/login" method="POST">
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <input name="phoneNumber" id="phoneNumber" placeholder="Enter your phone number" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pin">Enter App Login PIN</label>
+                            <input name="pin" id="pin" type="tel" placeholder="Enter PIN" required maxlength="5" />
+                            <p id="pinError" class="error" style="display: none;"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="submit" value="Login" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="footer">
+                    <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+});
+
 
 
 
