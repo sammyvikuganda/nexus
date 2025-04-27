@@ -2,7 +2,6 @@ const express = require('express');
 const session = require('express-session');
 const admin = require('firebase-admin');
 const bodyParser = require('body-parser');
-require('dotenv').config();
 
 const app = express();
 const port = 3000;
