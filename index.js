@@ -1318,416 +1318,6 @@ app.get('/api/login', (req, res) => {
     `);
 });
 
-// ================== DASHBOARD ==================
-
-// Dashboard page
-app.get('/dashboard', async (req, res) => {
-    if (!req.session.userId) {
-        return res.redirect('/api/login');
-    }
-
-    try {
-        const userRef = db.ref('users/' + req.session.userId);
-        const snapshot = await userRef.once('value');
-
-        if (!snapshot.exists()) {
-            return res.status(404).send('User not found');
-        }
-
-        const userData = snapshot.val();
-
-        res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <title>Dashboard</title>
-                <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-                <style>
-                    :root {
-                        --primary: #4F46E5;
-                        --primary-light: #6366F1;
-                        --secondary: #10B981;
-                        --dark: #1F2937;
-                        --light: #F9FAFB;
-                        --gray: #6B7280;
-                        --danger: #EF4444;
-                    }
-                    
-                    body {
-                        font-family: 'Inter', sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        display: flex;
-                        flex-direction: column;
-                        height: 100vh;
-                        background-color: var(--light);
-                        color: var(--dark);
-                    }
-                    
-                    header {
-                        padding: 20px;
-                        background: white;
-                        color: var(--dark);
-                        text-align: center;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                        position: relative;
-                        z-index: 10;
-                    }
-                    
-                    .header-content {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        max-width: 1200px;
-                        margin: 0 auto;
-                    }
-                    
-                    .profile-badge {
-                        display: flex;
-                        align-items: center;
-                        gap: 10px;
-                    }
-                    
-                    .avatar {
-                        width: 40px;
-                        height: 40px;
-                        border-radius: 50%;
-                        background-color: var(--primary-light);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: white;
-                        font-weight: 500;
-                    }
-                    
-                    main {
-                        flex: 1;
-                        padding: 20px;
-                        overflow-y: auto;
-                        max-width: 1200px;
-                        width: 100%;
-                        margin: 0 auto;
-                    }
-                    
-                    nav {
-                        display: flex;
-                        justify-content: space-around;
-                        background: #fff;
-                        padding: 12px 0;
-                        position: fixed;
-                        bottom: 0;
-                        width: 100%;
-                        border-top: 1px solid #E5E7EB;
-                        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-                    }
-                    
-                    nav button {
-                        background: none;
-                        border: none;
-                        font-size: 12px;
-                        color: var(--gray);
-                        cursor: pointer;
-                        flex-grow: 1;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 4px;
-                        padding: 8px 0;
-                        transition: all 0.2s ease;
-                    }
-                    
-                    nav button.active {
-                        color: var(--primary);
-                    }
-                    
-                    nav button .material-icons {
-                        font-size: 24px;
-                    }
-                    
-                    section {
-                        display: none;
-                        animation: fadeIn 0.3s ease;
-                    }
-                    
-                    @keyframes fadeIn {
-                        from { opacity: 0; transform: translateY(10px); }
-                        to { opacity: 1; transform: translateY(0); }
-                    }
-                    
-                    section.active {
-                        display: block;
-                    }
-                    
-                    .card {
-                        background: white;
-                        border-radius: 12px;
-                        padding: 20px;
-                        margin-bottom: 20px;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                    }
-                    
-                    .card-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 16px;
-                        padding-bottom: 12px;
-                        border-bottom: 1px solid #E5E7EB;
-                    }
-                    
-                    .card-title {
-                        font-size: 18px;
-                        font-weight: 600;
-                        margin: 0;
-                        color: var(--dark);
-                    }
-                    
-                    .info-grid {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                        gap: 16px;
-                    }
-                    
-                    .info-item {
-                        background: var(--light);
-                        padding: 16px;
-                        border-radius: 8px;
-                    }
-                    
-                    .info-label {
-                        font-size: 12px;
-                        color: var(--gray);
-                        margin-bottom: 4px;
-                    }
-                    
-                    .info-value {
-                        font-size: 16px;
-                        font-weight: 500;
-                    }
-                    
-                    .balance-value {
-                        font-size: 24px;
-                        font-weight: 600;
-                        color: var(--secondary);
-                    }
-                    
-                    .coming-soon {
-                        text-align: center;
-                        padding: 40px 20px;
-                        color: var(--gray);
-                    }
-                    
-                    .coming-soon .material-icons {
-                        font-size: 48px;
-                        margin-bottom: 16px;
-                        color: #E5E7EB;
-                    }
-                    
-                    .coming-soon h2 {
-                        font-weight: 500;
-                        margin-bottom: 8px;
-                    }
-                    
-                    .logout-btn {
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 8px;
-                        color: var(--danger);
-                        text-decoration: none;
-                        margin-top: 20px;
-                    }
-                </style>
-            </head>
-            <body>
-                <header>
-                    <div class="header-content">
-                        <h1>Dashboard</h1>
-                        <div class="profile-badge">
-                            <div class="avatar">${userData.firstName ? userData.firstName.charAt(0).toUpperCase() : 'U'}</div>
-                            <div>
-                                <div style="font-weight: 500;">${userData.firstName || 'User'}</div>
-                                <div style="font-size: 12px; color: var(--gray);">${userData.email || ''}</div>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <main>
-                    <section id="home" class="active">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Account Overview</h2>
-                                <span class="material-icons">account_balance_wallet</span>
-                            </div>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <div class="info-label">Balance</div>
-                                    <div class="info-value balance-value">$${userData.balance || 0}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">First Name</div>
-                                    <div class="info-value">${userData.firstName || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Last Name</div>
-                                    <div class="info-value">${userData.lastName || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Member Since</div>
-                                    <div class="info-value">${userData.registeredAt || 'N/A'}</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Recent Activity</h2>
-                                <span class="material-icons">history</span>
-                            </div>
-                            <div class="coming-soon">
-                                <span class="material-icons">hourglass_empty</span>
-                                <p>Your recent transactions will appear here</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="chat">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Chat Support</h2>
-                                <span class="material-icons">chat</span>
-                            </div>
-                            <div class="coming-soon">
-                                <span class="material-icons">construction</span>
-                                <h2>Chat Feature</h2>
-                                <p>Coming Soon...</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="games">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Games</h2>
-                                <span class="material-icons">sports_esports</span>
-                            </div>
-                            <div class="coming-soon">
-                                <span class="material-icons">extension</span>
-                                <h2>Game Center</h2>
-                                <p>Coming Soon...</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="investments">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Investments</h2>
-                                <span class="material-icons">trending_up</span>
-                            </div>
-                            <div class="coming-soon">
-                                <span class="material-icons">bar_chart</span>
-                                <h2>Investment Portfolio</h2>
-                                <p>Coming Soon...</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="settings">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Profile Settings</h2>
-                                <span class="material-icons">manage_accounts</span>
-                            </div>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <div class="info-label">First Name</div>
-                                    <div class="info-value">${userData.firstName || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Last Name</div>
-                                    <div class="info-value">${userData.lastName || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Email</div>
-                                    <div class="info-value">${userData.email || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Phone Number</div>
-                                    <div class="info-value">${userData.phoneNumber || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">KYC Status</div>
-                                    <div class="info-value" style="color: ${userData.kyc === 'Verified' ? 'var(--secondary)' : 'var(--danger)'}">
-                                        ${userData.kyc || 'Pending'}
-                                    </div>
-                                </div>
-                            </div>
-                            <a href="/api/logout" class="logout-btn">
-                                <span class="material-icons">logout</span>
-                                Logout
-                            </a>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Security</h2>
-                                <span class="material-icons">security</span>
-                            </div>
-                            <div class="coming-soon">
-                                <span class="material-icons">lock</span>
-                                <p>Security settings will appear here</p>
-                            </div>
-                        </div>
-                    </section>
-                </main>
-
-                <nav>
-                    <button onclick="showSection('home')" id="homeBtn" class="active">
-                        <span class="material-icons">home</span>
-                        <span>Home</span>
-                    </button>
-                    <button onclick="showSection('chat')" id="chatBtn">
-                        <span class="material-icons">chat</span>
-                        <span>Chat</span>
-                    </button>
-                    <button onclick="showSection('games')" id="gamesBtn">
-                        <span class="material-icons">sports_esports</span>
-                        <span>Games</span>
-                    </button>
-                    <button onclick="showSection('investments')" id="investmentsBtn">
-                        <span class="material-icons">trending_up</span>
-                        <span>Invest</span>
-                    </button>
-                    <button onclick="showSection('settings')" id="settingsBtn">
-                        <span class="material-icons">settings</span>
-                        <span>Settings</span>
-                    </button>
-                </nav>
-
-                <script>
-                    function showSection(sectionId) {
-                        document.querySelectorAll('section').forEach(section => {
-                            section.classList.remove('active');
-                        });
-                        document.querySelectorAll('nav button').forEach(button => {
-                            button.classList.remove('active');
-                        });
-                        document.getElementById(sectionId).classList.add('active');
-                        document.getElementById(sectionId + 'Btn').classList.add('active');
-                    }
-                </script>
-            </body>
-            </html>
-        `);
-    } catch (error) {
-        console.error('Error fetching dashboard:', error);
-        res.status(500).send('Dashboard error');
-    }
-});
 
 
 // ================== PROFILE ==================
@@ -1752,8 +1342,1412 @@ app.get('/profile', async (req, res) => {
             <head>
                 <meta charset="UTF-8" />
                 <title>Profile</title>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            transition: all 2.9s ease-in-out;
+        }
+
+        
+
+
+
+
+
+
+
+
+    
+        
+
+
+
+
+          /* Support Header styles */
+#support-header {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center content horizontally */
+    padding: 10px;
+    background-color: #1A7EB1;
+    color: white;
+    border-bottom: 1px solid #ccc;
+    height: 50px; /* Adjust height as needed */
+}
+
+#support-header h1 {
+    margin: 0;
+    font-size: 22px; /* Slightly reduced font size */
+    line-height: 1.2; /* Adjust line-height to move text down */
+    padding-top: 10px; /* Add padding to move text slightly down */
+    font-weight: 400; /* Subtle reduction in boldness */
+}
+
+/* Container for support text */
+.support-container {
+    padding-bottom: 10px;
+    padding-top: 10px;
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    margin: 20px; /* Space around the container */
+    font-size: 16px; /* Adjusted base font size */
+    color: #333;
+    position: relative; /* To position the icon absolutely */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    overflow: hidden; /* Hide overflow to ensure the effect stays within bounds */
+}
+
+/* Add pseudo-element for the effect */
+.support-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 100%; /* Start off the left edge */
+    bottom: 0;
+    right: 0;
+    background: #f2f2f2; /* Color of the effect */
+    transition: left 0.2s ease-out; /* Shortened transition duration */
+    z-index: -1; /* Ensure the effect is behind the content */
+}
+
+.support-container:active::before {
+    left: 0; /* Move effect from left to right */
+}
+
+/* Circle with 'S' */
+.support-circle {
+    width: 30px; /* Reduced size of the circle */
+    height: 30px;
+    border-radius: 50%; /* Make it a circle */
+    background-color: #1A7EB1; /* Background color */
+    color: white; /* White text color */
+    display: flex;
+    align-items: center; /* Center text vertically */
+    justify-content: center; /* Center text horizontally */
+    margin-right: 10px; /* Space between circle and text */
+    font-size: 16px; /* Reduced size of the 'S' */
+}
+
+/* Text styles */
+.support-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left; /* Align text to the left */
+    margin-right: 60px; /* Create space for the icon on the right */
+}
+
+.support-text p {
+    margin: 0; /* Remove default margin */
+    line-height: 1.2; /* Adjust line height if needed */
+}
+
+/* Text for 'CHAT WITH US' */
+.support-text #support-text {
+    font-size: 16px; /* Slightly reduced font size */
+    color: black; /* Black text color */
+    font-weight: bold; /* Bold text */
+}
+
+/* Text for 'Tap here to text us' */
+.support-text #support-tap-to-text {
+    font-size: 12px; /* Reduced font size */
+    color: grey; /* Gray text color */
+}
+
+/* Icon styles */
+.support-icon {
+    width: 10px; /* Smaller size of the icon */
+    height: 20px;
+    position: absolute; /* Position the icon absolutely */
+    right: 20px; /* Distance from the right edge of the container */
+}
+
+/* Make anchor tags fill the container */
+.support-link {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit text color */
+    display: block; /* Make the anchor tag a block-level element */
+    transition: background-color 0.2s ease, opacity 0.2s ease; /* Shortened transition duration */
+    outline: none; /* Removes the default outline */
+    -webkit-tap-highlight-color: transparent; /* Removes the tap highlight color on touch devices */
+}
+
+
+
+
+/* General Modal Styles */
+.modal,
+.logout-modal,
+.error-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000; /* Ensure modals are on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Modal Content Styles */
+.modal-content,
+.logout-modal-content,
+.error-modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px 20px;
+    border: 1px solid #888;
+    border-radius: 8px;
+    position: absolute;
+    top: 40%; /* Move modal up slightly */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the modal with an offset */
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Label Styles */
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Input Field Styles */
+.modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 2px solid #f44336;
+    outline: none;
+    font-size: 15px;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Input Focus Styles */
+.modal-content input:focus {
+    border-bottom: 2px solid #333;
+}
+
+/* Modal Buttons Styles */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+/* Button Styles */
+.modal-buttons button {
+    width: 46%;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, opacity 0.1s ease, transform 0.2s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Cancel Button Styles */
+.modal-buttons button.cancel {
+    background-color: #fff;
+    color: #f44336;
+    border: 2px solid #f44336;
+}
+
+/* Send Button Styles */
+.modal-buttons button.send {
+    background-color: #f44336;
+    color: white;
+}
+
+/* Button Hover and Active Styles */
+.modal-buttons button:hover:active {
+    opacity: 0.1;
+}
+
+.modal-buttons button:active {
+    transform: scale(0.95);
+}
+
+/* Logout Modal Styles */
+.logout-modal-content {
+    margin: auto;
+    padding: 20px;
+    width: 70%;
+    max-width: 400px;
+    text-align: center;
+    border-radius: 20px;
+    position: absolute;
+    top: 40%; /* Move modal up slightly */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the modal with an offset */
+}
+
+.logout-modal-content h2 {
+    font-weight: normal;
+    margin: 10px 0;
+}
+
+.logout-modal-content p {
+    color: grey;
+    margin-bottom: 15px;
+}
+
+.logout-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.logout-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    width: 150px;
+    transition: background-color 0.1s ease, opacity 0.1s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.logout-confirm {
+    background-color: red;
+    color: white;
+    font-weight: normal;
+}
+
+.logout-cancel {
+    background-color: white;
+    color: red;
+    border: 2px solid red;
+    font-weight: normal;
+}
+
+.logout-button:active {
+    opacity: 0.1;
+    transform: scale(0.95);
+}
+
+/* Error Modal Styles */
+.error-modal-content {
+    margin: auto;
+    padding: 15px;
+    width: 70%;
+    max-width: 350px;
+    text-align: center;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    top: 40%; /* Move modal up slightly */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the modal with an offset */
+}
+
+#errorTitle {
+    color: black;
+    font-weight: normal;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+#errorMessage {
+    color: grey;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+#errorModalCloseButton {
+    background-color: white;
+    color: red;
+    border: 2px solid red;
+    padding: 12px;
+    width: 150px;
+    cursor: pointer;
+    border-radius: 28px;
+    font-size: 16px;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 0.3s ease, opacity 0.1s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#errorModalCloseButton:hover {
+    background-color: white;
+    color: red;
+}
+
+#errorModalCloseButton:active {
+    opacity: 0.1;
+    transform: scale(0.95);
+}
+
+
+
+
+
+
+
+
+
+.modal-required {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top, ensure higher z-index */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+}
+
+.modal-content-required {
+    background-color: #fefefe;
+    position: absolute; /* Position the modal */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the modal */
+    padding: 15px;
+    border: 1px solid #888;
+    width: 70%; /* Slightly larger modal width */
+    max-width: 350px; /* Increase max-width slightly */
+    border-radius: 15px;
+    text-align: center; /* Center text */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow for better appearance */
+}
+
+.modal-heading {
+    font-size: 18px; /* Heading text size */
+    color: #333; /* Heading text color */
+    margin-bottom: 15px; /* Space below the heading */
+}
+
+.close-required {
+    background-color: red; /* Red background */
+    color: white; /* White text */
+    border: 2px solid red; /* Red border */
+    padding: 12px 40px; /* Increased button padding for wider button */
+    border-radius: 28px; /* Button border radius increased */
+    font-size: 16px; /* Increased button font size */
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    text-transform: uppercase; /* Optional: Make the button text uppercase */
+    transition: opacity 0.1s ease; /* Add transition for opacity */
+}
+
+.close-required:hover,
+.close-required:focus {
+    background-color: red; /* Darker red on hover */
+    transition: background-color 0.3s ease, opacity 0.1s ease; /* Add transition for opacity */
+    outline: none; /* Removes the default outline */
+    -webkit-tap-highlight-color: transparent; /* Removes the tap highlight color on touch devices */
+}
+
+.close-required:active {
+    opacity: 0.1; /* Fading effect on active state */
+}
+
+.cancel-required {
+    background-color: white; /* White background */
+    color: red; /* Red text */
+    border: 2px solid red; /* Red border */
+    padding: 12px 40px; /* Same padding as close button */
+    border-radius: 28px; /* Same border radius as close button */
+    font-size: 16px; /* Same font size as close button */
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px; /* Add margin to space out from the close button */
+    text-transform: uppercase; /* Optional: Make the button text uppercase */
+    transition: opacity 0.1s ease; /* Add transition for opacity */
+}
+
+.cancel-required:hover,
+.cancel-required:focus {
+    background-color: #f2f2f2; /* Slightly darker white on hover */
+    transition: background-color 0.3s ease, opacity 0.1s ease; /* Add transition for opacity */
+    outline: none; /* Removes the default outline */
+    -webkit-tap-highlight-color: transparent; /* Removes the tap highlight color on touch devices */
+}
+
+
+.cancel-required:active {
+    opacity: 0.1; /* Fading effect on active state */
+}
+
+
+
+.game-header {
+  background-color: #1A7EB1;
+  color: white;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+.game-content {
+  margin-top: 60px; /* Make space for the fixed header */
+  padding: 0 2px;
+  overflow-y: auto;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.game-image-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.game-image-container a {
+  display: block;
+  width: 250px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-image: linear-gradient(
+    45deg,
+    #ffcc00,
+    #d40000,
+    #a020f0,
+    #ffcc00
+  );
+  background-size: 300% 300%;
+  animation: game-casinoGlow 2s linear infinite;
+  text-align: center;
+  padding-bottom: 10px;
+  text-decoration: none;
+}
+
+@keyframes game-casinoGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.game-image-container img {
+  width: 100%;
+  max-height: 200px;
+  display: block;
+}
+
+.game-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffcc00;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+
+
+
+/*💵 Investment CSS */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  background-color: #1A7EB1;
+  color: white;
+  text-align: center;
+  padding: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1px;
+  padding-bottom: 80px; /* Prevent content being hidden behind nav */
+  box-sizing: border-box;
+}
+
+    .top-info {
+      display: flex;
+      justify-content: space-around;
+      padding: 6px 10px;
+    }
+
+    .info-box {
+      text-align: center;
+    }
+
+    .info-box h4 {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .info-box p {
+      margin: 2px 0 0;
+      font-size: 0.95rem;
+      font-weight: bold;
+      background: linear-gradient(90deg, #ff00cc, #3333ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .circle-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-top: 6px;
+    }
+
+    
+
+    .circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: conic-gradient(#ff00cc 30%, #eee 30%);
+      position: relative;
+    }
+
+    .circle-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .circle-inner h5 {
+      margin: 0;
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .circle-inner p {
+      margin: 3px 0 0;
+      font-size: 0.95rem;
+      font-weight: bold;
+      background: linear-gradient(to right, #ff00cc, #3333ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 12px auto 4px;
+    }
+
+    .buttons button {
+      background: linear-gradient(135deg, #ff00cc, #3333ff);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .info-text {
+      text-align: center;
+      font-size: 0.65rem;
+      color: #666;
+      padding: 4px 12px 10px;
+      max-width: 300px;
+      margin: 0 auto;
+      line-height: 1.2;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #333;
+      margin: 12px 0 5px;
+    }
+
+    .transaction-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0 16px 20px;
+    }
+
+    .transaction-card {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 5px solid #ff5733;
+    }
+
+    .transaction-info {
+      flex: 1;
+      margin-left: 12px;
+    }
+
+    .transaction-info h4 {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .transaction-info p {
+      margin: 3px 0;
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    .transaction-amount {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #ff5733;
+      background: linear-gradient(90deg, #ff5733, #ffcc00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+  .label-free {
+  color: #FF6347;
+  font-weight: bold;
+  background-color: rgba(255, 99, 71, 0.2);
+  padding: 3px 6px;
+  border-radius: 5px;
+  border: 2px solid #FF6347;
+  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 0.2px;
+}
+
+
+   .label-premium {
+  font-size: 0.55rem;
+  font-weight: bold;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #FFD700, #FFB700, #FFA500);
+  color: black; /* Set text color to black */
+  border: 2px solid #FFD700;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  /* Remove text clipping */
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+}
+
+
+
+.label-text {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #555;
+    }
+
+
+
+   .countdown-text {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #2E8B57;
+  text-align: center;
+  margin: 6px auto;
+  padding: 4px 8px;
+  background-color: #E6F4EA;
+  border: 1px solid #2E8B57;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: block;
+  width: fit-content;
+}
+
+
+
+
+/* Bottom Navigation Container */
+        .bottom-nav {
+            display: flex;
+            justify-content: center;
+            background-color: white;
+            padding: 8px 0; /* Increased padding for more height */
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            border-top: 1px solid #d3d3d3;
+            z-index: 1;
+        }
+
+        /* Bottom Navigation Items Wrapper */
+        .nav-items-wrapper {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 420px; /* Limit the width of the navigation */
+        }
+
+        /* Bottom Navigation Items */
+        .bottom-nav .nav-item {
+            text-align: center;
+            margin: 0;
+            padding: 5px;
+            cursor: pointer;
+            transition: opacity 0.2s ease, color 0.2s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            flex: 1;
+        }
+
+        /* Centered Games Icon (Updated) */
+        .bottom-nav .nav-item.wallet {
+            flex: 0; /* Prevent it from stretching */
+        }
+
+        .bottom-nav .nav-item i {
+            font-size: 23px; /* Set icon size */
+            margin-bottom: 1px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Make the Wallet icon the biggest */
+        .bottom-nav .nav-item.wallet i {
+            font-size: 35px; /* Adjusted for the wallet icon */
+            color: white;
+            background-color: #D3D3D3; /* Grey circle background */
+            padding: 15px; /* Adjust size of the circle */
+            border-radius: 50%; /* Make it a circle */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Optional: add shadow for effect */
+            margin-top: -35px; /* Adjust vertical position */
+            transition: all 0.3s ease;
+        }
+
+        /* Add glowing gradient effect for the 'Games' button */
+        .bottom-nav .nav-item.wallet:hover i {
+            background: linear-gradient(45deg, #ff6a00, #ee0979); /* Bright gradient colors for gaming */
+            box-shadow: 0 0 15px 5px rgba(255, 105, 180, 0.8), 0 0 20px 10px rgba(255, 0, 150, 0.5); /* Glowing effect */
+        }
+
+        /* Specific rule for inactive state of wallet icon */
+        .bottom-nav .nav-item.wallet.inactive i {
+            color: white; /* Make Wallet icon white when inactive */
+            background-color: #D3D3D3; /* Inactive state: Grey background */
+        }
+
+        /* When Wallet is active */
+        .bottom-nav .nav-item.wallet.active i {
+            background-color: #1A7EB1; /* Active state: Background changes */
+            color: white; /* Icon remains white */
+        }
+
+        .bottom-nav .nav-item.wallet p {
+            position: relative;
+            top: 9px; /* Adjusted to align with the new height */
+            margin: 0;
+            font-size: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .bottom-nav .nav-item p {
+            margin: 0;
+            font-size: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* Active state styling for the text and icon */
+        .bottom-nav .nav-item.active i,
+        .bottom-nav .nav-item.active p {
+            color: #1A7EB1; /* Active color for both icon and text */
+        }
+
+        /* Inactive state styling */
+        .bottom-nav .nav-item.inactive i,
+        .bottom-nav .nav-item.inactive p {
+            color: #D3D3D3; /* Inactive color for both icon and text */
+        }
+
+        /* Fading effect on active (click) state */
+        .bottom-nav .nav-item:active {
+            opacity: 0.2;
+        }
+
+
+
+
+.withdraw-bottom-sheet {
+      position: fixed;
+      bottom: -100%;
+      left: 0;
+      right: 0;
+      background-color: white;
+      height: 100%;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .withdraw-bottom-sheet.open {
+      bottom: 0;
+    }
+
+    .withdraw-header {
+      background-color: #1A7EB1;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px 16px; /* Slightly reduced padding */
+      font-size: 22px; /* Slightly smaller font */
+      font-weight: bold;
+      position: relative;
+    }
+
+    .withdraw-header .withdraw-title {
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .withdraw-back-arrow {
+      position: absolute;
+      left: 16px;
+      font-size: 20px; /* Slightly smaller back arrow */
+      color: white;
+      cursor: pointer;
+    }
+
+    .withdraw-form {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      overflow-y: auto;
+      align-items: center;
+    }
+
+    .withdraw-form-group {
+      width: 90%;
+      margin-bottom: 14px; /* Slightly reduced margin */
+    }
+
+    .withdraw-form-group label {
+      font-size: 14px; /* Slightly smaller font */
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px; /* Slightly smaller margin */
+      display: block;
+    }
+
+    .withdraw-form-group input {
+      width: 100%;
+      padding: 10px; /* Slightly smaller padding */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px; /* Slightly smaller font */
+      box-sizing: border-box;
+    }
+
+    .withdraw-form-group input:focus {
+      border-color: #1A7EB1;
+      outline: none;
+    }
+
+    .withdraw-insufficient-balance {
+      color: red;
+      font-size: 14px; /* Slightly smaller font */
+      margin-bottom: 6px; /* Slightly smaller margin */
+      text-align: center;
+      display: none;
+    }
+
+    .withdraw-form button {
+      padding: 12px;
+      background-color: #1A7EB1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px; /* Slightly smaller font */
+      font-weight: bold;
+      cursor: pointer;
+      width: 90%;
+      box-sizing: border-box;
+    }
+
+    .withdraw-form button:hover {
+      background-color: #167AA6;
+    }
+
+    .withdraw-open-bottom-sheet-btn {
+      padding: 12px 18px; /* Slightly smaller padding */
+      background-color: #1A7EB1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px; /* Slightly smaller font */
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 36px);
+      box-sizing: border-box;
+    }
+
+
+
+.app-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .home-section {
+      background: linear-gradient(to right, #1A7EB1, #1A7EB1);
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    /* CSS to increase the icon size */
+.user-icon i {
+    font-size: 50px;
+}
+
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .user-info h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+    }
+
+    .user-info h2 .verified-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      margin-left: 5px;
+    }
+
+    .user-info h2 .verified-icon i {
+      color: #1A7EB1;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .user-info p {
+      font-size: 12px;
+      margin-top: -4px;
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .notification-icon {
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    .notification-icon:active {
+      opacity: 0.7;
+    }
+
+    .balance-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    .balance-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .balance {
+      font-size: 18px;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .balance .currency {
+      font-weight: normal;
+      margin-right: 5px;
+      font-size: 10px;
+    }
+
+    .balance .amount {
+      font-family: 'Peace Sans', sans-serif;
+      font-weight: 900;
+    }
+
+    .skeleton-loader {
+      background-color: #e0e0e0;
+      width: 60px;
+      height: 18px;
+      border-radius: 4px;
+      animation: skeleton-loading 1.2s infinite;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-color: #e0e0e0; }
+      50% { background-color: #f0f0f0; }
+      100% { background-color: #e0e0e0; }
+    }
+
+    .balance-container img {
+      width: 19px;
+      height: 15px;
+      cursor: pointer;
+      margin-left: 7px;
+      transition: opacity 0.3s ease;
+    }
+
+    .balance-container img:active {
+      opacity: 0.3;
+    }
+
+    .floating-button button {
+      background-color: transparent;
+      border: 1px solid white;
+      color: white;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    .floating-button button:active {
+      opacity: 0.2;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin: 25px 20px 10px;
+      gap: 16px;
+    }
+
+    .action-button {
+      background-color: white;
+      color: #1A7EB1;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 20px;
+      flex: 1;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .action-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .action-button:active {
+      transform: scale(0.98);
+    }
+
+    .action-button i {
+      color: #1A7EB1;
+    }
+
+    .icon-button-row {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      padding: 20px;
+    }
+
+    .icon-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: white;
+      padding: 12px;
+      border-radius: 16px;
+      flex: 1;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .icon-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .icon-button:active {
+      transform: scale(0.97);
+    }
+
+    .icon-button i {
+      color: #1A7EB1;
+      margin-bottom: 6px;
+    }
+
+    .icon-button span {
+      font-size: 13px;
+      color: #1A7EB1;
+      font-weight: 500;
+    }
+
+    /* Luxury Total Gained Section */
+    .monthly-gain {
+      margin: 20px;
+      padding: 5px;
+      background: linear-gradient(135deg, #fff8e1, #f9d976);
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid #f5deb3;
+    }
+
+    .monthly-gain:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+    }
+
+    .monthly-gain h3 {
+      color: #b68c26;
+      font-size: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .monthly-gain .amount {
+      font-size: 20px;
+      font-weight: bold;
+      color: #3e2f13;
+      font-family: 'Peace Sans', sans-serif;
+      margin: 8px 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .monthly-gain .month {
+      font-size: 14px;
+      color: #7a6229;
+      font-style: italic;
+    }
+
+
+
+
+
+
+
+.settings-section .header {
+  background: linear-gradient(to right, #1A7EB1, #1A7EB1);
+  color: white;
+  padding: 15px;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-section .user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.settings-section .user-info h2 {
+  margin: 5px 0;
+  font-size: 20px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.settings-section .user-info p {
+  margin: 5px 0;
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 300;
+  letter-spacing: 3px;
+}
+
+.settings-section .user-details {
+  padding: 20px;
+  background-color: #ffffff;
+  margin-top: 190px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  height: calc(100vh - 180px - 100px);
+}
+
+.detail-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.detail-item:last-child {
+  border-bottom: 1px solid #ddd;
+}
+
+.detail-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 100%;
+  bottom: 0;
+  right: 0;
+  background: rgba(242, 242, 242, 0.7);
+  transition: left 0.2s ease-out;
+  z-index: 0;
+}
+
+.detail-item:active::before {
+  left: 0;
+}
+
+.detail-item .info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item .label {
+  font-size: 15px;
+  font-weight: bold;
+  color: #888;
+  margin-bottom: 7px;
+}
+
+.detail-item .value {
+  font-size: 14px;
+  font-weight: 300;
+  color: #555;
+}
+
+.detail-item:focus {
+  outline: none;
+}
+
+.detail-item .icon {
+  font-size: 16px;
+  margin-right: 10px;
+  color: #4a4a4a;
+}
+
+.detail-item .icon:hover {
+  color: #007bff;
+}
+
+.detail-item .icon,
+.detail-item .info {
+  position: relative;
+  z-index: 1;
+}
+
+
+
+    </style>
             </head>
             <body>
+
                 <h1>Profile: ${userData.firstName} ${userData.lastName}</h1>
                 <p><strong>Phone Number:</strong> ${userData.phoneNumber}</p>
                 <p><strong>Balance:</strong> $${userData.balance}</p>
@@ -1777,6 +2771,262 @@ app.get('/api/logout', (req, res) => {
     });
 });
 
+
+
+
+
+
+
+
+
+
+// Dashboard page
+app.get('/dashboard', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/api/login');
+    }
+
+    try {
+        const userRef = db.ref('users/' + req.session.userId);
+        const snapshot = await userRef.once('value');
+
+        if (!snapshot.exists()) {
+            return res.status(404).send('User not found');
+        }
+
+        const userData = snapshot.val();
+
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Dashboard</title>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+                <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+            </head>
+            <body>
+
+                <div id="content">
+                    <div id="home-section" class="section active">
+                        <div class="app-container">
+                            <div class="home-section">
+                                <div class="header">
+                                    <div class="header-left">
+                                        <div class="user-icon">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <div class="user-info">
+                                            <h2 id="user-name">
+                                                Hello, <span id="dynamic-user-name">${userData.firstName}</span>
+                                                <span class="material-icons" style="display: none;">verified</span>
+                                            </h2>
+                                            <p>Every Small Step Makes a Big Impact.</p>
+                                        </div>
+                                    </div>
+                                    <div class="header-right">
+                                        <a href="#" aria-label="Notification">
+                                            <i data-feather="bell" class="notification-icon"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="balance-wrapper">
+                                    <div class="balance-container">
+                                        <div id="balance" class="balance">
+                                            <span class="currency"></span>
+                                            <span id="balance-amount" class="amount">${userData.balance || 0}</span>
+                                        </div>
+                                        <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
+                                    </div>
+                                    <div class="floating-button">
+                                        <button class="service" id="newTradingButton">Topup balance</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chat-section" class="section" style="display: none;">
+                        <div class="app-container">
+                            <header>Support</header>
+                            <div class="content">
+                                <a href="go:CHAT" class="support-link">
+                                    <div class="support-container">
+                                        <div class="support-circle">C</div>
+                                        <div class="support-text">
+                                            <p>CHAT WITH US</p>
+                                            <p>Tap here to text us</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right support-icon"></i>
+                                    </div>
+                                </a>
+                                <a href="https://t.me/nexussupport20" class="support-link">
+                                    <div class="support-container">
+                                        <div class="support-circle">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" class="support-circle-icon">
+                                        </div>
+                                        <div class="support-text">
+                                            <p>TELEGRAM</p>
+                                            <p>Tap here to message us</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right support-icon"></i>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="games-section" class="section" style="display: none;">
+                        <div class="app-container">
+                            <header>GAMES</header>
+                            <div class="content">
+                                <div class="game-image-container">
+                                    <a href="go:FRUITS">
+                                        <img src="https://i.postimg.cc/9fM5XKcp/c60cacec-e353-4a9e-947a-fa2fec50bbd1.png" alt="Casino Machine 1" />
+                                        <div class="game-name">FRUITS</div>
+                                    </a>
+
+                                    <a href="go:LUCKY3">
+                                        <img src="https://i.postimg.cc/Xqng4SbN/70d8c0d0-c934-476f-a937-f17aa570e254.png" alt="Casino Machine 2" />
+                                        <div class="game-name">LUCKY3</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="investments-section" class="section" style="display: none;">
+                        <header>Investments</header>
+                        <div class="content">
+                            <div class="top-info">
+                                <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
+                                <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
+                            </div>
+                            <p id="countdownTimer" class="countdown-text"></p>
+                            <div class="circle-wrapper">
+                                <span id="planLabel">---</span>
+                                <div class="circle" id="progressCircle">
+                                    <div class="circle-inner">
+                                        <h5>Daily Payout</h5>
+                                        <p id="earningAmount">---</p>
+                                    </div>
+                                </div>
+                                <span class="label-text">---</span>
+                            </div>
+
+                            <div class="buttons">
+                                <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
+                                <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
+                                <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
+                            </div>
+
+                            <div class="info-text">
+                                To withdraw your capital from investment press Stop Investment. 
+                            </div>
+
+                            <div class="section-title">Transaction History</div>
+                            <div class="transaction-cards" id="transactionCards"></div>
+                        </div>
+                    </div>
+
+                    <div id="settings-section" class="section" style="display: none;">
+                        <div class="settings-section">
+                            <div class="header">
+                                <i class="fas fa-user-circle" style="font-size: 6rem; color: white;"></i>
+                                <div class="user-info">
+                                    <h2 id="full-name">${userData.firstName} ${userData.lastName}</h2>
+                                    <p id="phone-number">${userData.phoneNumber}</p>
+                                </div>
+                            </div>
+
+                            <div class="user-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-id-card icon"></i>
+                                    <div class="info">
+                                        <span class="label">User ID</span>
+                                        <span id="user-id">${req.session.userId}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-envelope icon"></i>
+                                    <div class="info">
+                                        <span class="label">Email</span>
+                                        <span id="email-address">${userData.email || 'Not set'}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-user-check icon"></i>
+                                    <div class="info">
+                                        <span class="label">KYC Status</span>
+                                        <span id="kyc-status">${userData.kyc || 'Pending'}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item" id="logoutSection">
+                                    <i class="fas fa-sign-out-alt icon"></i>
+                                    <div class="info">
+                                        <span class="label">Account</span>
+                                        <a href="/api/logout" class="value">Sign out</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-nav">
+                    <div class="nav-items-wrapper">
+                        <div class="nav-item home active" onclick="switchSection('home')">
+                            <i class="fas fa-home"></i>
+                            <p>Home</p>
+                        </div>
+                        <div class="nav-item chat" onclick="switchSection('chat')">
+                            <i class="fas fa-headset"></i>
+                            <p>Support</p>
+                        </div>
+                        <div class="nav-item games" onclick="switchSection('games')">
+                            <i class="fas fa-gamepad"></i>
+                            <p>Games</p>
+                        </div>
+                        <div class="nav-item investments" onclick="switchSection('investments')">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Investments</p>
+                        </div>
+                        <div class="nav-item settings" onclick="switchSection('settings')">
+                            <i class="fas fa-cogs"></i>
+                            <p>Settings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function switchSection(section) {
+                        document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+                        document.getElementById(section + '-section').style.display = 'block';
+                        
+                        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                        document.querySelector('.nav-item.' + section).classList.add('active');
+                    }
+
+                    function toggleBalance() {
+                        const balanceAmount = document.getElementById('balance-amount');
+                        if (balanceAmount.style.display === 'none') {
+                            balanceAmount.style.display = 'inline';
+                        } else {
+                            balanceAmount.style.display = 'none';
+                        }
+                    }
+                </script>
+
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('Dashboard error:', error);
+        res.status(500).send('Dashboard error');
+    }
+});
 
 
 
