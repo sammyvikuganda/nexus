@@ -27,15 +27,11 @@ if (!process.env.SESSION_SECRET) {
 }
 
 app.use(session({
-    secret: process.env.SESSION_SECRET,  // Ensure your secret is set properly in environment variables
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        secure: true,  // Set to true if using HTTPS
-        maxAge: 60 * 60 * 1000  // Session expires after 1 hour (in milliseconds)
-    }
+    cookie: { secure: false } // set to true only if using HTTPS
 }));
-
 
 // ================== REGISTER ==================
 app.post('/api/register', async (req, res) => {
@@ -137,52 +133,42 @@ app.get('/api/login', (req, res) => {
 });
 
 // ================== DASHBOARD ==================
-// Serve the dashboard page
 app.get('/dashboard', async (req, res) => {
     if (!req.session.userId) {
-        // Redirect to login if the user is not authenticated
         return res.redirect('/api/login');
     }
 
     try {
-        // Fetch user details from the database using user ID stored in session
-        const userSnapshot = await db.ref(`users/${req.session.userId}`).once('value');
-        
-        if (!userSnapshot.exists()) {
+        const userRef = db.ref('users/' + req.session.userId);
+        const snapshot = await userRef.once('value');
+
+        if (!snapshot.exists()) {
             return res.status(404).send('User not found');
         }
 
-        const userData = userSnapshot.val();
+        const userData = snapshot.val();
 
-        // Render the dashboard page with user details
         res.send(`
             <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <title>Dashboard - Nexus</title>
+                <title>Dashboard</title>
             </head>
             <body>
                 <h1>Welcome back, ${userData.firstName} ${userData.lastName}!</h1>
-                <h2>Your Account Details</h2>
                 <p>Balance: $${userData.balance}</p>
                 <p>Crypto Balance: $${userData.cryptoBalance}</p>
                 <p>Robot Credit: ${userData.robotCredit}</p>
-                
-                <!-- Button to go to profile page -->
-                <p><a href="/profile">View Profile</a></p>
-
-                <p><a href="/">Home</a> | <a href="/api/login">Logout</a></p>
+                <p><a href="/api/logout">Logout</a></p>
             </body>
             </html>
         `);
     } catch (error) {
-        console.error('Error fetching user data:', error);
-        res.status(500).send('Error fetching user data');
+        console.error('Error fetching dashboard:', error);
+        res.status(500).send('Dashboard error');
     }
 });
-
 
 // ================== LOGOUT ==================
 app.get('/api/logout', (req, res) => {
@@ -190,62 +176,6 @@ app.get('/api/logout', (req, res) => {
         res.redirect('/api/login');
     });
 });
-
-
-
-
-
-
-
-
-
-// Serve the profile page
-app.get('/profile', async (req, res) => {
-    if (!req.session.userId) {
-        // Redirect to login if the user is not authenticated
-        return res.redirect('/api/login');
-    }
-
-    try {
-        // Fetch user details from the database using user ID stored in session
-        const userSnapshot = await db.ref(`users/${req.session.userId}`).once('value');
-        
-        if (!userSnapshot.exists()) {
-            return res.status(404).send('User not found');
-        }
-
-        const userData = userSnapshot.val();
-
-        // Render the profile page with user details
-        res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <title>Profile - Nexus</title>
-            </head>
-            <body>
-                <h1>Profile Details</h1>
-                <p><strong>Phone Number:</strong> ${userData.phoneNumber}</p>
-                <p><strong>Country:</strong> ${userData.country}</p>
-                <p><strong>First Name:</strong> ${userData.firstName}</p>
-                <p><strong>Last Name:</strong> ${userData.lastName}</p>
-                <p><strong>Email:</strong> ${userData.email}</p>
-                <p><strong>KYC Status:</strong> ${userData.kyc}</p>
-
-                <p><a href="/dashboard">Back to Dashboard</a> | <a href="/api/login">Logout</a></p>
-            </body>
-            </html>
-        `);
-    } catch (error) {
-        console.error('Error fetching user profile data:', error);
-        res.status(500).send('Error fetching user profile data');
-    }
-});
-
-
-
 
 // ================== SERVER ==================
 const PORT = process.env.PORT || 3000;
