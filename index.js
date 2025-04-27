@@ -27,10 +27,10 @@ if (!process.env.SESSION_SECRET) {
 }
 
 app.use(session({
-    secret: process.env.SESSION_SECRET, // only from env
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // set true if HTTPS
+    cookie: { secure: false } // set to true only if using HTTPS
 }));
 
 // ================== REGISTER ==================
@@ -42,16 +42,10 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-        const userId = phoneNumber;
+        const newUserRef = db.ref('users').push();
+        const userId = newUserRef.key;
 
-        const userRef = db.ref('users/' + userId);
-        const snapshot = await userRef.once('value');
-
-        if (snapshot.exists()) {
-            return res.status(400).send('User already exists');
-        }
-
-        await userRef.set({
+        await newUserRef.set({
             userId,
             phoneNumber,
             pin,
@@ -76,10 +70,9 @@ app.post('/api/login', async (req, res) => {
     const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
 
     try {
-        const userRef = db.ref('users/' + phoneNumber);
-        const snapshot = await userRef.once('value');
+        const usersSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
 
-        if (!snapshot.exists()) {
+        if (!usersSnapshot.exists()) {
             if (isFormRequest) {
                 return res.send(`
                     <script>
@@ -91,7 +84,9 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).send('User not found');
         }
 
-        const userData = snapshot.val();
+        const users = usersSnapshot.val();
+        const userId = Object.keys(users)[0];
+        const userData = users[userId];
 
         if (userData.pin !== pin) {
             if (isFormRequest) {
@@ -105,7 +100,8 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).send('Incorrect PIN');
         }
 
-        req.session.userId = userData.userId;
+        // Save only the userId in session
+        req.session.userId = userId;
 
         return res.redirect('/dashboard');
 
