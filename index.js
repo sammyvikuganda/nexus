@@ -1320,6 +1320,7 @@ app.get('/api/login', (req, res) => {
 
 // ================== DASHBOARD ==================
 
+// Dashboard page
 app.get('/dashboard', async (req, res) => {
     if (!req.session.userId) {
         return res.redirect('/api/login');
@@ -1350,6 +1351,7 @@ app.get('/dashboard', async (req, res) => {
                         display: flex;
                         flex-direction: column;
                         height: 100vh;
+                        background-color: #f9f9f9;
                     }
                     header {
                         padding: 15px;
@@ -1365,19 +1367,21 @@ app.get('/dashboard', async (req, res) => {
                     nav {
                         display: flex;
                         justify-content: space-around;
-                        background: #eee;
+                        background: #fff;
                         padding: 10px 0;
                         position: fixed;
                         bottom: 0;
                         width: 100%;
                         border-top: 1px solid #ccc;
+                        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
                     }
                     nav button {
                         background: none;
                         border: none;
-                        font-size: 16px;
+                        font-size: 14px;
                         color: #555;
                         cursor: pointer;
+                        flex-grow: 1;
                     }
                     nav button.active {
                         color: #4CAF50;
@@ -1389,6 +1393,11 @@ app.get('/dashboard', async (req, res) => {
                     section.active {
                         display: block;
                     }
+                    .coming-soon {
+                        text-align: center;
+                        margin-top: 50px;
+                        color: #aaa;
+                    }
                 </style>
             </head>
             <body>
@@ -1399,26 +1408,48 @@ app.get('/dashboard', async (req, res) => {
                 <main>
                     <section id="home" class="active">
                         <h2>Home</h2>
-                        <p>Balance: $${userData.balance}</p>
-                        <p>Crypto Balance: $${userData.cryptoBalance}</p>
-                        <p>Robot Credit: ${userData.robotCredit}</p>
+                        <p><strong>First Name:</strong> ${userData.firstName}</p>
+                        <p><strong>Balance:</strong> $${userData.balance || 0}</p>
+                        <p><strong>Registered At:</strong> ${userData.registeredAt || 'N/A'}</p>
                     </section>
 
-                    <section id="profile">
-                        <h2>Profile</h2>
-                        <p><strong>Name:</strong> ${userData.firstName} ${userData.lastName}</p>
-                        <p><strong>Phone:</strong> ${userData.phoneNumber}</p>
+                    <section id="chat">
+                        <div class="coming-soon">
+                            <h2>Chat</h2>
+                            <p>Coming Soon...</p>
+                        </div>
+                    </section>
+
+                    <section id="games">
+                        <div class="coming-soon">
+                            <h2>Games</h2>
+                            <p>Coming Soon...</p>
+                        </div>
+                    </section>
+
+                    <section id="investments">
+                        <div class="coming-soon">
+                            <h2>Investments</h2>
+                            <p>Coming Soon...</p>
+                        </div>
                     </section>
 
                     <section id="settings">
                         <h2>Settings</h2>
+                        <p><strong>Phone Number:</strong> ${userData.phoneNumber || 'N/A'}</p>
+                        <p><strong>First Name:</strong> ${userData.firstName || 'N/A'}</p>
+                        <p><strong>Last Name:</strong> ${userData.lastName || 'N/A'}</p>
+                        <p><strong>Email:</strong> ${userData.email || 'N/A'}</p>
+                        <p><strong>KYC:</strong> ${userData.kyc || 'Pending'}</p>
                         <p><a href="/api/logout">Logout</a></p>
                     </section>
                 </main>
 
                 <nav>
                     <button onclick="showSection('home')" id="homeBtn" class="active">Home</button>
-                    <button onclick="showSection('profile')" id="profileBtn">Profile</button>
+                    <button onclick="showSection('chat')" id="chatBtn">Chat</button>
+                    <button onclick="showSection('games')" id="gamesBtn">Games</button>
+                    <button onclick="showSection('investments')" id="investmentsBtn">Investments</button>
                     <button onclick="showSection('settings')" id="settingsBtn">Settings</button>
                 </nav>
 
