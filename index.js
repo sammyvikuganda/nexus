@@ -160,6 +160,7 @@ app.get('/dashboard', async (req, res) => {
                 <p>Balance: $${userData.balance}</p>
                 <p>Crypto Balance: $${userData.cryptoBalance}</p>
                 <p>Robot Credit: ${userData.robotCredit}</p>
+                <button onclick="window.location.href='/profile'">Go to Profile</button>
                 <p><a href="/api/logout">Logout</a></p>
             </body>
             </html>
@@ -167,6 +168,46 @@ app.get('/dashboard', async (req, res) => {
     } catch (error) {
         console.error('Error fetching dashboard:', error);
         res.status(500).send('Dashboard error');
+    }
+});
+
+// ================== PROFILE ==================
+app.get('/profile', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/api/login');
+    }
+
+    try {
+        const userRef = db.ref('users/' + req.session.userId);
+        const snapshot = await userRef.once('value');
+
+        if (!snapshot.exists()) {
+            return res.status(404).send('User not found');
+        }
+
+        const userData = snapshot.val();
+
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <title>Profile</title>
+            </head>
+            <body>
+                <h1>Profile: ${userData.firstName} ${userData.lastName}</h1>
+                <p><strong>Phone Number:</strong> ${userData.phoneNumber}</p>
+                <p><strong>Balance:</strong> $${userData.balance}</p>
+                <p><strong>Crypto Balance:</strong> $${userData.cryptoBalance}</p>
+                <p><strong>Robot Credit:</strong> ${userData.robotCredit}</p>
+                <button onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+                <p><a href="/api/logout">Logout</a></p>
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).send('Profile error');
     }
 });
 
