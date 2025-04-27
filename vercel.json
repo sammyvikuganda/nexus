@@ -5,7 +5,11 @@
     { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
   "routes": [
+    // API Routes
     { "src": "/api/teza-webhook", "dest": "/api/teza-webhook.js" },
-    { "src": "/api/(.*)", "dest": "/index.js" }
+    { "src": "/api/(.*)", "dest": "/index.js" },
+    
+    // Serve Static Files from the public/ folder (no routing needed, Vercel does this by default)
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
