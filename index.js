@@ -2230,7 +2230,97 @@ app.use((req, res) => {
 
 
 
-// Serve login page
+// Login user endpoint
+app.post('/api/login', async (req, res) => {
+    const { phoneNumber, pin } = req.body;
+
+    // Detect if the request came from a form
+    const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
+
+    try {
+        // Check if the user exists in the database
+        const userSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
+        
+        if (!userSnapshot.exists()) {
+            if (isFormRequest) {
+                return res.send(`
+                    <script>
+                        alert('User not found. Please check your credentials.');
+                        window.history.back();
+                    </script>
+                `);
+            } else {
+                return res.status(400).json({
+                    message: 'User not found. Please check your credentials.'
+                });
+            }
+        }
+
+        const user = userSnapshot.val();
+        const userData = Object.values(user)[0]; // Get the first (and only) user object
+
+        // Validate PIN
+        if (userData.pin !== pin) {
+            if (isFormRequest) {
+                return res.send(`
+                    <script>
+                        alert('Incorrect PIN. Please try again.');
+                        window.history.back();
+                    </script>
+                `);
+            } else {
+                return res.status(400).json({
+                    message: 'Incorrect PIN. Please try again.'
+                });
+            }
+        }
+
+        // Successful login response
+        if (isFormRequest) {
+            return res.send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                    <title>Login Successful</title>
+                </head>
+                <body>
+                    <h1>Login Successful</h1>
+                    <p>Welcome back, ${userData.firstName} ${userData.lastName}!</p>
+                    <p>You are now logged in.</p>
+                </body>
+                </html>
+            `);
+        } else {
+            return res.json({
+                message: 'Login successful',
+                userId: userData.userId
+            });
+        }
+    } catch (error) {
+        console.error('Error logging in user:', error);
+        if (isFormRequest) {
+            return res.send(`
+                <script>
+                    alert('An unexpected error occurred. Please try again later.');
+                    window.history.back();
+                </script>
+            `);
+        } else {
+            return res.status(500).json({
+                message: 'Error logging in user',
+                error
+            });
+        }
+    }
+});
+
+
+
+
+
+// Serve login form
 app.get('/api/login', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -2238,102 +2328,42 @@ app.get('/api/login', (req, res) => {
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <title>Nexus - Login</title>
+            <title>Login to Nexus</title>
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
-            <style>
-                body { font-family: 'Poppins', sans-serif; padding: 2rem; background: #f5f5f5; }
-                .login-container { max-width: 400px; margin: auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                input { width: 100%; padding: 0.8rem; margin-top: 1rem; border: 1px solid #ccc; border-radius: 4px; }
-                button { width: 100%; padding: 0.8rem; background: #4CAF50; color: white; border: none; margin-top: 1rem; border-radius: 4px; cursor: pointer; }
-                button:hover { background: #45a049; }
-            </style>
         </head>
         <body>
-            <div class="login-container">
-                <h2>Login to Nexus</h2>
-                <form id="loginForm" method="POST" action="/api/login">
-                    <input type="email" name="email" placeholder="Email" required />
-                    <input type="password" name="pin" placeholder="PIN" required maxlength="5"/>
-                    <button type="submit">Login</button>
-                </form>
+            <div class="app-container">
+                <header>
+                    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Logo" />
+                    <h1 class="header-title">Login to Nexus Account</h1>
+                </header>
+
+                <div class="content">
+                    <form id="loginForm" action="/api/login" method="POST">
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <input name="phoneNumber" id="phoneNumber" placeholder="Enter your phone number" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pin">Enter App Login PIN</label>
+                            <input name="pin" id="pin" type="tel" placeholder="Enter PIN" required maxlength="5" />
+                            <p id="pinError" class="error" style="display: none;"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="submit" value="Login" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="footer">
+                    <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
+                </div>
             </div>
         </body>
         </html>
     `);
-});
-
-
-
-
-
-
-
-app.post('/api/login', async (req, res) => {
-    const { email, pin } = req.body;
-
-    try {
-        // Check if the user exists based on the email
-        const userRef = await db.ref('users').orderByChild('email').equalTo(email).once('value');
-        const userData = userRef.val();
-
-        if (!userData) {
-            return res.send(`
-                <script>
-                    alert('User not found.');
-                    window.history.back();
-                </script>
-            `);
-        }
-
-        const user = Object.values(userData)[0]; // Get the first matching user
-
-        // Validate the PIN
-        if (user.pin !== pin) {
-            return res.send(`
-                <script>
-                    alert('Invalid PIN.');
-                    window.history.back();
-                </script>
-            `);
-        }
-
-        const balance = user.balance || 0;
-
-        // Successful login - show balance page
-        return res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <title>Dashboard - Nexus</title>
-                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
-                <style>
-                    body { font-family: 'Poppins', sans-serif; text-align: center; padding: 2rem; background: #f5f5f5; }
-                    .balance-container { background: white; padding: 2rem; margin: auto; max-width: 400px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                    h2 { color: #333; }
-                    .balance { font-size: 2rem; color: green; margin-top: 1rem; }
-                </style>
-            </head>
-            <body>
-                <div class="balance-container">
-                    <h2>Welcome, ${user.firstName}!</h2>
-                    <p>Your balance is:</p>
-                    <div class="balance">$${balance.toFixed(2)}</div>
-                </div>
-            </body>
-            </html>
-        `);
-
-    } catch (error) {
-        console.error('Error logging in user:', error);
-        res.send(`
-            <script>
-                alert('Server error. Please try again later.');
-                window.history.back();
-            </script>
-        `);
-    }
 });
 
 
