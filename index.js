@@ -1343,114 +1343,369 @@ app.get('/dashboard', async (req, res) => {
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
                 <title>Dashboard</title>
+                <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
                 <style>
+                    :root {
+                        --primary: #4F46E5;
+                        --primary-light: #6366F1;
+                        --secondary: #10B981;
+                        --dark: #1F2937;
+                        --light: #F9FAFB;
+                        --gray: #6B7280;
+                        --danger: #EF4444;
+                    }
+                    
                     body {
-                        font-family: Arial, sans-serif;
+                        font-family: 'Inter', sans-serif;
                         margin: 0;
                         padding: 0;
                         display: flex;
                         flex-direction: column;
                         height: 100vh;
-                        background-color: #f9f9f9;
+                        background-color: var(--light);
+                        color: var(--dark);
                     }
+                    
                     header {
-                        padding: 15px;
-                        background: #4CAF50;
-                        color: white;
+                        padding: 20px;
+                        background: white;
+                        color: var(--dark);
                         text-align: center;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                        position: relative;
+                        z-index: 10;
                     }
+                    
+                    .header-content {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        max-width: 1200px;
+                        margin: 0 auto;
+                    }
+                    
+                    .profile-badge {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    
+                    .avatar {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background-color: var(--primary-light);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: 500;
+                    }
+                    
                     main {
                         flex: 1;
                         padding: 20px;
                         overflow-y: auto;
+                        max-width: 1200px;
+                        width: 100%;
+                        margin: 0 auto;
                     }
+                    
                     nav {
                         display: flex;
                         justify-content: space-around;
                         background: #fff;
-                        padding: 10px 0;
+                        padding: 12px 0;
                         position: fixed;
                         bottom: 0;
                         width: 100%;
-                        border-top: 1px solid #ccc;
-                        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+                        border-top: 1px solid #E5E7EB;
+                        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
                     }
+                    
                     nav button {
                         background: none;
                         border: none;
-                        font-size: 14px;
-                        color: #555;
+                        font-size: 12px;
+                        color: var(--gray);
                         cursor: pointer;
                         flex-grow: 1;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 4px;
+                        padding: 8px 0;
+                        transition: all 0.2s ease;
                     }
+                    
                     nav button.active {
-                        color: #4CAF50;
-                        font-weight: bold;
+                        color: var(--primary);
                     }
+                    
+                    nav button .material-icons {
+                        font-size: 24px;
+                    }
+                    
                     section {
                         display: none;
+                        animation: fadeIn 0.3s ease;
                     }
+                    
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    
                     section.active {
                         display: block;
                     }
+                    
+                    .card {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    }
+                    
+                    .card-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 16px;
+                        padding-bottom: 12px;
+                        border-bottom: 1px solid #E5E7EB;
+                    }
+                    
+                    .card-title {
+                        font-size: 18px;
+                        font-weight: 600;
+                        margin: 0;
+                        color: var(--dark);
+                    }
+                    
+                    .info-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                        gap: 16px;
+                    }
+                    
+                    .info-item {
+                        background: var(--light);
+                        padding: 16px;
+                        border-radius: 8px;
+                    }
+                    
+                    .info-label {
+                        font-size: 12px;
+                        color: var(--gray);
+                        margin-bottom: 4px;
+                    }
+                    
+                    .info-value {
+                        font-size: 16px;
+                        font-weight: 500;
+                    }
+                    
+                    .balance-value {
+                        font-size: 24px;
+                        font-weight: 600;
+                        color: var(--secondary);
+                    }
+                    
                     .coming-soon {
                         text-align: center;
-                        margin-top: 50px;
-                        color: #aaa;
+                        padding: 40px 20px;
+                        color: var(--gray);
+                    }
+                    
+                    .coming-soon .material-icons {
+                        font-size: 48px;
+                        margin-bottom: 16px;
+                        color: #E5E7EB;
+                    }
+                    
+                    .coming-soon h2 {
+                        font-weight: 500;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .logout-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        color: var(--danger);
+                        text-decoration: none;
+                        margin-top: 20px;
                     }
                 </style>
             </head>
             <body>
                 <header>
-                    <h1>Welcome, ${userData.firstName}!</h1>
+                    <div class="header-content">
+                        <h1>Dashboard</h1>
+                        <div class="profile-badge">
+                            <div class="avatar">${userData.firstName ? userData.firstName.charAt(0).toUpperCase() : 'U'}</div>
+                            <div>
+                                <div style="font-weight: 500;">${userData.firstName || 'User'}</div>
+                                <div style="font-size: 12px; color: var(--gray);">${userData.email || ''}</div>
+                            </div>
+                        </div>
+                    </div>
                 </header>
 
                 <main>
                     <section id="home" class="active">
-                        <h2>Home</h2>
-                        <p><strong>First Name:</strong> ${userData.firstName}</p>
-                        <p><strong>Balance:</strong> $${userData.balance || 0}</p>
-                        <p><strong>Registered At:</strong> ${userData.registeredAt || 'N/A'}</p>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Account Overview</h2>
+                                <span class="material-icons">account_balance_wallet</span>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Balance</div>
+                                    <div class="info-value balance-value">$${userData.balance || 0}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">First Name</div>
+                                    <div class="info-value">${userData.firstName || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Last Name</div>
+                                    <div class="info-value">${userData.lastName || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Member Since</div>
+                                    <div class="info-value">${userData.registeredAt || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Recent Activity</h2>
+                                <span class="material-icons">history</span>
+                            </div>
+                            <div class="coming-soon">
+                                <span class="material-icons">hourglass_empty</span>
+                                <p>Your recent transactions will appear here</p>
+                            </div>
+                        </div>
                     </section>
 
                     <section id="chat">
-                        <div class="coming-soon">
-                            <h2>Chat</h2>
-                            <p>Coming Soon...</p>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Chat Support</h2>
+                                <span class="material-icons">chat</span>
+                            </div>
+                            <div class="coming-soon">
+                                <span class="material-icons">construction</span>
+                                <h2>Chat Feature</h2>
+                                <p>Coming Soon...</p>
+                            </div>
                         </div>
                     </section>
 
                     <section id="games">
-                        <div class="coming-soon">
-                            <h2>Games</h2>
-                            <p>Coming Soon...</p>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Games</h2>
+                                <span class="material-icons">sports_esports</span>
+                            </div>
+                            <div class="coming-soon">
+                                <span class="material-icons">extension</span>
+                                <h2>Game Center</h2>
+                                <p>Coming Soon...</p>
+                            </div>
                         </div>
                     </section>
 
                     <section id="investments">
-                        <div class="coming-soon">
-                            <h2>Investments</h2>
-                            <p>Coming Soon...</p>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Investments</h2>
+                                <span class="material-icons">trending_up</span>
+                            </div>
+                            <div class="coming-soon">
+                                <span class="material-icons">bar_chart</span>
+                                <h2>Investment Portfolio</h2>
+                                <p>Coming Soon...</p>
+                            </div>
                         </div>
                     </section>
 
                     <section id="settings">
-                        <h2>Settings</h2>
-                        <p><strong>Phone Number:</strong> ${userData.phoneNumber || 'N/A'}</p>
-                        <p><strong>First Name:</strong> ${userData.firstName || 'N/A'}</p>
-                        <p><strong>Last Name:</strong> ${userData.lastName || 'N/A'}</p>
-                        <p><strong>Email:</strong> ${userData.email || 'N/A'}</p>
-                        <p><strong>KYC:</strong> ${userData.kyc || 'Pending'}</p>
-                        <p><a href="/api/logout">Logout</a></p>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Profile Settings</h2>
+                                <span class="material-icons">manage_accounts</span>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">First Name</div>
+                                    <div class="info-value">${userData.firstName || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Last Name</div>
+                                    <div class="info-value">${userData.lastName || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">${userData.email || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Phone Number</div>
+                                    <div class="info-value">${userData.phoneNumber || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">KYC Status</div>
+                                    <div class="info-value" style="color: ${userData.kyc === 'Verified' ? 'var(--secondary)' : 'var(--danger)'}">
+                                        ${userData.kyc || 'Pending'}
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="/api/logout" class="logout-btn">
+                                <span class="material-icons">logout</span>
+                                Logout
+                            </a>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Security</h2>
+                                <span class="material-icons">security</span>
+                            </div>
+                            <div class="coming-soon">
+                                <span class="material-icons">lock</span>
+                                <p>Security settings will appear here</p>
+                            </div>
+                        </div>
                     </section>
                 </main>
 
                 <nav>
-                    <button onclick="showSection('home')" id="homeBtn" class="active">Home</button>
-                    <button onclick="showSection('chat')" id="chatBtn">Chat</button>
-                    <button onclick="showSection('games')" id="gamesBtn">Games</button>
-                    <button onclick="showSection('investments')" id="investmentsBtn">Investments</button>
-                    <button onclick="showSection('settings')" id="settingsBtn">Settings</button>
+                    <button onclick="showSection('home')" id="homeBtn" class="active">
+                        <span class="material-icons">home</span>
+                        <span>Home</span>
+                    </button>
+                    <button onclick="showSection('chat')" id="chatBtn">
+                        <span class="material-icons">chat</span>
+                        <span>Chat</span>
+                    </button>
+                    <button onclick="showSection('games')" id="gamesBtn">
+                        <span class="material-icons">sports_esports</span>
+                        <span>Games</span>
+                    </button>
+                    <button onclick="showSection('investments')" id="investmentsBtn">
+                        <span class="material-icons">trending_up</span>
+                        <span>Invest</span>
+                    </button>
+                    <button onclick="showSection('settings')" id="settingsBtn">
+                        <span class="material-icons">settings</span>
+                        <span>Settings</span>
+                    </button>
                 </nav>
 
                 <script>
@@ -1473,9 +1728,6 @@ app.get('/dashboard', async (req, res) => {
         res.status(500).send('Dashboard error');
     }
 });
-
-
-
 
 
 // ================== PROFILE ==================
