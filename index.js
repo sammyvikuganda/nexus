@@ -1798,6 +1798,39 @@ app.get('/', (req, res) => {
 });
 
 
+app.use((req, res) => {
+  res.status(404).send(`
+    <html>
+      <head>
+        <title>Page Not Found</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+          }
+          h1 {
+            font-size: 50px;
+          }
+          p {
+            font-size: 20px;
+          }
+          a {
+            text-decoration: none;
+            color: #007BFF;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Oops!</h1>
+        <p>The page you're looking for is currently unavailable.</p>
+        <p><a href="/">Go back Home</a></p>
+      </body>
+    </html>
+  `);
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
