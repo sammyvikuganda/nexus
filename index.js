@@ -33,7 +33,7 @@ app.use(express.static('public'));
 
 
 // Login endpoint
-app.post('/api/login', async (req, res) => {
+app.post('/api/loginapp', async (req, res) => {
     const { phoneNumber, pin } = req.body;
 
     try {
