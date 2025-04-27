@@ -4211,7 +4211,7 @@ header {
             </head>
             <body>
 
-                <div id="content">
+                
                     <div id="home-section" class="section active">
                         <div class="app-container">
                             <div class="home-section">
