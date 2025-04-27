@@ -2788,14 +2788,14 @@ header {
                                         <a href="#" aria-label="Notification">
                                             <i data-feather="bell" class="notification-icon"></i>
                                         </a>
-                                    </div>
-                                </div>
-
-                                <div class="balance-wrapper">
+                                    <div class="balance-wrapper">
                                     <div class="balance-container">
                                         <div id="balance" class="balance">
                                             <span class="currency"></span>
-                                            <span id="balance-amount" class="amount">${userData.balance || 0}</span>
+                                            <!-- Actual balance -->
+                                            <span id="balance-amount" class="amount" style="display: none;">${userData.balance || 0}</span>
+                                            <!-- Placeholder balance (•••••••) -->
+                                            <span id="balance-placeholder" class="amount" style="display: inline;">•••••••</span>
                                         </div>
                                         <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
                                     </div>
@@ -2970,10 +2970,15 @@ header {
 
                     function toggleBalance() {
                         const balanceAmount = document.getElementById('balance-amount');
-                        if (balanceAmount.style.display === 'none') {
-                            balanceAmount.style.display = 'inline';
-                        } else {
+                        const balancePlaceholder = document.getElementById('balance-placeholder');
+                        
+                        // If the actual balance is showing, hide it and show the placeholder
+                        if (balanceAmount.style.display === 'inline') {
                             balanceAmount.style.display = 'none';
+                            balancePlaceholder.style.display = 'inline'; // Show the placeholder (•••••••)
+                        } else {
+                            balanceAmount.style.display = 'inline'; // Show the actual balance
+                            balancePlaceholder.style.display = 'none'; // Hide the placeholder
                         }
                     }
                 </script>
