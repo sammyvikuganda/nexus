@@ -5,11 +5,10 @@ const path = require('path');
 const axios = require('axios');
 const session = require('express-session');
 const Redis = require('ioredis'); // Redis client
-const connectRedis = require('connect-redis'); // Correct way to import connect-redis
-const RedisStore = connectRedis(session); // Use with session
+const RedisStore = require('connect-redis').default; // <-- IMPORTANT: use .default
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
-require('dotenv').config(); // to load .env file
+require('dotenv').config(); // load .env file
 
 const app = express();
 
@@ -27,7 +26,7 @@ const db = admin.database();
 const publicKey = process.env.TEZA_PUBLIC_KEY;
 const secretKey = process.env.TEZA_SECRET_KEY;
 
-// CORS and Body Parsing
+// CORS and body parsing
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,20 +34,23 @@ app.use(express.static('public'));
 
 // Redis connection setup
 const redisClient = new Redis({
-    host: process.env.REDIS_HOST, // Replace with your Redis host (e.g., Upstash)
+    host: process.env.REDIS_HOST, // your Upstash host
     port: 6379,
-    password: process.env.REDIS_PASSWORD, // Replace with your Redis password
-    tls: {} // Secure connection for Upstash
+    password: process.env.REDIS_PASSWORD, // your Upstash password
+    tls: {} // important for Upstash
 });
 
 // Session setup with Redis
 app.use(session({
-    store: new RedisStore({ client: redisClient }), // Store session in Redis
+    store: new RedisStore({ client: redisClient }), // use Redis for sessions
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // set to true only if using HTTPS
+    cookie: { secure: false }
 }));
+
+
+
 
 
 
