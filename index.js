@@ -3640,40 +3640,37 @@ header {
 }
 
 
-</script>
 
 
+(function startCountdown() {
+    const countdownElement = document.getElementById('countdownTimer');
+    let remainingTime = ${remainingTime};
 
+    function updateCountdown() {
+        if (remainingTime <= 0) {
+            countdownElement.innerText = "0h 0m 0s";
+            return;
+        }
 
+        remainingTime -= 1000;
 
+        let hours = Math.floor(remainingTime / (1000 * 60 * 60));
+        let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
 
-
-<script>
-    let remainingTime = 3600;  // a number
-
-
-</script>
-
-<script>
-function updateCountdown() {
-    if (remainingTime <= 0) {
-        document.getElementById('countdownTimer').textContent = '0h 0m 0s';
-        clearInterval(countdownInterval);
-        return;
+        countdownElement.innerText = `${hours}h ${minutes}m ${seconds}s`;
     }
 
-    let hours = Math.floor(remainingTime / (1000 * 60 * 60));
-    let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-    let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-
-    document.getElementById('countdownTimer').textContent = hours + "h " + minutes + "m " + seconds + "s";
-
-    remainingTime -= 1000;
-}
-
-updateCountdown();
-const countdownInterval = setInterval(updateCountdown, 1000);
+    setInterval(updateCountdown, 1000);
+})();
 </script>
+
+
+
+
+
+
+
 
 
 
