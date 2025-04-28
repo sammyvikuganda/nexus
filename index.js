@@ -3012,75 +3012,37 @@ header {
 
 
 <script>
-   // Function to format currency
-   function formatCurrency(amount, currencyCode) {
-     try {
-       if (isNaN(amount)) amount = 0;
-       return new Intl.NumberFormat('en-US', {
-         style: 'currency',
-         currency: currencyCode,
-         minimumFractionDigits: 0,
-         maximumFractionDigits: 0
-       }).format(amount);
-     } catch {
-       return `${currencyCode} ${amount}`;
-     }
-   }
+    // Function to calculate and update the countdown based on lastUpdated timestamp
+    function updateCountdown(lastUpdated) {
+        const now = new Date();
+        const nextPayoutTime = new Date(lastUpdated).getTime() + 24 * 60 * 60 * 1000; // 24 hours from last updated
+        const timeRemaining = nextPayoutTime - now.getTime();
 
-   // Countdown timer and progress circle update function
-   function updateCircleProgress(lastUpdatedTime, invested) {
-     const circle = document.getElementById('progressCircle');
-     const countdown = document.getElementById('countdownTimer');
+        if (timeRemaining <= 0) {
+            document.getElementById('countdownTimer').textContent = "Payout Available Now!";
+            return;  // No need to continue if payout is available
+        }
 
-     if (!lastUpdatedTime || !circle || !countdown || invested <= 0) {
-       countdown.style.display = 'none';
-       circle.style.background = 'conic-gradient(#eee 0%, #eee 100%)';
-       return;
-     }
+        const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
-     const now = new Date();
-     const start = new Date(lastUpdatedTime);
-     const elapsedMs = now - start;
-     const totalMs = 24 * 60 * 60 * 1000;
-     const percentage = Math.min((elapsedMs / totalMs) * 100, 100).toFixed(2);
-     circle.style.background = `conic-gradient(#ff00cc ${percentage}%, #eee ${percentage}%)`;
+        document.getElementById('countdownTimer').textContent = `${hours}h ${minutes}m ${seconds}s remaining for next payout`;
+    }
 
-     const remainingMs = Math.max(totalMs - elapsedMs, 0);
-     const hours = String(Math.floor(remainingMs / (1000 * 60 * 60))).padStart(2, '0');
-     const minutes = String(Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-     const seconds = String(Math.floor((remainingMs % (1000 * 60)) / 1000)).padStart(2, '0');
-     countdown.innerText = `Next payout in: ${hours}:${minutes}:${seconds}`;
-     countdown.style.display = 'block';
+    // Initialize countdown on page load
+    window.onload = function () {
+        // Replace with the actual lastUpdated timestamp from your server
+        const lastUpdated = new Date("${investmentData.lastUpdated}");  // This assumes `investmentData.lastUpdated` is passed correctly to the template
 
-     // Continuously update every second if invested
-     requestAnimationFrame(() => updateCircleProgress(lastUpdatedTime, invested));
-   }
+        // Call the countdown function initially
+        updateCountdown(lastUpdated);
 
-   // Assuming you already fetched investmentData
-   document.getElementById("investedAmount").textContent = formatCurrency(${investmentData.amount}, userCurrency);
-   document.getElementById("profitAmount").textContent = formatCurrency(${investmentData.payout}, userCurrency);
-   document.getElementById("planLabel").textContent = 'Plan: ' + '${investmentData.premium}%' + ' Premium'; // Assuming premium is displayed
-   document.getElementById("earningAmount").textContent = formatCurrency(${investmentData.amount * (investmentData.premium / 100)}, userCurrency); // Assuming daily payout is calculated like this
-   
-   // Display transaction history using the transaction card structure
-   const txCards = document.getElementById('transactionCards');
-   ${investmentData.transactions.map(tx => `
-       const txCard = document.createElement('div');
-       txCard.classList.add('transaction-card');
-       txCard.innerHTML = \`
-       <div class="transaction-info">
-         <h4>${tx.reason}</h4>
-         <p>Time: ${new Date(tx.time).toLocaleString()}</p>
-       </div>
-       <div class="transaction-amount">
-         ${tx.reason === 'Commission paid' || tx.reason === 'Investment added' ? '+' : '-'} ${formatCurrency(tx.amount, userCurrency)}
-       </div>
-       \`;
-       txCards.appendChild(txCard);
-   `).join('')}
-
-   // Call the countdown function with the lastUpdated time from the investment data
-   updateCircleProgress(${investmentData.lastUpdated}, ${investmentData.amount});
+        // Update the countdown every second
+        setInterval(function () {
+            updateCountdown(lastUpdated);
+        }, 1000);
+    };
 </script>
 
             </body>
