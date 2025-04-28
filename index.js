@@ -3031,8 +3031,8 @@ header {
 
     // Initialize countdown on page load
     window.onload = function () {
-        // Ensure that investmentData.lastUpdated is passed correctly as a JavaScript date
-        const lastUpdated = new Date("<%= investmentData.lastUpdated %>");  // Using EJS to render the date as a string
+        // Assuming `investmentData.lastUpdated` is properly injected from the server side and wrapped in quotes
+        const lastUpdated = new Date("${investmentData.lastUpdated}");  // Correct syntax
 
         // Call the countdown function initially
         updateCountdown(lastUpdated);
