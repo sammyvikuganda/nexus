@@ -3645,29 +3645,6 @@ header {
 
 
 
-<script>
-    let remainingTime = ${remainingTime};
-</script>
-<script>
-    function updateCountdown() {
-        if (remainingTime <= 0) {
-            document.getElementById('countdownTimer').textContent = '0h 0m 0s';
-            clearInterval(countdownInterval);
-            return;
-        }
-
-        let hours = Math.floor(remainingTime / (1000 * 60 * 60));
-        let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-
-        document.getElementById('countdownTimer').textContent = `${hours}h ${minutes}m ${seconds}s`;
-
-        remainingTime -= 1000;
-    }
-
-    updateCountdown();
-    const countdownInterval = setInterval(updateCountdown, 1000);
-</script>
 
 
 
