@@ -2769,49 +2769,22 @@ header {
 
                 <div id="content">
                     <div id="home-section" class="section active">
-                        <div class="app-container">
-  <div class="home-section">
-    <div class="header">
-      <div class="header-left">
-        <!-- Replaced the image with FontAwesome user icon -->
-        <div class="user-icon">
-          <i class="fas fa-user-circle"></i>
-        </div>
-        <div class="user-info">
-          <h2 id="user-name">
-            Hello,
-            <span id="dynamic-user-name">
-              <i class="fas fa-circle-notch fa-spin"></i>
-            </span>
-            <span class="material-icons" style="display: none;">verified</span>
-          </h2>
-          <p>Every Small Step Makes a Big Impact.</p>
-        </div>
-      </div>
-      <div class="header-right">
-        <a href="go:AB" aria-label="Notification">
-          <i data-feather="bell" class="notification-icon"></i>
-        </a>
-      </div>
-    </div>
-
-    <div class="balance-wrapper">
-      <div class="balance-container">
-        <div id="balance" class="balance">
-          <span class="currency"></span>
-          <span id="balance-skeleton" class="skeleton-loader"></span>
-          <span id="balance-amount" class="amount" style="display: none;"></span>
-          <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
-        </div>
-        <!-- Replaced the image with Material Icon for toggle balance -->
-        <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
-      </div>
-      <div class="floating-button">
-        <button class="service" id="newTradingButton">Topup balance</button>
-      </div>
-    </div>
-</div>
-
+                        <div class="balance-wrapper">
+                                    <div class="balance-container">
+                                        <div id="balance" class="balance">
+                                            <span class="currency">Balance:</span>
+                                            <span id="balance-skeleton" class="skeleton-loader"></span>
+                                            <span id="balance-amount" class="amount" style="display: none;">${userData.balance || 0}</span>
+                                            <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
+                                        </div>
+                                        <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
+                                    </div>
+                                    <div class="floating-button">
+                                        <button class="service" id="newTradingButton">Topup balance</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
   <div class="content">
   <div class="action-buttons">
