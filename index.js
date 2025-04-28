@@ -1368,8 +1368,16 @@ app.get('/dashboard', async (req, res) => {
         const userData = snapshot.val();
 
 
-// Fetch investment data
-        const investmentResponse = await fetch(`/api/fetchInvestment/${req.session.userId}`);
+// Construct the full URL for the investment API
+        const investmentUrl = `${req.protocol}://${req.get('host')}/api/fetchInvestment/${req.session.userId}`;
+
+        // Fetch investment data
+        const investmentResponse = await fetch(investmentUrl);
+        
+        if (!investmentResponse.ok) {
+            throw new Error('Failed to fetch investment data');
+        }
+
         const investmentData = await investmentResponse.json();
 
 
