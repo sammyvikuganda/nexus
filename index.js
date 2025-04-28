@@ -3616,6 +3616,9 @@ header {
                 
 
                 <script>
+
+let remainingTime = ${remainingTime};
+
                     function switchSection(section) {
                         document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
                         document.getElementById(section + '-section').style.display = 'block';
