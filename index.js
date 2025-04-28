@@ -3667,7 +3667,6 @@ header {
                     setInterval(updateCountdown, 1000);
                 </script>
 
-
             </body>
             </html>
         `);
