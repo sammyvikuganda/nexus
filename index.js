@@ -1,4 +1,4 @@
-,const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const path = require('path');
@@ -1380,6 +1380,25 @@ if (investmentData.premium > 0) {
 }
 dailyPayout = dailyPayout.toFixed(2); // Optional: round it
 
+
+
+
+
+// Get the last updated time and calculate the next payout time
+const lastUpdated = new Date(investmentData.lastUpdated); // Convert to Date object
+const nextPayoutTime = new Date(lastUpdated.getTime() + 24 * 60 * 60 * 1000); // Add 24 hours
+
+// Calculate remaining time in hours, minutes, and seconds
+const now = new Date();
+let remainingTime = nextPayoutTime - now;
+
+// Calculate hours, minutes, and seconds for countdown
+let hours = Math.floor(remainingTime / (1000 * 60 * 60));
+let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+// Format countdown timer (this will be sent to frontend)
+let countdownText = `${hours}h ${minutes}m ${seconds}s`;
 
 
         res.send(`
@@ -3036,40 +3055,26 @@ header {
 </script>
 
 
-
 <script>
-    // Get the last updated timestamp from your backend data
-const lastUpdated = new Date("${investmentData.lastUpdated}"); // This is the ISO format timestamp
+            // Set interval to update the countdown every second
+            setInterval(function() {
+                var countdownElement = document.getElementById('countdownTimer');
+                var remainingTime = ${remainingTime};
 
-// Set the next payout time to 24 hours after the last update
-const nextPayoutTime = new Date(lastUpdated.getTime() + 24 * 60 * 60 * 1000); // 24 hours later
+                if (remainingTime <= 0) {
+                    countdownElement.innerText = "Payout is ready!";
+                    clearInterval();
+                } else {
+                    var hours = Math.floor(remainingTime / (1000 * 60 * 60));
+                    var minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                    countdownElement.innerText = hours + 'h ' + minutes + 'm ' + seconds + 's';
+                }
 
-// Function to update the countdown every second
-function updateCountdown() {
-    const now = new Date();
-    const timeRemaining = nextPayoutTime - now;
+                remainingTime -= 1000; // Decrease the remaining time by 1 second
+            }, 1000); // Update every second
+        </script>
 
-    if (timeRemaining <= 0) {
-        // When the countdown reaches 0, reset to the next 24-hour period
-        nextPayoutTime.setTime(nextPayoutTime.getTime() + 24 * 60 * 60 * 1000);
-    }
-
-    // Calculate remaining hours, minutes, and seconds
-    const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
-    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-
-    // Format the countdown string
-    const countdownText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-    // Update the countdown timer element
-    document.getElementById('countdownTimer').innerText = countdownText;
-}
-
-// Update the countdown immediately and then every second
-updateCountdown();
-setInterval(updateCountdown, 1000);
-</script>
 
 
             </body>
