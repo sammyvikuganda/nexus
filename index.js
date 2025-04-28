@@ -3011,19 +3011,39 @@ header {
 
 
 <script>
-   document.getElementById("investedAmount").textContent = '${investmentData.amount}';
-   document.getElementById("profitAmount").textContent = '${investmentData.payout}';
-   document.getElementById("planLabel").textContent = 'Plan: ' + '${investmentData.premium}%' + ' Premium'; // Assuming premium is displayed
-   document.getElementById("earningAmount").textContent = '${investmentData.amount * (investmentData.premium / 100)}'; // Assuming daily payout is calculated like this
-   // Display transaction history
-   const txCards = document.getElementById('transactionCards');
-   ${investmentData.transactions.map(tx => `
-       const txCard = document.createElement('div');
-       txCard.classList.add('transaction-card');
-       txCard.innerHTML = '<p>${tx.time}: $${tx.amount} - ${tx.reason}</p>';
-       txCards.appendChild(txCard);
-   `).join('')}
+    // Function to calculate and update the countdown based on lastUpdated timestamp
+    function updateCountdown(lastUpdated) {
+        const now = new Date();
+        const nextPayoutTime = new Date(lastUpdated).getTime() + 24 * 60 * 60 * 1000; // 24 hours from last updated
+        const timeRemaining = nextPayoutTime - now.getTime();
+
+        if (timeRemaining <= 0) {
+            document.getElementById('countdownTimer').textContent = "Payout Available Now!";
+            return;  // No need to continue if payout is available
+        }
+
+        const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+        document.getElementById('countdownTimer').textContent = `${hours}h ${minutes}m ${seconds}s remaining for next payout`;
+    }
+
+    // Initialize countdown on page load
+    window.onload = function () {
+        // Ensure that investmentData.lastUpdated is passed correctly as a JavaScript date
+        const lastUpdated = new Date("<%= investmentData.lastUpdated %>");  // Using EJS to render the date as a string
+
+        // Call the countdown function initially
+        updateCountdown(lastUpdated);
+
+        // Update the countdown every second
+        setInterval(function () {
+            updateCountdown(lastUpdated);
+        }, 1000);
+    };
 </script>
+
 
 
 
