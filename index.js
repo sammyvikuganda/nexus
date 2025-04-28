@@ -1371,14 +1371,14 @@ app.get('/dashboard', async (req, res) => {
 
         const investmentData = await investmentResponse.json();
 
+
 let dailyPayout;
 if (investmentData.premium > 0) {
     dailyPayout = (investmentData.amount * investmentData.premium) / 100;
 } else {
-    dailyPayout = (investmentData.amount * 1) / 100; // default 1%
+    dailyPayout = (investmentData.amount * 1) / 100; // fallback 1%
 }
-investmentData.payout = dailyPayout.toFixed(2); // you update payout value
-
+dailyPayout = dailyPayout.toFixed(2); // Optional: round it
 
 
 
@@ -2894,13 +2894,16 @@ header {
         <div class="circle-wrapper">
             <span id="planLabel">${investmentData.premium > 0 ? `Premium Plan - ${investmentData.premium}%` : 'Free Plan'}</span>
             <div class="circle" id="progressCircle">
-                <div class="circle-inner">
-                    <h5>Daily Payout</h5>
-                    <p id="earningAmount">${investmentData.payout}</p>
-                </div>
-            </div>
-            <span class="label-text">${investmentData.premium > 0 ? `${investmentData.premium}%` : '1% per day'}</span>
-        </div>
+    <div class="circle-inner">
+        <h5>Daily Payout</h5>
+        <p id="earningAmount">${dailyPayout}</p>
+    </div>
+</div>
+
+            <span class="label-text">
+    ${investmentData.premium > 0 ? 'Premium' : '1% per day'}
+</span>
+
 
         <!-- Investment Action Buttons -->
         <div class="buttons">
