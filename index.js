@@ -5,7 +5,8 @@ const path = require('path');
 const axios = require('axios');
 const session = require('express-session');
 const Redis = require('ioredis'); // Redis client
-const RedisStore = require('connect-redis')(session); // Redis session store
+const connectRedis = require('connect-redis'); // Correct way to import connect-redis
+const RedisStore = connectRedis(session); // Use with session
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
 require('dotenv').config(); // to load .env file
@@ -48,37 +49,6 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false } // set to true only if using HTTPS
 }));
-
-
-
-// Login endpoint
-app.post('/api/loginapp', async (req, res) => {
-    const { phoneNumber, pin } = req.body;
-
-    try {
-        const snapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
-        const users = snapshot.val();
-
-        if (users) {
-            let user = null;
-Object.keys(users).forEach(key => {
-                if (users[key].pin === pin) {
-                    user = { userId: key, ...users[key] };
-                }
-            });
-
-            if (user) {
-                res.json(user);
-            } else {
-                res.status(404).json({ message: 'Incorrect PIN or user not found' });
-            }
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-   } catch (error) {
-        res.status(500).json({ message: 'Error logging in', error });
-    }
-});
 
 
 
