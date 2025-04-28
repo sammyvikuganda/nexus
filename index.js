@@ -1104,15 +1104,19 @@ const existing = snapshot.val();
 app.get('/api/fetchInvestment/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
+        
+        // Reference to the user's investment data
         const investmentRef = db.ref(`users/${userId}/investment`);
         const snapshot = await investmentRef.once('value');
 
+        // If no investment found for the user
         if (!snapshot.exists()) {
             return res.status(404).json({ message: 'No investment found for this user' });
         }
 
+        // Extract investment data from the snapshot
         const investment = snapshot.val();
-const currentTime = new Date();
+        const currentTime = new Date();
         let lastUpdated = new Date(investment.lastUpdated);
         const transactionsRef = db.ref(`users/${userId}/investment/transactions`);
         let totalPayout = investment.payout || 0;
@@ -1124,10 +1128,11 @@ const currentTime = new Date();
             payoutCount++;
             lastUpdated = new Date(lastUpdated.getTime() + 24 * 60 * 60 * 1000);
 
-// If premium is 0, use 1% (0.01) for the daily income calculation
+            // Calculate daily income based on premium or default 1%
             const dailyIncome = parseFloat((investment.amount * (premium > 0 ? premium / 100 : 0.01)).toFixed(2));
             totalPayout = parseFloat((totalPayout + dailyIncome).toFixed(2));
 
+            // Log the transaction for each payout
             await transactionsRef.push({
                 amount: dailyIncome,
                 time: lastUpdated.toISOString(),
@@ -1135,7 +1140,7 @@ const currentTime = new Date();
             });
         }
 
-// Only update if there was a payout
+        // Update the investment record only if there was a payout
         if (payoutCount > 0) {
             await investmentRef.update({
                 payout: totalPayout,
@@ -1143,10 +1148,12 @@ const currentTime = new Date();
             });
         }
 
+        // Retrieve the transaction history
         const txSnapshot = await transactionsRef.once('value');
         const txHistory = txSnapshot.exists() ? Object.values(txSnapshot.val()) : [];
 
-res.status(200).json({
+        // Send the response with updated investment data
+        res.status(200).json({
             userId,
             amount: investment.amount,
             payout: totalPayout,
@@ -1156,6 +1163,7 @@ res.status(200).json({
             transactions: txHistory
         });
     } catch (error) {
+        // Handle any errors that occur during the fetch and update process
         console.error('Error fetching investment:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
