@@ -2,15 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const path = require('path');
-const app = express();
 const axios = require('axios');
 const session = require('express-session');
+const Redis = require('ioredis'); // Redis client
+const RedisStore = require('connect-redis')(session); // Redis session store
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
+require('dotenv').config(); // to load .env file
 
-
-
-
+const app = express();
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -23,34 +23,32 @@ admin.initializeApp({
 });
 
 const db = admin.database();
-
 const publicKey = process.env.TEZA_PUBLIC_KEY;
 const secretKey = process.env.TEZA_SECRET_KEY;
 
-
-
+// CORS and Body Parsing
 app.use(cors());
 app.use(express.json());
-
-
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.static('public'));
 
+// Redis connection setup
+const redisClient = new Redis({
+    host: process.env.REDIS_HOST, // Replace with your Redis host (e.g., Upstash)
+    port: 6379,
+    password: process.env.REDIS_PASSWORD, // Replace with your Redis password
+    tls: {} // Secure connection for Upstash
+});
 
-
-
-// Session setup
-if (!process.env.SESSION_SECRET) {
-    throw new Error('SESSION_SECRET is not set in environment variables');
-}
-
+// Session setup with Redis
 app.use(session({
+    store: new RedisStore({ client: redisClient }), // Store session in Redis
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false } // set to true only if using HTTPS
 }));
+
 
 
 // Login endpoint
@@ -1652,43 +1650,14 @@ app.post('/api/withdraw', async (req, res) => {
 
 
 
-const countryPhoneRules = {
-    'uganda': { prefix: '+256', length: 13 },
-    'kenya': { prefix: '+254', length: 13 },
-    'rwanda': { prefix: '+250', length: 13 },
-    // Add more if needed
-};
-
-function normalizePhoneNumber(input, country) {
-    if (!country) return input;
-
-    const rule = countryPhoneRules[country.toLowerCase()];
-    if (!rule) return input;
-
-    let phone = input.replace(/\s+/g, ''); // remove all spaces
-
-    if (phone.startsWith('0')) {
-        phone = rule.prefix + phone.slice(1); // Replace 0 with the country's prefix
-    }
-
-    if (phone.startsWith(rule.prefix)) {
-        phone = phone.slice(0, rule.prefix.length) + ' ' + phone.slice(rule.prefix.length); // Add a space after the prefix
-    }
-
-    return phone; // Return the formatted phone number
-}
-
+// ================== LOGIN ==================
 app.post('/api/login', async (req, res) => {
-    let { phoneNumber, pin } = req.body;
+    const { phoneNumber, pin } = req.body;
 
     const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
 
     try {
-        const rawPhoneNumber = phoneNumber.replace(/\s+/g, ''); // Remove spaces from the input phone number
-
-        console.log('Raw Phone Number:', rawPhoneNumber); // Debug log
-
-        const usersSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(rawPhoneNumber).once('value');
+        const usersSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
 
         if (!usersSnapshot.exists()) {
             if (isFormRequest) {
@@ -1706,23 +1675,6 @@ app.post('/api/login', async (req, res) => {
         const userId = Object.keys(users)[0];
         const userData = users[userId];
 
-        const userCountry = userData.country || '';
-        const normalizedPhone = normalizePhoneNumber(rawPhoneNumber, userCountry);
-
-        console.log('Normalized Phone Number:', normalizedPhone); // Debug log
-
-        if (userData.phoneNumber !== normalizedPhone) {
-            if (isFormRequest) {
-                return res.send(`
-                    <script>
-                        alert('Phone number does not match records.');
-                        window.location.href='/api/login';
-                    </script>
-                `);
-            }
-            return res.status(400).send('Phone number does not match records.');
-        }
-
         if (userData.pin !== pin) {
             if (isFormRequest) {
                 return res.send(`
@@ -1735,6 +1687,7 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).send('Incorrect PIN');
         }
 
+        // Save only the userId in session
         req.session.userId = userId;
 
         return res.redirect('/dashboard');
