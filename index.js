@@ -1970,7 +1970,7 @@ app.get('/dashboard', async (req, res) => {
         }
         dailyPayout = dailyPayout.toFixed(2); // Optional: round
 
-        // Calculate countdown
+        // Calculate next payout time (24 hours after the last update)
         const lastUpdated = new Date(investmentData.lastUpdated);
         const nextPayoutTime = new Date(lastUpdated.getTime() + 24 * 60 * 60 * 1000);
 
@@ -1987,6 +1987,7 @@ app.get('/dashboard', async (req, res) => {
 
         let countdownText = `${hours}h ${minutes}m ${seconds}s`;
 
+        // Send the full HTML response
         res.send(`
             <!DOCTYPE html>
             <html lang="en">
@@ -3643,29 +3644,28 @@ header {
 
 
 <script>
-            // Pass the next payout time from the server to the client
-            const nextPayoutTime = new Date("${nextPayoutTime.toISOString()}").getTime();
+                    // Pass the next payout time from the server to the client
+                    const nextPayoutTime = new Date("${nextPayoutTime.toISOString()}").getTime();
 
-            function updateCountdown() {
-                const countdownElement = document.getElementById('countdownTimer');
-                let remainingTime = nextPayoutTime - new Date().getTime();
+                    function updateCountdown() {
+                        const countdownElement = document.getElementById('countdownTimer');
+                        let remainingTime = nextPayoutTime - new Date().getTime();
 
-                if (remainingTime <= 0) {
-                    countdownElement.textContent = 'Time Expired';
-                    return;
-                }
+                        if (remainingTime <= 0) {
+                            countdownElement.textContent = 'Time Expired';
+                            return;
+                        }
 
-                const hours = Math.floor(remainingTime / (1000 * 60 * 60));
-                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                        const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+                        const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
 
-                countdownElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
-            }
+                        countdownElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                    }
 
-            // Update countdown every second
-            setInterval(updateCountdown, 1000);
-        </script>
-
+                    // Update countdown every second
+                    setInterval(updateCountdown, 1000);
+                </script>
 
 
             </body>
