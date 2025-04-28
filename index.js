@@ -1100,23 +1100,20 @@ const existing = snapshot.val();
 
 
 
+
 // Fetch and update investment
 app.get('/api/fetchInvestment/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
-        
-        // Reference to the user's investment data
         const investmentRef = db.ref(`users/${userId}/investment`);
         const snapshot = await investmentRef.once('value');
 
-        // If no investment found for the user
         if (!snapshot.exists()) {
             return res.status(404).json({ message: 'No investment found for this user' });
         }
 
-        // Extract investment data from the snapshot
         const investment = snapshot.val();
-        const currentTime = new Date();
+const currentTime = new Date();
         let lastUpdated = new Date(investment.lastUpdated);
         const transactionsRef = db.ref(`users/${userId}/investment/transactions`);
         let totalPayout = investment.payout || 0;
@@ -1128,11 +1125,10 @@ app.get('/api/fetchInvestment/:userId', async (req, res) => {
             payoutCount++;
             lastUpdated = new Date(lastUpdated.getTime() + 24 * 60 * 60 * 1000);
 
-            // Calculate daily income based on premium or default 1%
+// If premium is 0, use 1% (0.01) for the daily income calculation
             const dailyIncome = parseFloat((investment.amount * (premium > 0 ? premium / 100 : 0.01)).toFixed(2));
             totalPayout = parseFloat((totalPayout + dailyIncome).toFixed(2));
 
-            // Log the transaction for each payout
             await transactionsRef.push({
                 amount: dailyIncome,
                 time: lastUpdated.toISOString(),
@@ -1140,7 +1136,7 @@ app.get('/api/fetchInvestment/:userId', async (req, res) => {
             });
         }
 
-        // Update the investment record only if there was a payout
+// Only update if there was a payout
         if (payoutCount > 0) {
             await investmentRef.update({
                 payout: totalPayout,
@@ -1148,12 +1144,10 @@ app.get('/api/fetchInvestment/:userId', async (req, res) => {
             });
         }
 
-        // Retrieve the transaction history
         const txSnapshot = await transactionsRef.once('value');
         const txHistory = txSnapshot.exists() ? Object.values(txSnapshot.val()) : [];
 
-        // Send the response with updated investment data
-        res.status(200).json({
+res.status(200).json({
             userId,
             amount: investment.amount,
             payout: totalPayout,
@@ -1163,13 +1157,10 @@ app.get('/api/fetchInvestment/:userId', async (req, res) => {
             transactions: txHistory
         });
     } catch (error) {
-        // Handle any errors that occur during the fetch and update process
         console.error('Error fetching investment:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
-
 
 
 
@@ -1368,17 +1359,6 @@ app.get('/dashboard', async (req, res) => {
         const userData = snapshot.val();
 
 
-// Construct the full URL for the investment API
-        const investmentUrl = `${req.protocol}://${req.get('host')}/api/fetchInvestment/${req.session.userId}`;
-
-        // Fetch investment data
-        const investmentResponse = await fetch(investmentUrl);
-        
-        if (!investmentResponse.ok) {
-            throw new Error('Failed to fetch investment data');
-        }
-
-        const investmentData = await investmentResponse.json();
 
 
 
@@ -2876,39 +2856,59 @@ header {
 
                     <!-- Investment Section -->
                                 <div id="investments-section" class="section" style="display: none;">
-                        
-                        <div class="content">
-                            <div class="top-info">
-                                <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
-                                <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
-                            </div>
-                            <p id="countdownTimer" class="countdown-text"></p>
-                            <div class="circle-wrapper">
-                                <span id="planLabel">---</span>
-                                <div class="circle" id="progressCircle">
-                                    <div class="circle-inner">
-                                        <h5>Daily Payout</h5>
-                                        <p id="earningAmount">---</p>
-                                    </div>
-                                </div>
-                                <span class="label-text">0% per day</span>
-                            </div>
+    <div class="content">
+        <!-- Top Info: Invested Amount & Profits -->
+        <div class="top-info">
+            <div class="info-box">
+                <h4>Invested</h4>
+                <p id="investedAmount">${investmentData.amount}</p>
+            </div>
+            <div class="info-box">
+                <h4>Profits</h4>
+                <p id="profitAmount">${investmentData.payout}</p>
+            </div>
+        </div>
 
-                            <div class="buttons">
-                                <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
-                                <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
-                                <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
-                            </div>
+        <!-- Daily Payout Info (using data from the backend) -->
+        <p id="countdownTimer" class="countdown-text"></p>
+        <div class="circle-wrapper">
+            <span id="planLabel">${investmentData.premium > 0 ? `Premium Plan - ${investmentData.premium}%` : 'Free Plan'}</span>
+            <div class="circle" id="progressCircle">
+                <div class="circle-inner">
+                    <h5>Daily Payout</h5>
+                    <p id="earningAmount">${investmentData.payout}</p>
+                </div>
+            </div>
+            <span class="label-text">${investmentData.premium > 0 ? `${investmentData.premium}%` : '1% per day'}</span>
+        </div>
 
-                            <div class="info-text">
-                                To withdraw your capital from investment press Stop Investment. 
-                            </div>
+        <!-- Investment Action Buttons -->
+        <div class="buttons">
+            <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
+            <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
+            <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
+        </div>
 
-                            <div class="section-title">Transaction History</div>
-                            <div class="transaction-cards" id="transactionCards"></div>
-                        </div>
-                    </div>
+        <!-- Info Text -->
+        <div class="info-text">
+            To withdraw your capital from investment press Stop Investment.
+        </div>
+
+        <!-- Transaction History -->
+        <div class="section-title">Transaction History</div>
+        <div class="transaction-cards" id="transactionCards">
+            <!-- Loop through transaction history and display each transaction -->
+            ${investmentData.transactions.map(tx => `
+                <div class="transaction-card">
+                    <p>Amount: ${tx.amount}</p>
+                    <p>Time: ${new Date(tx.time).toLocaleString()}</p>
+                    <p>Reason: ${tx.reason}</p>
+                </div>
+            `).join('')}
+        </div>
+    </div>
 </div>
+
                     <div id="settings-section" class="section" style="display: none;">
                         <div class="settings-section">
                             <div class="header">
@@ -3006,46 +3006,8 @@ header {
     }
 }
 
-                </script>
 
-
-
-<script>
-    // Function to calculate and update the countdown based on lastUpdated timestamp
-    function updateCountdown(lastUpdated) {
-        const now = new Date();
-        const nextPayoutTime = new Date(lastUpdated).getTime() + 24 * 60 * 60 * 1000; // 24 hours from last updated
-        const timeRemaining = nextPayoutTime - now.getTime();
-
-        if (timeRemaining <= 0) {
-            document.getElementById('countdownTimer').textContent = "Payout Available Now!";
-            return;  // No need to continue if payout is available
-        }
-
-        const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
-        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-
-        document.getElementById('countdownTimer').textContent = `${hours}h ${minutes}m ${seconds}s remaining for next payout`;
-    }
-
-    // Initialize countdown on page load
-    window.onload = function () {
-        // Assuming `investmentData.lastUpdated` is properly injected from the server side and wrapped in quotes
-        const lastUpdated = new Date("${investmentData.lastUpdated}");  // Correct syntax
-
-        // Call the countdown function initially
-        updateCountdown(lastUpdated);
-
-        // Update the countdown every second
-        setInterval(function () {
-            updateCountdown(lastUpdated);
-        }, 1000);
-    };
 </script>
-
-
-
 
             </body>
             </html>
