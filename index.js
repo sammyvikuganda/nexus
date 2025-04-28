@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 
 
+
 // Initialize Firebase Admin SDK
 admin.initializeApp({
     credential: admin.credential.cert({
@@ -120,6 +121,10 @@ if (snapshot.exists()) {
 
     return withdrawalId;
 };
+
+
+
+const currentMonth = new Date().toLocaleString('default', { month: 'long' });
 
 
 
