@@ -3641,37 +3641,30 @@ header {
 </script>
 
 
+
 <script>
-function startCountdown(durationInMs) {
-    let endTime = Date.now() + durationInMs;
+(function(){
+    let remainingMilliseconds = ${remainingTime};
 
-    function updateTimer() {
-        let remaining = endTime - Date.now();
-
-        if (remaining <= 0) {
-            document.getElementById('countdownTimer').textContent = '0h 0m 0s';
-            clearInterval(timerInterval);
+    function updateCountdown() {
+        if (remainingMilliseconds <= 0) {
+            document.getElementById('countdownTimer').innerText = '0h 0m 0s';
             return;
         }
 
-        let hours = Math.floor(remaining / (1000 * 60 * 60));
-        let minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        let hours = Math.floor(remainingMilliseconds / (1000 * 60 * 60));
+        let minutes = Math.floor((remainingMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((remainingMilliseconds % (1000 * 60)) / 1000);
 
-        document.getElementById('countdownTimer').textContent = `${hours}h ${minutes}m ${seconds}s`;
+        document.getElementById('countdownTimer').innerText = `\${hours}h \${minutes}m \${seconds}s`;
+
+        remainingMilliseconds -= 1000;
     }
 
-    updateTimer(); // initial call
-    var timerInterval = setInterval(updateTimer, 1000);
-}
-
-// Start countdown when page loads
-window.onload = function() {
-    // Pass initial remaining time in milliseconds
-    startCountdown(${remainingTime});
-};
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+})();
 </script>
-
 
 
 
