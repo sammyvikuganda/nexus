@@ -2894,16 +2894,16 @@ header {
         <div class="circle-wrapper">
             <span id="planLabel">${investmentData.premium > 0 ? `Premium Plan - ${investmentData.premium}%` : 'Free Plan'}</span>
             <div class="circle" id="progressCircle">
-    <div class="circle-inner">
-        <h5>Daily Payout</h5>
-        <p id="earningAmount">${dailyPayout}</p>
-    </div>
-</div>
+                <div class="circle-inner">
+                    <h5>Daily Payout</h5>
+                    <p id="earningAmount">${dailyPayout}</p>
+                </div>
+            </div>
 
             <span class="label-text">
     ${investmentData.premium > 0 ? 'Premium' : '1% per day'}
 </span>
-
+</div>
 
         <!-- Investment Action Buttons -->
         <div class="buttons">
