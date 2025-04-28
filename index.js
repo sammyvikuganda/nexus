@@ -3672,7 +3672,9 @@ header {
 
 
 <script>
-    let remainingTime = ${remainingTime}; // No quotes, inject raw number!
+    let remainingTime = 3600;  // a number
+
+
 </script>
 
 <script>
