@@ -2360,281 +2360,6 @@ header {
 
 
 
-.app-container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .home-section {
-      background: linear-gradient(to right, #1A7EB1, #1A7EB1);
-      color: white;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    /* CSS to increase the icon size */
-.user-icon i {
-    font-size: 50px;
-}
-
-
-    .user-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .user-info h2 {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.4;
-      display: flex;
-      align-items: center;
-    }
-
-    .user-info h2 .verified-icon {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: white;
-      border-radius: 50%;
-      width: 14px;
-      height: 14px;
-      margin-left: 5px;
-    }
-
-    .user-info h2 .verified-icon i {
-      color: #1A7EB1;
-      font-size: 10px;
-      font-weight: bold;
-    }
-
-    .user-info p {
-      font-size: 12px;
-      margin-top: -4px;
-      line-height: 1.5;
-      font-weight: 300;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .notification-icon {
-      font-size: 24px;
-      color: white;
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-
-    .notification-icon:active {
-      opacity: 0.7;
-    }
-
-    .balance-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 30px;
-    }
-
-    .balance-container {
-      display: flex;
-      align-items: center;
-    }
-
-    .balance {
-      font-size: 18px;
-      margin-right: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .balance .currency {
-      font-weight: normal;
-      margin-right: 5px;
-      font-size: 10px;
-    }
-
-    .balance .amount {
-      font-family: 'Peace Sans', sans-serif;
-      font-weight: 900;
-    }
-
-    .skeleton-loader {
-      background-color: #e0e0e0;
-      width: 60px;
-      height: 18px;
-      border-radius: 4px;
-      animation: skeleton-loading 1.2s infinite;
-    }
-
-    @keyframes skeleton-loading {
-      0% { background-color: #e0e0e0; }
-      50% { background-color: #f0f0f0; }
-      100% { background-color: #e0e0e0; }
-    }
-
-    .balance-container img {
-      width: 19px;
-      height: 15px;
-      cursor: pointer;
-      margin-left: 7px;
-      transition: opacity 0.3s ease;
-    }
-
-    .balance-container img:active {
-      opacity: 0.3;
-    }
-
-    .floating-button button {
-      background-color: transparent;
-      border: 1px solid white;
-      color: white;
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-
-    .floating-button button:active {
-      opacity: 0.2;
-    }
-
-    .action-buttons {
-      display: flex;
-      justify-content: space-around;
-      margin: 25px 20px 10px;
-      gap: 16px;
-    }
-
-    .action-button {
-      background-color: white;
-      color: #1A7EB1;
-      border: none;
-      border-radius: 16px;
-      padding: 14px 20px;
-      flex: 1;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .action-button:hover {
-      transform: translateY(-2px);
-    }
-
-    .action-button:active {
-      transform: scale(0.98);
-    }
-
-    .action-button i {
-      color: #1A7EB1;
-    }
-
-    .icon-button-row {
-      display: flex;
-      justify-content: space-around;
-      gap: 10px;
-      padding: 20px;
-    }
-
-    .icon-button {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: white;
-      padding: 12px;
-      border-radius: 16px;
-      flex: 1;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease;
-    }
-
-    .icon-button:hover {
-      transform: translateY(-2px);
-    }
-
-    .icon-button:active {
-      transform: scale(0.97);
-    }
-
-    .icon-button i {
-      color: #1A7EB1;
-      margin-bottom: 6px;
-    }
-
-    .icon-button span {
-      font-size: 13px;
-      color: #1A7EB1;
-      font-weight: 500;
-    }
-
-    /* Luxury Total Gained Section */
-    .monthly-gain {
-      margin: 20px;
-      padding: 5px;
-      background: linear-gradient(135deg, #fff8e1, #f9d976);
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-      text-align: center;
-      transition: all 0.3s ease;
-      border: 1px solid #f5deb3;
-    }
-
-    .monthly-gain:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
-    }
-
-    .monthly-gain h3 {
-      color: #b68c26;
-      font-size: 15px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .monthly-gain .amount {
-      font-size: 20px;
-      font-weight: bold;
-      color: #3e2f13;
-      font-family: 'Peace Sans', sans-serif;
-      margin: 8px 0;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .monthly-gain .month {
-      font-size: 14px;
-      color: #7a6229;
-      font-style: italic;
-    }
-
 
 
 
@@ -2763,6 +2488,204 @@ header {
 
 
 
+
+
+
+
+
+
+
+.app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header-section {
+            background: linear-gradient(to right, #1A7EB1, #1A7EB1);
+            color: white;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-icon i {
+            font-size: 50px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .user-info h2 {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            margin-top: -4px;
+            line-height: 1.5;
+            font-weight: 300;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon {
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .balance-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .balance-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .balance {
+            font-size: 18px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .balance .currency {
+            font-weight: normal;
+            margin-right: 5px;
+            font-size: 10px;
+        }
+
+        .balance .amount {
+            font-weight: 900;
+        }
+
+        .floating-button button {
+            background-color: transparent;
+            border: 1px solid white;
+            color: white;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Main Content Styles with nexusweb prefix */
+        .nexusweb-main-content {
+            padding: 20px;
+        }
+
+        .nexusweb-action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 15px;
+        }
+
+        .nexusweb-action-button {
+            background-color: #1A7EB1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 0;
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nexusweb-action-button i {
+            font-size: 20px;
+        }
+
+        .nexusweb-quick-access {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .nexusweb-quick-access-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .nexusweb-quick-access-item i {
+            color: #1A7EB1;
+            font-size: 20px;
+        }
+
+        .nexusweb-quick-access-item span {
+            font-size: 12px;
+            color: #333;
+        }
+
+        .nexusweb-stats-card {
+            background: linear-gradient(135deg, #fff8e1, #f9d976);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #f5deb3;
+        }
+
+        .nexusweb-stats-card h3 {
+            color: #b68c26;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+        }
+
+        .nexusweb-stats-card .nexusweb-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3e2f13;
+            margin-bottom: 5px;
+        }
+
+        .nexusweb-stats-card .nexusweb-label {
+            font-size: 12px;
+            color: #7a6229;
+        }
     </style>
             </head>
             <body>
@@ -2771,79 +2694,84 @@ header {
                     <!-- Home Section -->
                     <div id="home-section" class="section active">
                         <div class="app-container">
-                            <div class="home-section">
-                                <div class="header">
-                                    <div class="header-left">
-                                        <div class="user-icon">
-                                            <i class="fas fa-user-circle"></i>
-                                        </div>
-                                        <div class="user-info">
-                                            <h2 id="user-name">
-                                                Hello, 
-                                                <span id="dynamic-user-name">${userData.firstName}</span>
-                                                <span class="material-icons" style="display: none;">verified</span>
-                                            </h2>
-                                            <p>Every Small Step Makes a Big Impact.</p>
-                                        </div>
-                                    </div>
-                                    <div class="header-right">
-                                        <a href="go:AB" aria-label="Notification">
-                                            <i data-feather="bell" class="notification-icon"></i>
-                                        </a>
-                                    </div>
-                                </div>
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="header">
+                    <div class="header-left">
+                        <div class="user-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-info">
+                            <h2 id="user-name">
+                                Hello, 
+                                <span id="dynamic-user-name">${userData.firstName}</span>
+                                <span class="material-icons" style="display: none;">verified</span>
+                            </h2>
+                            <p>Every Small Step Makes a Big Impact.</p>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <div class="notification-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                    </div>
+                </div>
 
-                                <div class="balance-wrapper">
-                                    <div class="balance-container">
-                                        <div id="balance" class="balance">
-                                            <span class="currency">Balance:</span>
-                                            <span id="balance-amount" class="amount">${userData.balance || 0}</span>
-                                            <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
-                                        </div>
-                                        <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
-                                    </div>
-                                    <div class="floating-button">
-                                        <button class="service" id="newTradingButton">Topup balance</button>
-                                    </div>
-                                </div>
-                            <!-- Action Buttons (Withdraw, Send) -->
-      <div class="action-buttons">
-        <button class="action-button" id="withdraw-button">
-          <i class="fas fa-arrow-down-circle"></i> Withdraw
-        </button>
-        <button class="action-button">
-          <i class="fas fa-paper-plane"></i> Send
-        </button>
-      </div>
+                <div class="balance-wrapper">
+                    <div class="balance-container">
+                        <div id="balance" class="balance">
+                            <span class="currency">Balance:</span>
+                            <span id="balance-amount" class="amount">${userData.balance || 0}</span>
+                            <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
+                        </div>
+                        <i id="toggle-icon" class="fas fa-eye" onclick="toggleBalance()"></i>
+                    </div>
+                    <div class="floating-button">
+                        <button class="service" id="newTradingButton">Topup balance</button>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Icon Buttons Row (Activity, Referrals, USD Wallet) -->
-      <div class="icon-button-row">
-        <a href="go:ACTIVITY" class="icon-button">
-          <i class="fas fa-activity"></i>
-          <span>Activity</span>
-        </a>
+            <!-- Main Content Section with nexusweb classes and new IDs -->
+            <div class="nexusweb-main-content">
+                <!-- Action Buttons -->
+                <div class="nexusweb-action-buttons">
+                    <button class="nexusweb-action-button" id="nexusweb-withdraw-button">
+                        <i class="fas fa-arrow-circle-down"></i>
+                        Withdraw
+                    </button>
+                    <button class="nexusweb-action-button" id="nexusweb-send-button">
+                        <i class="fas fa-paper-plane"></i>
+                        Send
+                    </button>
+                </div>
 
-        <a href="go:REFERRALS" class="icon-button">
-          <i class="fas fa-users"></i>
-          <span>Referrals</span>
-        </a>
+                <!-- Quick Access -->
+                <div class="nexusweb-quick-access">
+                    <div class="nexusweb-quick-access-item" id="nexusweb-activity-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Activity</span>
+                    </div>
+                    <div class="nexusweb-quick-access-item" id="nexusweb-referrals-item">
+                        <i class="fas fa-users"></i>
+                        <span>Referrals</span>
+                    </div>
+                    <div class="nexusweb-quick-access-item" id="nexusweb-wallet-item">
+                        <i class="fas fa-wallet"></i>
+                        <span>USD Wallet</span>
+                    </div>
+                </div>
 
-        <div class="icon-button">
-          <i class="fas fa-dollar-sign"></i>
-          <span>USD Wallet</span>
+                <!-- Stats Card -->
+                <div class="nexusweb-stats-card" id="nexusweb-stats-section">
+                    <h3>Total Gained</h3>
+                    <div class="nexusweb-value">${userData.totalGained || '---'}</div>
+                    <div class="nexusweb-label">${currentMonth}</div>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <!-- Monthly Gain Section -->
-      <div class="monthly-gain">
-        <h3>Total Gained</h3>
-        <div class="amount">---</div>
-        <div class="month">---</div>
-      </div>
     </div>
-  </div>
-</div>
-  
+
   
 
 
@@ -3001,6 +2929,8 @@ header {
                         </div>
                     </div>
                 </div>
+
+                
 
                 <script>
                     function switchSection(section) {
