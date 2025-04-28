@@ -1371,6 +1371,16 @@ app.get('/dashboard', async (req, res) => {
 
         const investmentData = await investmentResponse.json();
 
+let dailyPayout;
+if (investmentData.premium > 0) {
+    dailyPayout = (investmentData.amount * investmentData.premium) / 100;
+} else {
+    dailyPayout = (investmentData.amount * 1) / 100; // default 1%
+}
+investmentData.payout = dailyPayout.toFixed(2); // you update payout value
+
+
+
 
         res.send(`
             <!DOCTYPE html>
