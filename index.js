@@ -2806,33 +2806,30 @@ header {
                                         <button class="service" id="newTradingButton">Topup balance</button>
                                     </div>
                                 </div>
-                            <!-- Action Buttons -->
+                            <!-- Action Buttons (Withdraw, Send) -->
       <div class="action-buttons">
         <button class="action-button" id="withdraw-button">
-          <i data-feather="arrow-down-circle"></i>Withdraw
+          <i class="fas fa-arrow-down-circle"></i> Withdraw
         </button>
         <button class="action-button">
-          <i data-feather="send"></i>Send
+          <i class="fas fa-paper-plane"></i> Send
         </button>
       </div>
 
-      <!-- Icon Buttons Row -->
+      <!-- Icon Buttons Row (Activity, Referrals, USD Wallet) -->
       <div class="icon-button-row">
-        <!-- Activity button -->
         <a href="go:ACTIVITY" class="icon-button">
-          <i data-feather="activity"></i>
+          <i class="fas fa-activity"></i>
           <span>Activity</span>
         </a>
 
-        <!-- Referrals button -->
         <a href="go:REFERRALS" class="icon-button">
-          <i data-feather="users"></i>
+          <i class="fas fa-users"></i>
           <span>Referrals</span>
         </a>
 
-        <!-- USD Wallet button -->
         <div class="icon-button">
-          <i data-feather="dollar-sign"></i>
+          <i class="fas fa-dollar-sign"></i>
           <span>USD Wallet</span>
         </div>
       </div>
