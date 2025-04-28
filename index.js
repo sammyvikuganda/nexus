@@ -2892,7 +2892,10 @@ header {
         <!-- Daily Payout Info (using data from the backend) -->
         <p id="countdownTimer" class="countdown-text"></p>
         <div class="circle-wrapper">
-            <span id="planLabel">${investmentData.premium > 0 ? 'Premium Plan' : 'Free Plan'}</span>
+    <!-- Dynamically change class based on premium status -->
+    <span id="planLabel" class="${investmentData.premium > 0 ? 'label-premium' : 'label-free'}">
+        ${investmentData.premium > 0 ? `Premium - ${investmentData.premium}%` : 'Free Plan'}
+    </span>
 
             <div class="circle" id="progressCircle">
                 <div class="circle-inner">
@@ -2901,8 +2904,10 @@ header {
                 </div>
             </div>
 
-            <span class="label-text">${investmentData.premium > 0 ? `${investmentData.premium}%` : '1% per day'}</span>
-        </div>
+            <span class="label-text">
+  ${investmentData.premium > 0 ? `${investmentData.premium}% per day` : '1% per day'}
+</span>
+</div>
 
         <!-- Investment Action Buttons -->
         <div class="buttons">
