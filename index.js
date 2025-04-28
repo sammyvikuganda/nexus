@@ -140,7 +140,7 @@ app.get('/api/register', (req, res) => {
             <title>Welcome to Nexus - Register</title>
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
             <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
 
     * {
       box-sizing: border-box;
@@ -155,7 +155,7 @@ app.get('/api/register', (req, res) => {
       flex-direction: column;
     }
 
-.app-container {
+    .app-container {
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -175,7 +175,7 @@ app.get('/api/register', (req, res) => {
       height: 36px;
     }
 
-.header-title {
+    .header-title {
       flex: 1;
       text-align: center;
       font-size: 1.2rem;
@@ -196,7 +196,8 @@ app.get('/api/register', (req, res) => {
       flex-direction: column;
       gap: 1rem;
     }
-.form-group {
+
+    .form-group {
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
@@ -216,8 +217,7 @@ app.get('/api/register', (req, res) => {
       flex: 0.6;
     }
 
-
-label {
+    label {
       font-weight: 500;
       color: #555;
       font-size: 0.9rem;
@@ -233,8 +233,7 @@ label {
       height: 48px;
     }
 
-
-input:focus, select:focus {
+    input:focus, select:focus {
       border-color: #1A7EB1;
       outline: none;
       box-shadow: 0 0 8px rgba(26, 126, 177, 0.2);
@@ -255,7 +254,7 @@ input:focus, select:focus {
       font-size: 1rem;
     }
 
-input[type="submit"]:hover {
+    input[type="submit"]:hover {
       background-color: #15608B;
       box-shadow: 0 4px 10px rgba(26, 126, 177, 0.2);
       transform: translateY(-2px);
@@ -274,7 +273,8 @@ input[type="submit"]:hover {
       font-weight: 600;
       transition: color 0.3s ease;
     }
-.footer a:hover {
+
+    .footer a:hover {
       color: #15608B;
     }
 
@@ -292,12 +292,22 @@ input[type="submit"]:hover {
       .header-title {
         font-size: 1rem;
       }
-input {
+
+      input {
         padding: 0.7rem;
       }
     }
 
-</style>
+
+
+
+
+
+
+
+
+
+  </style>
         </head>
         <body>
             <div class="app-container">
@@ -308,8 +318,7 @@ input {
                 </header>
 
                 <div class="content">
-
-<form id="registerForm" action="/api/register?sponsorid=${sponsorId}" method="POST">
+                    <form id="registerForm" action="/api/register?sponsorid=${sponsorId}" method="POST">
                         <div class="form-group">
                             <label for="firstName">First Name</label>
                             <input name="firstName" id="firstName" placeholder="First Name" required />
@@ -317,8 +326,7 @@ input {
 
                         <div class="form-group">
                             <label for="lastName">Last Name</label>
-
-<input name="lastName" id="lastName" placeholder="Last Name" required />
+                            <input name="lastName" id="lastName" placeholder="Last Name" required />
                         </div>
 
                         <div class="form-group-inline">
@@ -326,8 +334,7 @@ input {
                                 <label for="country">Country</label>
                                 <select name="country" id="country" required>
                                     <option value="">Select a country</option>
-
-</select>
+                                </select>
                             </div>
                             <div class="form-group phone">
                                 <label for="phoneNumber">Phone Number</label>
@@ -335,8 +342,7 @@ input {
                                     <input type="tel" id="countryCode" readonly placeholder="+Code" style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
                                     <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
                                 </div>
-
-<p id="phoneError" class="error" style="display: none;"></p>
+                                <p id="phoneError" class="error" style="display: none;"></p>
                             </div>
                         </div>
 
@@ -346,8 +352,7 @@ input {
                         </div>
 
                         <div class="form-group">
-
-<label for="pin">Set App Login PIN</label>
+                            <label for="pin">Set App Login PIN</label>
                             <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
                             <p id="pinError" class="error" style="display: none;"></p>
                         </div>
@@ -357,13 +362,14 @@ input {
                         </div>
                     </form>
                 </div>
+              
 
-<div class="footer">
+                <div class="footer">
                     <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
                 </div>
             </div>
 
-<script>
+            <script>
   document.addEventListener('DOMContentLoaded', () => {
     const countrySelect = document.getElementById('country');
     const codeInput = document.getElementById('countryCode');
@@ -389,7 +395,7 @@ input {
       selected = countries.find(c => c.country === countrySelect.value);
       codeInput.value = selected ? selected.country_code : '';
       phoneInput.value = '';
-phoneError.style.display = 'none';
+      phoneError.style.display = 'none';
     };
 
     phoneInput.oninput = () => {
@@ -398,7 +404,7 @@ phoneError.style.display = 'none';
       }
     };
 
-document.getElementById('registerForm').onsubmit = e => {
+    document.getElementById('registerForm').onsubmit = e => {
       pinError.style.display = 'none';
       phoneError.style.display = 'none';
 
@@ -409,8 +415,7 @@ document.getElementById('registerForm').onsubmit = e => {
         } else if (phoneInput.value.length !== selected.phone_length) {
           phoneError.textContent = 'Phone number must be exactly ' + selected.phone_length + ' digits for ' + selected.country + '.';
         } else {
-
-pinError.textContent = 'PIN must be at least 5 characters long.';
+          pinError.textContent = 'PIN must be at least 5 characters long.';
           pinError.style.display = 'block';
         }
         phoneError.style.display = 'block';
@@ -422,7 +427,9 @@ pinError.textContent = 'PIN must be at least 5 characters long.';
   });
 </script>
 
-</body>
+
+
+        </body>
         </html>
     `);
 });
@@ -441,8 +448,7 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
         const user = users[userId];
         if (
             user.phoneNumber === phoneNumber || 
-
-user.email === email || 
+            user.email === email || 
             (nin && user.nin === nin)
         ) {
             credentialsExist = true;
@@ -456,6 +462,9 @@ user.email === email ||
 };
 
 
+
+
+
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
     const { phoneNumber, country, firstName, lastName, dob, nin, email, pin, deviceDetails } = req.body;
@@ -467,8 +476,7 @@ app.post('/api/register', async (req, res) => {
     try {
         const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
 
-
-if (credentialsExist && deviceExists) {
+        if (credentialsExist && deviceExists) {
             if (isFormRequest) {
                 return res.send(`
                     <script>
@@ -480,7 +488,7 @@ if (credentialsExist && deviceExists) {
                 return res.status(400).json({
                     message: 'Some of the credentials you provided are already registered, and you cannot register another account using this device.'
                 });
-}
+            }
         }
 
         if (credentialsExist) {
@@ -493,7 +501,7 @@ if (credentialsExist && deviceExists) {
                 `);
             } else {
                 return res.status(400).json({
-message: 'Some of the credentials you provided already exist. If you have registered previously, please log in.'
+                    message: 'Some of the credentials you provided already exist. If you have registered previously, please log in.'
                 });
             }
         }
@@ -505,8 +513,7 @@ message: 'Some of the credentials you provided already exist. If you have regist
                         alert('You cannot register another account using this device.');
                         window.history.back();
                     </script>
-
-`);
+                `);
             } else {
                 return res.status(400).json({
                     message: 'You cannot register another account using this device.'
@@ -520,15 +527,15 @@ message: 'Some of the credentials you provided already exist. If you have regist
             const sponsorRef = await db.ref(`users/${sponsorId}`).once('value');
             if (sponsorRef.exists()) {
                 const sponsorData = sponsorRef.val();
-
-const newReferralCount = (sponsorData.referralCount || 0) + 1;
+                const newReferralCount = (sponsorData.referralCount || 0) + 1;
 
                 await db.ref(`users/${sponsorId}`).update({
                     referralCount: newReferralCount
                 });
             }
         }
-const userData = {
+
+        const userData = {
             phoneNumber,
             country,
             firstName,
@@ -550,7 +557,7 @@ const userData = {
                 "Bank Transfer": "",
                 "Crypto Transfer": ""
             },
-deviceDetails: deviceDetails || null,
+            deviceDetails: deviceDetails || null,
             sponsorId: sponsorId || null,
             referralCount: 0
         };
@@ -566,9 +573,406 @@ deviceDetails: deviceDetails || null,
                 userId: userId,
             });
 
-if (secondaryResponse.data.userId) {
+            if (secondaryResponse.data.userId) {
+                // Instead of redirecting, show a success page with the user's name
                 if (isFormRequest) {
-                    return res.redirect('https://www.google.com');
+                    return res.send(`
+                        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Nexus - Earn Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #7c4dff;  /* Elegant purple */
+            --primary-dark: #651fff;
+            --telegram: #0088cc;
+            --success: #00bfa5;  /* Teal accent */
+            --earn: #ffab00;    /* Golden yellow */
+            --text: #263238;    /* Dark blue-gray */
+            --text-light: #607d8b;
+            --bg: #f5f7fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* Elegant floating circles background */
+        .bg-circles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bg-circles li {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(124, 77, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s linear infinite;
+            bottom: -150px;
+        }
+        
+        .bg-circles li:nth-child(1) {
+            left: 25%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 0s;
+            background: rgba(0, 191, 165, 0.1);
+        }
+        
+        .bg-circles li:nth-child(2) {
+            left: 10%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 2s;
+            animation-duration: 12s;
+        }
+        
+        .bg-circles li:nth-child(3) {
+            left: 70%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 4s;
+        }
+        
+        .bg-circles li:nth-child(4) {
+            left: 40%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 0s;
+            animation-duration: 18s;
+            background: rgba(255, 171, 0, 0.1);
+        }
+        
+        .bg-circles li:nth-child(5) {
+            left: 65%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 0s;
+        }
+        
+        .bg-circles li:nth-child(6) {
+            left: 75%;
+            width: 110px;
+            height: 110px;
+            animation-delay: 3s;
+            background: rgba(124, 77, 255, 0.1);
+        }
+        
+        .bg-circles li:nth-child(7) {
+            left: 35%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 7s;
+            background: rgba(0, 191, 165, 0.1);
+        }
+        
+        .bg-circles li:nth-child(8) {
+            left: 50%;
+            width: 25px;
+            height: 25px;
+            animation-delay: 15s;
+            animation-duration: 45s;
+        }
+        
+        .bg-circles li:nth-child(9) {
+            left: 20%;
+            width: 15px;
+            height: 15px;
+            animation-delay: 2s;
+            animation-duration: 35s;
+            background: rgba(255, 171, 0, 0.1);
+        }
+        
+        .bg-circles li:nth-child(10) {
+            left: 85%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 0s;
+            animation-duration: 11s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+                border-radius: 50%;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+                border-radius: 50%;
+            }
+        }
+
+        .content-wrapper {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 15px 30px rgba(124, 77, 255, 0.1);
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(124, 77, 255, 0.1);
+        }
+        
+        .success-notification {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        
+        .icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .success-icon {
+            font-size: 2.8rem;
+            color: var(--success);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 191, 165, 0.1);
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(0, 191, 165, 0.2);
+            animation: pulse 2s infinite;
+            margin-bottom: 0.8rem;
+        }
+        
+        .platform-badge {
+            display: inline-block;
+            background: rgba(255, 171, 0, 0.15);
+            color: var(--earn);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 171, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(255, 171, 0, 0.1);
+        }
+        
+        .success-content h3 {
+            margin: 0 0 0.6rem 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #7c4dff, #00bfa5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .success-messages {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+        
+        .success-messages p {
+            margin: 0.5rem 0;
+        }
+        
+        .earn-highlight {
+            color: var(--earn);
+            font-weight: 600;
+        }
+        
+        .download-options {
+            text-align: center;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        
+        .download-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.25rem;
+            letter-spacing: -0.5px;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.9rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 20px rgba(124, 77, 255, 0.2);
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                      rgba(255,255,255,0) 0%, 
+                      rgba(255,255,255,0.2) 50%, 
+                      rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(124, 77, 255, 0.3);
+        }
+        
+        .download-btn:hover::after {
+            animation: shine 1.5s infinite;
+        }
+        
+        .download-btn i {
+            font-size: 1.2rem;
+            margin-right: 0.8rem;
+        }
+        
+        .divider {
+            margin: 1rem 0;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid rgba(96, 125, 139, 0.15);
+        }
+        
+        .divider::before {
+            margin-right: 0.8rem;
+        }
+        
+        .divider::after {
+            margin-left: 0.8rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shine {
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </div>
+    
+    <div class="content-wrapper">
+        <div class="success-notification">
+            <div class="icon-container">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="platform-badge">
+                    <i class="fas fa-coins"></i> Online Money Platform
+                </div>
+            </div>
+            <div class="success-content">
+                <h3>Registration Successful!</h3>
+                <div class="success-messages">
+                    <p>Welcome ${firstName} ${lastName}, your account is ready! Download the app to start your <span class="earn-highlight">earning journey</span> today.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="download-options">
+            <h2 class="download-title">Start Earning Now</h2>
+            
+            <a href="https://apk.e-droid.net/apk/app3402371-3q8gkl.apk?v=3" class="download-btn" download>
+                <i class="fas fa-download"></i>
+                Download Nexus App
+            </a>
+            
+            <div class="divider">OR</div>
+            
+            <a href="https://t.me/yourtelegramgroup" class="download-btn" style="background: linear-gradient(135deg, var(--telegram), #0077b5); box-shadow: 0 6px 20px rgba(0, 136, 204, 0.2);">
+                <i class="fab fa-telegram"></i>
+                Join Telegram Group
+            </a>
+        </div>
+        
+        <footer>
+            <p>© 2023 Nexus - Online Money Earning Platform. All rights reserved</p>
+        </footer>
+    </div>
+</body>
+</html>
+                    `);
                 } else {
                     return res.json({
                         message: 'User registered successfully and replicated in secondary database',
@@ -580,7 +984,7 @@ if (secondaryResponse.data.userId) {
                     message: 'User registered in the primary database, but failed in the secondary database',
                     userId: userId
                 });
-}
+            }
         } catch (secondaryError) {
             console.error('Error creating user in secondary database:', secondaryError);
             return res.status(500).json({
@@ -594,8 +998,7 @@ if (secondaryResponse.data.userId) {
             return res.send(`
                 <script>
                     alert('An unexpected error occurred while registering. Please try again later.');
-
-window.history.back();
+                    window.history.back();
                 </script>
             `);
         } else {
@@ -608,6 +1011,7 @@ window.history.back();
 });
 
 
+
 // Endpoint to handle withdrawal request
 app.post('/api/withdraw', async (req, res) => {
   // Destructure the required data from the request body
@@ -618,8 +1022,7 @@ app.post('/api/withdraw', async (req, res) => {
     return res.status(400).json({ message: 'Mobile number, amount, transaction ID, and description are required.' });
   }
 
-
-// Get environment variables (ensure they are set in Vercel or locally)
+  // Get environment variables (ensure they are set in Vercel or locally)
   const JPESA_API_KEY = process.env.JPESA_API_KEY; // Using JPESA_API_KEY for the JPesa API key
   const CALLBACK_URL = process.env.CALLBACK_URL;
 
@@ -628,7 +1031,7 @@ app.post('/api/withdraw', async (req, res) => {
     return res.status(500).json({ message: 'JPesa API Key or Callback URL missing in environment variables.' });
   }
 
-// Construct the XML data using dynamic user inputs
+  // Construct the XML data using dynamic user inputs
   const DATA = `<?xml version="1.0" encoding="ISO-8859-1"?>
     <g7bill>
       <_key_>${JPESA_API_KEY}</_key_>
@@ -642,7 +1045,7 @@ app.post('/api/withdraw', async (req, res) => {
       <description>${description}</description>
     </g7bill>`;
 
-try {
+  try {
     // Send the request to JPesa API
     const response = await axios.post('https://my.jpesa.com/api/', DATA, {
       headers: {
@@ -656,12 +1059,16 @@ try {
     // Send success response to the client
     res.status(200).json({ message: 'Withdrawal request sent successfully!', data: response.data });
   } catch (error) {
-
-// Handle error and send a failure response
+    // Handle error and send a failure response
     console.error('Error sending request to JPesa:', error);
     res.status(500).json({ message: 'Error processing withdrawal', error: error.message });
   }
 });
+
+
+
+
+
 
 
 // Endpoint to update server status
@@ -674,8 +1081,8 @@ app.patch('/api/update-server-status', async (req, res) => {
 
   try {
     const serverStatusRef = db.ref('serverStatus');
-
-// Set the new status
+    
+    // Set the new status
     await serverStatusRef.set(status);
 
     return res.status(200).json({
@@ -686,6 +1093,8 @@ app.patch('/api/update-server-status', async (req, res) => {
     return res.status(500).json({ message: 'Error updating server status', error: error.message });
   }
 });
+
+
 
 
 // Endpoint to handle both Top Up and Withdraw
@@ -700,8 +1109,7 @@ app.patch('/api/update-balance', async (req, res) => {
     // Check server status before processing the request
     const serverStatusRef = db.ref('serverStatus');
     const serverStatusSnapshot = await serverStatusRef.once('value');
-
-const serverStatus = serverStatusSnapshot.val();
+    const serverStatus = serverStatusSnapshot.val();
 
     // If server status is busy, only allow Top Up
     if (serverStatus === 'busy' && reason !== 'Top Up') {
@@ -713,9 +1121,9 @@ const serverStatus = serverStatusSnapshot.val();
 
     if (!snapshot.exists()) {
       return res.status(404).json({ message: 'User not found' });
-                          }
+    }
 
-const user = snapshot.val();
+    const user = snapshot.val();
     const currentBalance = user.balance || 0;
     const sponsorCode = user.sponsorCode || null;
     const reference = `ref-${userId}-${Date.now()}`;
@@ -731,7 +1139,7 @@ const user = snapshot.val();
       description: `${reason} request for user: ${userId}`
     };
 
-let companyTax = 0;
+    let companyTax = 0;
     let companyCollection = 0;
     let sponsorCommission = 0;
 
@@ -746,7 +1154,7 @@ let companyTax = 0;
 
       companyTax = amount * 0.08;
 
-if (sponsorCode) {
+      if (sponsorCode) {
         const sponsorRef = db.ref(`users/${sponsorCode}`);
         const sponsorSnapshot = await sponsorRef.once('value');
         if (sponsorSnapshot.exists()) {
@@ -758,8 +1166,7 @@ if (sponsorCode) {
     } else if (reason === 'Top Up') {
       tezaApiUrl = 'https://tezanetwork.com/api/v1/deposit';
     } else {
-
-return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
+      return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
     }
 
     try {
@@ -773,7 +1180,7 @@ return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "T
       if (tezaResponse.status >= 200 && tezaResponse.status < 300) {
         const { status, transaction_id } = tezaResponse.data;
 
-if (status === 'success') {
+        if (status === 'success') {
           const transactionsRef = userRef.child('transactions');
           const newTransactionRef = transactionsRef.push();
 
@@ -786,7 +1193,8 @@ if (status === 'success') {
             status: 'pending',
             timestamp: new Date().toISOString()
           });
-if (reason === 'Withdraw') {
+
+          if (reason === 'Withdraw') {
             const newBalance = currentBalance - amount;
             await userRef.update({ balance: newBalance });
 
@@ -797,8 +1205,7 @@ if (reason === 'Withdraw') {
             await companyRef.update({
               companyTax: (companyData.companyTax || 0) + companyTax,
               companyCollection: (companyData.companyCollection || 0) + companyCollection
-
-});
+            });
           }
 
           // Update sponsor referral commission if valid
@@ -807,7 +1214,7 @@ if (reason === 'Withdraw') {
             const sponsorSnapshot = await sponsorRef.once('value');
             if (sponsorSnapshot.exists()) {
               const sponsorUser = sponsorSnapshot.val();
-const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCommission;
+              const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCommission;
               await sponsorRef.update({ referralCommission: newReferralCommission });
             }
           }
@@ -818,7 +1225,7 @@ const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCom
             reference
           });
         } else {
-return res.status(422).json({
+          return res.status(422).json({
             message: `Failed to initiate ${reason.toLowerCase()} with Teza`,
             details: tezaResponse.data.message || 'Unknown error'
           });
@@ -830,7 +1237,7 @@ return res.status(422).json({
         });
       }
     } catch (error) {
-console.error(`Error during Teza ${reason.toLowerCase()} submission:`, error);
+      console.error(`Error during Teza ${reason.toLowerCase()} submission:`, error);
       return res.status(500).json({
         message: `Failed to submit ${reason.toLowerCase()} to Teza`,
         error: error.message
@@ -842,6 +1249,9 @@ console.error(`Error during Teza ${reason.toLowerCase()} submission:`, error);
     return res.status(500).json({ message: 'Error processing request', error: error.message });
   }
 });
+
+
+
 
 
 
@@ -860,8 +1270,7 @@ app.all('/api/process-failed-logs', async (req, res) => {
 
       // Loop through each user
       for (let userId in users) {
-
-const userRef = db.ref(`users/${userId}`);
+        const userRef = db.ref(`users/${userId}`);
         const transactionsRef = userRef.child('transactions');
 
         // Get failed logs for the user
@@ -873,8 +1282,7 @@ const userRef = db.ref(`users/${userId}`);
           // Loop through each failed log and process
           for (let logId in failedLogs) {
             const failedLog = failedLogs[logId];
-
-const reference_id = failedLog.reference_id;
+            const reference_id = failedLog.reference_id;
             const transaction_id = failedLog.transaction_id;
             const failedStatus = failedLog.status;  // Get the status from the failed log ('Approved' or 'Failed')
 
@@ -884,14 +1292,15 @@ const reference_id = failedLog.reference_id;
               .equalTo(reference_id)
               .once('value');
 
-if (transactionSnapshot.exists()) {
+            if (transactionSnapshot.exists()) {
               // Find the transaction
               const transactionKey = Object.keys(transactionSnapshot.val())[0];
               const transaction = transactionSnapshot.val()[transactionKey];
 
               // Update the transaction status based on the failed log's status
               const updatedStatus = (failedStatus === 'Approved') ? 'completed' : failedStatus;
-await transactionsRef.child(transactionKey).update({
+
+              await transactionsRef.child(transactionKey).update({
                 status: updatedStatus,  // Update status to 'completed' if Approved, or keep it 'Failed'
                 timestamp: new Date().toISOString(),
               });
@@ -901,8 +1310,7 @@ await transactionsRef.child(transactionKey).update({
 
               console.log(`Transaction with reference ${reference_id} processed and status updated to ${updatedStatus}.`);
             } else {
-
-console.log(`Transaction with reference ${reference_id} not found for user ${userId}.`);
+              console.log(`Transaction with reference ${reference_id} not found for user ${userId}.`);
             }
           }
         }
@@ -915,10 +1323,9 @@ console.log(`Transaction with reference ${reference_id} not found for user ${use
     }
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
-
-
-}
+  }
 });
+
 
 
 
@@ -936,8 +1343,7 @@ app.all('/api/process-failed-logs/:userId', async (req, res) => {
       const userSnapshot = await userRef.once('value');
       if (!userSnapshot.exists()) {
         return res.status(404).json({ message: `User with ID ${userId} not found` });
-
-}
+      }
 
       // Get the failed logs for the specific user
       const failedLogsSnapshot = await userRef.child('failed_logs').once('value');
@@ -951,8 +1357,7 @@ app.all('/api/process-failed-logs/:userId', async (req, res) => {
       let failedToProcess = 0;
 
       // Process each failed log independently
-
-for (let logId in failedLogs) {
+      for (let logId in failedLogs) {
         const failedLog = failedLogs[logId];
         const { reference_id, transaction_id, status: failedStatus } = failedLog;
 
@@ -966,7 +1371,7 @@ for (let logId in failedLogs) {
             const transactionKey = Object.keys(transactionSnapshot.val())[0];
             const transaction = transactionSnapshot.val()[transactionKey];
 
-const updatedStatus = failedStatus === 'Approved' ? 'completed' : failedStatus;
+            const updatedStatus = failedStatus === 'Approved' ? 'completed' : failedStatus;
 
             // Use the original timestamp from the transaction, not the current time
             const transactionTimestamp = transaction.timestamp || new Date().toISOString();
@@ -976,7 +1381,7 @@ const updatedStatus = failedStatus === 'Approved' ? 'completed' : failedStatus;
               timestamp: transactionTimestamp,  // Keep the original timestamp
             });
 
-console.log(`Transaction ${reference_id} updated to ${updatedStatus} with original timestamp.`);
+            console.log(`Transaction ${reference_id} updated to ${updatedStatus} with original timestamp.`);
 
             // Only delete log after successful processing
             await userRef.child('failed_logs').child(logId).remove();
@@ -988,7 +1393,7 @@ console.log(`Transaction ${reference_id} updated to ${updatedStatus} with origin
           }
 
         } catch (logErr) {
-console.error(`Error processing log ${logId}:`, logErr);
+          console.error(`Error processing log ${logId}:`, logErr);
           failedToProcess++;
         }
       }
@@ -1003,12 +1408,12 @@ console.error(`Error processing log ${logId}:`, logErr);
     } catch (error) {
       console.error('Unexpected error while processing failed logs:', error);
       return res.status(500).json({ message: 'Failed to process logs', error: error.message });
-
-}
+    }
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 });
+
 
 
 
@@ -1028,8 +1433,7 @@ app.post('/api/verify-pin', async (req, res) => {
                 res.json({ valid: true });
             } else {
                 res.json({ valid: false });
-
-}
+            }
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -1037,6 +1441,7 @@ app.post('/api/verify-pin', async (req, res) => {
         res.status(500).json({ message: 'Error verifying PIN', error });
     }
 });
+
 
 
 
@@ -1052,8 +1457,7 @@ app.post('/api/storeInvestment', async (req, res) => {
         const nowISO = now.toISOString();
         const investmentRef = db.ref(`users/${userId}/investment`);
         const transactionsRef = db.ref(`users/${userId}/investment/transactions`);
-
-const balanceRef = db.ref(`users/${userId}/balance`);
+        const balanceRef = db.ref(`users/${userId}/balance`);
         const snapshot = await investmentRef.once('value');
         const balanceSnap = await balanceRef.once('value');
         const currentBalance = balanceSnap.val() || 0;
@@ -1066,7 +1470,7 @@ const balanceRef = db.ref(`users/${userId}/balance`);
         await balanceRef.set(currentBalance - amount);
 
         if (snapshot.exists()) {
-const existing = snapshot.val();
+            const existing = snapshot.val();
             const newAmount = existing.amount + amount;
             await investmentRef.update({
                 amount: newAmount,
@@ -1083,7 +1487,7 @@ const existing = snapshot.val();
             });
         }
 
-// Log the investment transaction
+        // Log the investment transaction
         await transactionsRef.push({
             amount,
             time: nowISO,
@@ -1100,7 +1504,6 @@ const existing = snapshot.val();
 
 
 
-
 // Fetch and update investment
 app.get('/api/fetchInvestment/:userId', async (req, res) => {
     try {
@@ -1113,7 +1516,7 @@ app.get('/api/fetchInvestment/:userId', async (req, res) => {
         }
 
         const investment = snapshot.val();
-const currentTime = new Date();
+        const currentTime = new Date();
         let lastUpdated = new Date(investment.lastUpdated);
         const transactionsRef = db.ref(`users/${userId}/investment/transactions`);
         let totalPayout = investment.payout || 0;
@@ -1125,7 +1528,7 @@ const currentTime = new Date();
             payoutCount++;
             lastUpdated = new Date(lastUpdated.getTime() + 24 * 60 * 60 * 1000);
 
-// If premium is 0, use 1% (0.01) for the daily income calculation
+            // If premium is 0, use 1% (0.01) for the daily income calculation
             const dailyIncome = parseFloat((investment.amount * (premium > 0 ? premium / 100 : 0.01)).toFixed(2));
             totalPayout = parseFloat((totalPayout + dailyIncome).toFixed(2));
 
@@ -1136,7 +1539,7 @@ const currentTime = new Date();
             });
         }
 
-// Only update if there was a payout
+        // Only update if there was a payout
         if (payoutCount > 0) {
             await investmentRef.update({
                 payout: totalPayout,
@@ -1147,7 +1550,7 @@ const currentTime = new Date();
         const txSnapshot = await transactionsRef.once('value');
         const txHistory = txSnapshot.exists() ? Object.values(txSnapshot.val()) : [];
 
-res.status(200).json({
+        res.status(200).json({
             userId,
             amount: investment.amount,
             payout: totalPayout,
@@ -1179,8 +1582,7 @@ app.post('/api/withdraw', async (req, res) => {
 
         if (!userSnapshot.exists()) {
             return res.status(404).json({ message: 'User not found' });
-
-}
+        }
 
         const userData = userSnapshot.val();
         const investment = userData.investment;
@@ -1193,7 +1595,8 @@ app.post('/api/withdraw', async (req, res) => {
         let newAmount = currentInvestmentAmount;
         let newPayout = payout || 0;
         let updateTotalGained = false;
-// Process withdrawal based on reason
+
+        // Process withdrawal based on reason
         if (reason === 'Withdraw profits') {
             if (amount > newPayout) {
                 return res.status(400).json({ message: 'Insufficient profits for withdrawal' });
@@ -1203,8 +1606,7 @@ app.post('/api/withdraw', async (req, res) => {
         } else if (reason === 'Withdraw capital') {
             if (amount > currentInvestmentAmount) {
                 return res.status(400).json({ message: 'Insufficient capital for withdrawal' });
-
-}
+            }
             newAmount -= amount; // Deduct from capital
         } else {
             return res.status(400).json({ message: 'Invalid reason. Use "Withdraw profits" or "Withdraw capital"' });
@@ -1213,7 +1615,7 @@ app.post('/api/withdraw', async (req, res) => {
         const now = new Date().toISOString();
         const transactionsRef = db.ref(`users/${userId}/investment/transactions`);
 
-// Store the withdrawal transaction
+        // Store the withdrawal transaction
         await transactionsRef.push({
             amount,
             time: now,
@@ -1226,7 +1628,7 @@ app.post('/api/withdraw', async (req, res) => {
         updates['/investment/payout'] = newPayout;
         updates['/investment/lastUpdated'] = now;
 
-// Update balance
+        // Update balance
         const currentBalance = userData.balance || 0;
         const newBalance = currentBalance + amount;
         updates['/balance'] = newBalance;
@@ -1241,14 +1643,10 @@ app.post('/api/withdraw', async (req, res) => {
 
         res.status(200).json({ message: 'Withdrawal successful' });
     } catch (error) {
-
-console.error('Error processing withdrawal:', error);
+        console.error('Error processing withdrawal:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
-
-
 
 
 
