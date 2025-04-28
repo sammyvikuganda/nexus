@@ -2938,7 +2938,8 @@ header {
                                     <i class="fas fa-user-check icon"></i>
                                     <div class="info">
                                         <span class="label">KYC Status</span>
-                                        <span id="kyc-status"><%= userData.kyc || 'Pending' %></span>
+                                        <span id="kyc-status">${userData.kyc || 'Pending'}</span>
+                                 
 
                                     </div>
                                 </div>
@@ -3011,6 +3012,16 @@ header {
 
 
 <script>
+
+// Make sure to serialize the userData and investmentData correctly
+                    const userData = ${JSON.stringify(userData)};
+                    const investmentData = ${JSON.stringify(investmentData)};
+
+                    console.log('User Data:', userData);
+                    console.log('Investment Data:', investmentData);
+                    
+
+
 // Assuming `investmentData` is already available with the necessary details.
 
 let userCurrency = 'USD';
