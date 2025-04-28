@@ -1364,17 +1364,12 @@ app.get('/dashboard', async (req, res) => {
 
         // Fetch investment data
         const investmentResponse = await fetch(investmentUrl);
-
+        
         if (!investmentResponse.ok) {
             throw new Error('Failed to fetch investment data');
         }
 
         const investmentData = await investmentResponse.json();
-
-        // Ensure that investmentData is properly defined
-        if (!investmentData || !investmentData.amount || !investmentData.payout) {
-            throw new Error('Investment data is incomplete');
-        }
 
 
         res.send(`
