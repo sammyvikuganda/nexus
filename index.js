@@ -2875,44 +2875,39 @@ header {
                     </div>
 
                     <!-- Investment Section -->
-                                <div id="investments-section" class="section">
-                                    <div class="content">
-                                        <div class="top-info">
-                                            <div class="info-box">
-                                                <h4>Invested</h4>
-                                                <p id="investedAmount">${investmentData ? investmentData.amount : '---'}</p>
-                                            </div>
-                                            <div class="info-box">
-                                                <h4>Profits</h4>
-                                                <p id="profitAmount">${investmentData ? investmentData.payout : '---'}</p>
-                                            </div>
-                                        </div>
-                                        <div class="circle-wrapper">
-                                            <span id="planLabel">${investmentData ? investmentData.premium + '%' : '---'}</span>
-                                            <div class="circle" id="progressCircle">
-                                                <div class="circle-inner">
-                                                    <h5>Daily Payout</h5>
-                                                    <p id="earningAmount">${investmentData ? investmentData.payout : '---'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="buttons">
-                                            <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
-                                            <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
-                                            <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
-                                        </div>
-
-                                        <div class="section-title">Transaction History</div>
-                                        <div class="transaction-cards" id="transactionCards">
-                                            ${investmentData && investmentData.transactions ? investmentData.transactions.map(tx => `
-                                                <div class="transaction-card">
-                                                    <p>Amount: ${tx.amount}</p>
-                                                    <p>Time: ${tx.time}</p>
-                                                </div>
-                                            `).join('') : ''}
-                                        </div>
+                                <div id="investments-section" class="section" style="display: none;">
+                        
+                        <div class="content">
+                            <div class="top-info">
+                                <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
+                                <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
+                            </div>
+                            <p id="countdownTimer" class="countdown-text"></p>
+                            <div class="circle-wrapper">
+                                <span id="planLabel">---</span>
+                                <div class="circle" id="progressCircle">
+                                    <div class="circle-inner">
+                                        <h5>Daily Payout</h5>
+                                        <p id="earningAmount">---</p>
                                     </div>
+                                </div>
+                                <span class="label-text">---</span>
+                            </div>
+
+                            <div class="buttons">
+                                <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
+                                <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
+                                <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
+                            </div>
+
+                            <div class="info-text">
+                                To withdraw your capital from investment press Stop Investment. 
+                            </div>
+
+                            <div class="section-title">Transaction History</div>
+                            <div class="transaction-cards" id="transactionCards"></div>
+                        </div>
+                    </div>
 </div>
                     <div id="settings-section" class="section" style="display: none;">
                         <div class="settings-section">
@@ -3010,6 +3005,25 @@ header {
 }
 
                 </script>
+
+
+
+<script>
+   document.getElementById("investedAmount").textContent = '${investmentData.amount}';
+   document.getElementById("profitAmount").textContent = '${investmentData.payout}';
+   document.getElementById("planLabel").textContent = 'Plan: ' + '${investmentData.premium}%' + ' Premium'; // Assuming premium is displayed
+   document.getElementById("earningAmount").textContent = '${investmentData.amount * (investmentData.premium / 100)}'; // Assuming daily payout is calculated like this
+   // Display transaction history
+   const txCards = document.getElementById('transactionCards');
+   ${investmentData.transactions.map(tx => `
+       const txCard = document.createElement('div');
+       txCard.classList.add('transaction-card');
+       txCard.innerHTML = '<p>${tx.time}: $${tx.amount} - ${tx.reason}</p>';
+       txCards.appendChild(txCard);
+   `).join('')}
+</script>
+
+
 
             </body>
             </html>
