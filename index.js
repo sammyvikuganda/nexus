@@ -3643,28 +3643,28 @@ header {
 
 
 <script>
-(function(){
-    let remainingMilliseconds = ${remainingTime};
+            // Pass the next payout time from the server to the client
+            const nextPayoutTime = new Date("${nextPayoutTime.toISOString()}").getTime();
 
-    function updateCountdown() {
-        if (remainingMilliseconds <= 0) {
-            document.getElementById('countdownTimer').innerText = '0h 0m 0s';
-            return;
-        }
+            function updateCountdown() {
+                const countdownElement = document.getElementById('countdownTimer');
+                let remainingTime = nextPayoutTime - new Date().getTime();
 
-        let hours = Math.floor(remainingMilliseconds / (1000 * 60 * 60));
-        let minutes = Math.floor((remainingMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((remainingMilliseconds % (1000 * 60)) / 1000);
+                if (remainingTime <= 0) {
+                    countdownElement.textContent = 'Time Expired';
+                    return;
+                }
 
-        document.getElementById('countdownTimer').innerText = `\${hours}h \${minutes}m \${seconds}s`;
+                const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
 
-        remainingMilliseconds -= 1000;
-    }
+                countdownElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+            }
 
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-})();
-</script>
+            // Update countdown every second
+            setInterval(updateCountdown, 1000);
+        </script>
 
 
 
