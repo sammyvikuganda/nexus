@@ -2789,23 +2789,120 @@ header {
                                             <i data-feather="bell" class="notification-icon"></i>
                                         </a>
                                     <div class="balance-wrapper">
-                                    <div class="balance-container">
-                                        <div id="balance" class="balance">
-                                            <span class="currency"></span>
-                                            <!-- Actual balance -->
-                                            <span id="balance-amount" class="amount" style="display: none;">${userData.balance || 0}</span>
-                                            <!-- Placeholder balance (•••••••) -->
-                                            <span id="balance-placeholder" class="amount" style="display: inline;">•••••••</span>
-                                        </div>
-                                        <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
-                                    </div>
-                                    <div class="floating-button">
-                                        <button class="service" id="newTradingButton">Topup balance</button>
-                                    </div>
-                                </div>
-                            </div>
+    <div class="balance-container">
+        <div id="balance" class="balance">
+            <span class="currency"></span>
+            <!-- Actual balance (Initially hidden) -->
+            <span id="balance-amount" class="amount" style="display: none;">${userData.balance || 0}</span>
+            <!-- Placeholder balance (Initially shown as dots) -->
+            <span id="balance-placeholder" class="amount">•••••••</span>
+        </div>
+        <!-- Toggle Icon for visibility -->
+        <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
+    </div>
+    <div class="floating-button">
+        <button class="service" id="newTradingButton">Topup balance</button>
+    
+       </div>
                         </div>
+
+<div class="content">
+  <div class="action-buttons">
+    <button class="action-button" id="withdraw-button">
+      <i data-feather="arrow-down-circle"></i>Withdraw
+    </button>
+    <button class="action-button">
+      <i data-feather="send"></i>Send
+    </button>
+  </div>
+
+  <div class="icon-button-row">
+    <!-- Updated Activity button -->
+    <a href="go:ACTIVITY" class="icon-button">
+      <i data-feather="activity"></i>
+      <span>Activity</span>
+    </a>
+
+    <!-- Referrals button now links to REFERRALS page -->
+    <a href="go:REFERRALS" class="icon-button"> <!-- Link to REFERRALS page -->
+      <i data-feather="users"></i>
+      <span>Referrals</span>
+    </a>
+
+    <div class="icon-button">
+      <i data-feather="dollar-sign"></i>
+      <span>USD Wallet</span>
+    </div>
+  </div>
+
+  <div class="monthly-gain">
+    <h3>Total Gained</h3>
+    <div class="amount">---</div>
+    <div class="month">---</div>
+  </div>
+</div>
+</div>
+
+<div class="withdraw-bottom-sheet" id="bottom-sheet">
+  <header class="withdraw-header">
+    <i class="fas fa-arrow-left withdraw-back-arrow" id="back-arrow"></i>
+    <div class="withdraw-title">Withdraw</div>
+  </header>
+
+  <form class="withdraw-form" id="withdraw-form">
+    <div class="withdraw-form-group">
+      <label for="phone-number">Phone Number</label>
+      <input
+        type="tel"
+        id="phone-number"
+        name="phone-number"
+        placeholder="Enter your phone number"
+        required
+        readonly
+      />
+    </div>
+
+    <div class="withdraw-form-group">
+      <label for="amount" style="display: flex; justify-content: space-between; align-items: center;">
+  <span>Amount to Withdraw</span>
+  <span id="receive-amount" style="color: green; font-size: 12px;">You receive: 50000</span>
+</label>
+      <input
+        type="number"
+        id="amount"
+        name="amount"
+        placeholder="Enter amount"
+        required
+      />
+    </div>
+<div class="withdraw-insufficient-balance" id="insufficient-balance" style="display:none;">
+  Insufficient balance
+</div>
+<div class="withdraw-insufficient-balance" id="invalid-user" style="display:none;">
+  Invalid sender or receiver
+</div>
+<div class="withdraw-insufficient-balance" id="self-send" style="display:none;">
+  You cannot send money to yourself
+</div>
+<div class="withdraw-insufficient-balance" id="min-withdrawal" style="display:none;">
+  Minimum withdrawal is UGX 1,500
+</div>
+<div class="withdraw-insufficient-balance" id="min-topup" style="display:none;">
+  Minimum top up is UGX 1,000
+</div>
+<div class="withdraw-insufficient-balance" id="provider-error" style="display:none;">
+  Internal server error from provider. Failed to process withdrawal.
+</div>
+
+<button type="submit">Withdraw</button>
+</form>
+</div>
+</div>
+</div>
+
+
                     </div>
+                            
 
                     <div id="chat-section" class="section" style="display: none;">
                         <div class="app-container">
@@ -2969,18 +3066,19 @@ header {
                     }
 
                     function toggleBalance() {
-                        const balanceAmount = document.getElementById('balance-amount');
-                        const balancePlaceholder = document.getElementById('balance-placeholder');
-                        
-                        // If the actual balance is showing, hide it and show the placeholder
-                        if (balanceAmount.style.display === 'inline') {
-                            balanceAmount.style.display = 'none';
-                            balancePlaceholder.style.display = 'inline'; // Show the placeholder (•••••••)
-                        } else {
-                            balanceAmount.style.display = 'inline'; // Show the actual balance
-                            balancePlaceholder.style.display = 'none'; // Hide the placeholder
-                        }
-                    }
+    const balanceAmount = document.getElementById('balance-amount');
+    const balancePlaceholder = document.getElementById('balance-placeholder');
+
+    // If balance is hidden (placeholder is visible), show the actual balance and hide the placeholder
+    if (balanceAmount.style.display === 'none') {
+        balanceAmount.style.display = 'inline';
+        balancePlaceholder.style.display = 'none';
+    } else {
+        // If balance is visible, hide it and show the placeholder
+        balanceAmount.style.display = 'none';
+        balancePlaceholder.style.display = 'inline';
+    }
+}
                 </script>
 
             </body>
