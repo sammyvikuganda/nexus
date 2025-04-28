@@ -2798,6 +2798,7 @@ header {
                                         <div id="balance" class="balance">
                                             <span class="currency">Balance:</span>
                                             <span id="balance-amount" class="amount">${userData.balance || 0}</span>
+                                            <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
                                         </div>
                                         <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
                                     </div>
@@ -2805,49 +2806,48 @@ header {
                                         <button class="service" id="newTradingButton">Topup balance</button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                            <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="action-button" id="withdraw-button">
+          <i data-feather="arrow-down-circle"></i>Withdraw
+        </button>
+        <button class="action-button">
+          <i data-feather="send"></i>Send
+        </button>
+      </div>
 
-  
-  <div class="action-buttons">
-    <button class="action-button" id="withdraw-button">
-      <i data-feather="arrow-down-circle"></i>Withdraw
-    </button>
-    <button class="action-button">
-      <i data-feather="send"></i>Send
-    </button>
-  </div>
+      <!-- Icon Buttons Row -->
+      <div class="icon-button-row">
+        <!-- Activity button -->
+        <a href="go:ACTIVITY" class="icon-button">
+          <i data-feather="activity"></i>
+          <span>Activity</span>
+        </a>
 
-  <div class="icon-button-row">
-    <!-- Updated Activity button -->
-    <a href="go:ACTIVITY" class="icon-button">
-      <i data-feather="activity"></i>
-      <span>Activity</span>
-    </a>
+        <!-- Referrals button -->
+        <a href="go:REFERRALS" class="icon-button">
+          <i data-feather="users"></i>
+          <span>Referrals</span>
+        </a>
 
-    <!-- Referrals button now links to REFERRALS page -->
-    <a href="go:REFERRALS" class="icon-button"> <!-- Link to REFERRALS page -->
-      <i data-feather="users"></i>
-      <span>Referrals</span>
-    </a>
+        <!-- USD Wallet button -->
+        <div class="icon-button">
+          <i data-feather="dollar-sign"></i>
+          <span>USD Wallet</span>
+        </div>
+      </div>
 
-    <div class="icon-button">
-      <i data-feather="dollar-sign"></i>
-      <span>USD Wallet</span>
+      <!-- Monthly Gain Section -->
+      <div class="monthly-gain">
+        <h3>Total Gained</h3>
+        <div class="amount">---</div>
+        <div class="month">---</div>
+      </div>
     </div>
   </div>
-
-  <div class="monthly-gain">
-    <h3>Total Gained</h3>
-    <div class="amount">---</div>
-    <div class="month">---</div>
-  </div>
 </div>
-</div>
-</div>
-</div>
-</div>
+  
+  
 
 
                     </div>
@@ -3028,6 +3028,7 @@ header {
         balancePlaceholder.style.display = 'inline';
     }
 }
+feather.replace();
                 </script>
 
             </body>
