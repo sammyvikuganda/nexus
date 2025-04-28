@@ -3495,7 +3495,7 @@ header {
         </div>
 
         <!-- Daily Payout Info (using data from the backend) -->
-        <p id="countdownTimer" class="countdown-text"></p>
+        <p id="countdownTimer" class="countdown-text">${countdownText}</p>
         <div class="circle-wrapper">
     <span id="planLabel" class="${investmentData.premium > 0 ? 'label-premium' : 'label-free'}">
         ${investmentData.premium > 0 ? 'Premium' : 'Free Plan'}
@@ -3641,6 +3641,36 @@ header {
 </script>
 
 
+<script>
+function startCountdown(durationInMs) {
+    let endTime = Date.now() + durationInMs;
+
+    function updateTimer() {
+        let remaining = endTime - Date.now();
+
+        if (remaining <= 0) {
+            document.getElementById('countdownTimer').textContent = '0h 0m 0s';
+            clearInterval(timerInterval);
+            return;
+        }
+
+        let hours = Math.floor(remaining / (1000 * 60 * 60));
+        let minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+        document.getElementById('countdownTimer').textContent = `${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    updateTimer(); // initial call
+    var timerInterval = setInterval(updateTimer, 1000);
+}
+
+// Start countdown when page loads
+window.onload = function() {
+    // Pass initial remaining time in milliseconds
+    startCountdown(${remainingTime});
+};
+</script>
 
 
 
