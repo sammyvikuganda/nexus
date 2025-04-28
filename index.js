@@ -3056,24 +3056,27 @@ header {
 
 
 <script>
-            // Set interval to update the countdown every second
-            setInterval(function() {
-                var countdownElement = document.getElementById('countdownTimer');
-                var remainingTime = ${remainingTime};
+    // Get the remaining time in milliseconds from the server
+    var remainingTime = ${remainingTime}; // This is the time in milliseconds
 
-                if (remainingTime <= 0) {
-                    countdownElement.innerText = "Payout is ready!";
-                    clearInterval();
-                } else {
-                    var hours = Math.floor(remainingTime / (1000 * 60 * 60));
-                    var minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                    var seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-                    countdownElement.innerText = hours + 'h ' + minutes + 'm ' + seconds + 's';
-                }
+    // Set interval to update the countdown every second
+    setInterval(function() {
+        var countdownElement = document.getElementById('countdownTimer');
 
-                remainingTime -= 1000; // Decrease the remaining time by 1 second
-            }, 1000); // Update every second
-        </script>
+        if (remainingTime <= 0) {
+            countdownElement.innerText = "Payout is ready!";
+            clearInterval(); // Stop the countdown once the time reaches zero
+        } else {
+            var hours = Math.floor(remainingTime / (1000 * 60 * 60));
+            var minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+            countdownElement.innerText = hours + 'h ' + minutes + 'm ' + seconds + 's';
+        }
+
+        remainingTime -= 1000; // Decrease the remaining time by 1 second
+    }, 1000); // Update every second
+</script>
+
 
 
 
