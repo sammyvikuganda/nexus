@@ -955,14 +955,14 @@ app.post('/api/register', async (req, res) => {
             
             <a href="https://apk.e-droid.net/apk/app3402371-3q8gkl.apk?v=3" class="download-btn" download>
                 <i class="fas fa-download"></i>
-                Download Nexus App
+                Download App
             </a>
             
             <div class="divider">OR</div>
             
-            <a href="https://t.me/yourtelegramgroup" class="download-btn" style="background: linear-gradient(135deg, var(--telegram), #0077b5); box-shadow: 0 6px 20px rgba(0, 136, 204, 0.2);">
-                <i class="fab fa-telegram"></i>
-                Join Telegram Group
+            <a href="/api/login" class="download-btn" style="background: linear-gradient(135deg, #00bfa5, #00897b); box-shadow: 0 6px 20px rgba(0, 191, 165, 0.2);">
+                <i class="fas fa-sign-in-alt"></i>
+                Login to Your Account
             </a>
         </div>
         
@@ -972,6 +972,7 @@ app.post('/api/register', async (req, res) => {
     </div>
 </body>
 </html>
+
                     `);
                 } else {
                     return res.json({
