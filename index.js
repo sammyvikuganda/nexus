@@ -1652,31 +1652,30 @@ app.post('/api/withdraw', async (req, res) => {
 
 
 
-// ================== LOGIN ==================
-const countryPhonePrefixes = {
-    'uganda': '+256',
-    'kenya': '+254',
-    'rwanda': '+250',
+const countryPhoneRules = {
+    'uganda': { prefix: '+256', length: 13 },
+    'kenya': { prefix: '+254', length: 13 },
+    'rwanda': { prefix: '+250', length: 13 },
     // Add more if needed
 };
 
 function normalizePhoneNumber(input, country) {
-    if (!country) return input; // if no country info, return as-is
+    if (!country) return input;
 
-    const prefix = countryPhonePrefixes[country.toLowerCase()];
-    if (!prefix) return input; // if no prefix found for country, return as-is
+    const rule = countryPhoneRules[country.toLowerCase()];
+    if (!rule) return input;
 
     let phone = input.replace(/\s+/g, ''); // remove all spaces
 
     if (phone.startsWith('0')) {
-        phone = prefix + phone.slice(1);
+        phone = rule.prefix + phone.slice(1); // Replace 0 with the country's prefix
     }
 
-    if (phone.startsWith(prefix) && phone.length > prefix.length) {
-        phone = prefix + ' ' + phone.slice(prefix.length);
+    if (phone.startsWith(rule.prefix)) {
+        phone = phone.slice(0, rule.prefix.length) + ' ' + phone.slice(rule.prefix.length); // Add a space after the prefix
     }
 
-    return phone;
+    return phone; // Return the formatted phone number
 }
 
 app.post('/api/login', async (req, res) => {
@@ -1685,9 +1684,10 @@ app.post('/api/login', async (req, res) => {
     const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
 
     try {
-        const rawPhoneNumber = phoneNumber.replace(/\s+/g, '');
+        const rawPhoneNumber = phoneNumber.replace(/\s+/g, ''); // Remove spaces from the input phone number
 
-        // First search by the raw phone number
+        console.log('Raw Phone Number:', rawPhoneNumber); // Debug log
+
         const usersSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(rawPhoneNumber).once('value');
 
         if (!usersSnapshot.exists()) {
@@ -1706,11 +1706,11 @@ app.post('/api/login', async (req, res) => {
         const userId = Object.keys(users)[0];
         const userData = users[userId];
 
-        // Normalize phone based on country
         const userCountry = userData.country || '';
         const normalizedPhone = normalizePhoneNumber(rawPhoneNumber, userCountry);
 
-        // Verify normalized phone matches the saved one
+        console.log('Normalized Phone Number:', normalizedPhone); // Debug log
+
         if (userData.phoneNumber !== normalizedPhone) {
             if (isFormRequest) {
                 return res.send(`
@@ -1723,7 +1723,6 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).send('Phone number does not match records.');
         }
 
-        // Check PIN
         if (userData.pin !== pin) {
             if (isFormRequest) {
                 return res.send(`
@@ -1736,7 +1735,6 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).send('Incorrect PIN');
         }
 
-        // Save userId in session
         req.session.userId = userId;
 
         return res.redirect('/dashboard');
@@ -1746,6 +1744,7 @@ app.post('/api/login', async (req, res) => {
         res.status(500).send('Login error');
     }
 });
+
 
 
 
