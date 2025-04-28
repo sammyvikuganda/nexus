@@ -2938,7 +2938,8 @@ header {
                                     <i class="fas fa-user-check icon"></i>
                                     <div class="info">
                                         <span class="label">KYC Status</span>
-                                        <span id="kyc-status">${userData.kyc || 'Pending'}</span>
+                                        <span id="kyc-status"><%= userData.kyc || 'Pending' %></span>
+
                                     </div>
                                 </div>
                                 <div class="detail-item" id="logoutSection">
