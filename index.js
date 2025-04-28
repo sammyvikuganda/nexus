@@ -2957,40 +2957,9 @@ header {
                 
 
                 <script>
-                    function switchSection(section) {
-                        document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-                        document.getElementById(section + '-section').style.display = 'block';
-                        
-                        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                        document.querySelector('.nav-item.' + section).classList.add('active');
-                    }
-
-                    function toggleBalance() {
-    const balanceAmount = document.getElementById('balance-amount');
-    const balancePlaceholder = document.getElementById('balance-placeholder');
-
-    // If balance is hidden (placeholder is visible), show the actual balance and hide the placeholder
-    if (balanceAmount.style.display === 'none') {
-        balanceAmount.style.display = 'inline';
-        balancePlaceholder.style.display = 'none';
-    } else {
-        // If balance is visible, hide it and show the placeholder
-        balanceAmount.style.display = 'none';
-        balancePlaceholder.style.display = 'inline';
-    }
-}
-feather.replace();
-                </script>
-
-
-
-
-
-
-<script>
     async function loadInvestmentData() {
         try {
-            const response = await fetch('/api/fetchInvestment/' + ${JSON.stringify(req.session.userId)});
+            const response = await fetch(`/api/fetchInvestment/${req.session.userId}`);
             if (!response.ok) throw new Error('Failed to fetch investment data');
             
             const data = await response.json();
@@ -3034,7 +3003,23 @@ feather.replace();
             loadInvestmentData();
         }
     }
+
+    function toggleBalance() {
+        const balanceAmount = document.getElementById('balance-amount');
+        const balancePlaceholder = document.getElementById('balance-placeholder');
+
+        // If balance is hidden (placeholder is visible), show the actual balance and hide the placeholder
+        if (balanceAmount.style.display === 'none') {
+            balanceAmount.style.display = 'inline';
+            balancePlaceholder.style.display = 'none';
+        } else {
+            // If balance is visible, hide it and show the placeholder
+            balanceAmount.style.display = 'none';
+            balancePlaceholder.style.display = 'inline';
+        }
+    }
 </script>
+
 
             </body>
             </html>
