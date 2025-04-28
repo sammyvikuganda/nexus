@@ -5,10 +5,10 @@ const path = require('path');
 const axios = require('axios');
 const session = require('express-session');
 const Redis = require('ioredis'); // Redis client
-const RedisStore = require('connect-redis').default; // <-- IMPORTANT: use .default
+const connectRedis = require('connect-redis'); // <-- Use the function directly
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
-require('dotenv').config(); // load .env file
+require('dotenv').config(); // to load .env file
 
 const app = express();
 
@@ -29,7 +29,7 @@ const db = admin.database();
 const publicKey = process.env.TEZA_PUBLIC_KEY;
 const secretKey = process.env.TEZA_SECRET_KEY;
 
-// CORS and body parsing
+// CORS and Body Parsing
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,12 +44,14 @@ const redisClient = new Redis({
 });
 
 // Session setup with Redis
+const RedisStore = connectRedis(session); // <- this is now correct for v5
+
 app.use(session({
-    store: new RedisStore({ client: redisClient }), // use Redis for sessions
+    store: new RedisStore({ client: redisClient }), // store session in Redis
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }
+    cookie: { secure: false } // set to true only if using HTTPS
 }));
 
 
