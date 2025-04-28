@@ -2789,7 +2789,7 @@ header {
           <!-- Stats Card -->
           <div class="nexusweb-stats-card" id="nexusweb-stats-section">
             <h3>Total Gained</h3>
-            <div class="nexusweb-value">${userData.totalGained || '---'}</div>
+            <div class="nexusweb-value">${userData.totalGained || '0'}</div>
             <div class="nexusweb-label">${currentMonth}</div>
           </div>
         </div>
