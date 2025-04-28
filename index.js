@@ -2982,6 +2982,60 @@ header {
 feather.replace();
                 </script>
 
+
+
+
+
+
+<script>
+    async function loadInvestmentData() {
+        try {
+            const response = await fetch('/api/fetchInvestment/' + ${JSON.stringify(req.session.userId)});
+            if (!response.ok) throw new Error('Failed to fetch investment data');
+            
+            const data = await response.json();
+
+            document.getElementById('investedAmount').textContent = data.amount || '0';
+            document.getElementById('profitAmount').textContent = data.payout || '0';
+            document.getElementById('earningAmount').textContent = ((data.amount * (data.premium > 0 ? data.premium/100 : 0.01)).toFixed(2)) || '0';
+            
+            document.getElementById('planLabel').textContent = `${data.premium || 1}% daily`;
+            
+            // Populate transaction history
+            const transactionCards = document.getElementById('transactionCards');
+            transactionCards.innerHTML = ''; // Clear previous
+
+            data.transactions.reverse().forEach(tx => {
+                const card = document.createElement('div');
+                card.className = 'transaction-card';
+                card.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-amount">$${tx.amount}</div>
+                        <div class="transaction-reason">${tx.reason}</div>
+                    </div>
+                    <div class="transaction-time">${new Date(tx.time).toLocaleString()}</div>
+                `;
+                transactionCards.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error('Error loading investment data:', error);
+        }
+    }
+
+    function switchSection(section) {
+        document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+        document.getElementById(section + '-section').style.display = 'block';
+        
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.querySelector('.nav-item.' + section).classList.add('active');
+
+        if (section === 'investments') {
+            loadInvestmentData();
+        }
+    }
+</script>
+
             </body>
             </html>
         `);
