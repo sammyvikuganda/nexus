@@ -5,12 +5,13 @@ const path = require('path');
 const axios = require('axios');
 const session = require('express-session');
 const Redis = require('ioredis'); // Redis client
-const connectRedis = require('connect-redis'); // <-- Use the function directly
+const connectRedis = require('connect-redis'); // connect-redis v4
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
 require('dotenv').config(); // to load .env file
 
 const app = express();
+
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
@@ -44,7 +45,7 @@ const redisClient = new Redis({
 });
 
 // Session setup with Redis
-const RedisStore = connectRedis(session); // <- this is now correct for v5
+const RedisStore = connectRedis(session); // Use directly as constructor for v4
 
 app.use(session({
     store: new RedisStore({ client: redisClient }), // store session in Redis
@@ -53,8 +54,6 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false } // set to true only if using HTTPS
 }));
-
-
 
 
 
