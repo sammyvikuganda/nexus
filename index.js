@@ -52,8 +52,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // set to true only if using HTTPS
+    cookie: { 
+        secure: false, // set to true only if using HTTPS
+        maxAge: 5 * 60 * 1000 // 5 minutes in milliseconds
+    }
 }));
+
 
 
 
