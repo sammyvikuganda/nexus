@@ -1374,12 +1374,14 @@ app.get('/dashboard', async (req, res) => {
 
 body {
   font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff;
-            transition: all 2.9s ease-in-out;
-        }
-
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  transition: all 2.9s ease-in-out;
+  height: 100vh;
+  
+  
+   }
         
 
 
@@ -1904,15 +1906,24 @@ body {
   height: 100vh;
 }
 
+
+
 header {
-  background-color: #1A7EB1;
-  color: white;
+  background-color: white;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   text-align: center;
-  padding: 8px;
-  font-size: 1.1rem;
+  padding: 12px; /* slightly bigger padding */
+  font-size: 1.6rem; /* bigger font size */
   font-weight: bold;
   flex-shrink: 0;
+  
+  background-image: linear-gradient(90deg, #ff7e5f, #feb47b); /* nice orange-pink gradient */
 }
+
+
+
 
 .content {
   flex: 1;
@@ -2499,198 +2510,205 @@ header {
 
 
 
-
 .app-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-        }
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .header-section {
-            background: linear-gradient(to right, #1A7EB1, #1A7EB1);
-            color: white;
-            padding: 20px;
-        }
+    .header-section {
+      background: linear-gradient(to right, #1A7EB1, #1A7EB1);
+      color: white;
+      padding: 20px;
+      flex-shrink: 0;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
+    .scrollable-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
 
-        .user-icon i {
-            font-size: 50px;
-        }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
 
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+    .user-icon i {
+      font-size: 50px;
+    }
 
-        .user-info h2 {
-            margin: 0;
-            font-size: 16px;
-            line-height: 1.4;
-            display: flex;
-            align-items: center;
-        }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-        .user-info p {
-            font-size: 12px;
-            margin-top: -4px;
-            line-height: 1.5;
-            font-weight: 300;
-        }
+    .user-info h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+    }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .user-info p {
+      font-size: 12px;
+      margin-top: -4px;
+      line-height: 1.5;
+      font-weight: 300;
+    }
 
-        .notification-icon {
-            font-size: 24px;
-            color: white;
-            cursor: pointer;
-            transition: opacity 0.3s ease;
-        }
+    .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .balance-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
+    .notification-icon {
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
 
-        .balance-container {
-            display: flex;
-            align-items: center;
-        }
+    .balance-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
 
-        .balance {
-            font-size: 18px;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-        }
+    .balance-container {
+      display: flex;
+      align-items: center;
+    }
 
-        .balance .currency {
-            font-weight: normal;
-            margin-right: 5px;
-            font-size: 10px;
-        }
+    .balance {
+      font-size: 18px;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+    }
 
-        .balance .amount {
-            font-weight: 900;
-        }
+    .balance .currency {
+      font-weight: normal;
+      margin-right: 5px;
+      font-size: 10px;
+    }
 
-        .floating-button button {
-            background-color: transparent;
-            border: 1px solid white;
-            color: white;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 14px;
-            cursor: pointer;
-        }
+    .balance .amount {
+      font-weight: 900;
+    }
 
-        /* Main Content Styles with nexusweb prefix */
-        .nexusweb-main-content {
-            padding: 20px;
-        }
+    .floating-button button {
+      background-color: transparent;
+      border: 1px solid white;
+      color: white;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
 
-        .nexusweb-action-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            gap: 15px;
-        }
+    .nexusweb-main-content {
+      padding: 0; /* Already handled inside scrollable-content */
+    }
 
-        .nexusweb-action-button {
-            background-color: #1A7EB1;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 0;
-            flex: 1;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
+    .nexusweb-action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      gap: 15px;
+    }
 
-        .nexusweb-action-button i {
-            font-size: 20px;
-        }
+    .nexusweb-action-button {
+      background-color: #1A7EB1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 0;
+      flex: 1;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
 
-        .nexusweb-quick-access {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 25px 0;
-        }
+    .nexusweb-action-button i {
+      font-size: 20px;
+    }
 
-        .nexusweb-quick-access-item {
-            background-color: white;
-            border-radius: 10px;
-            padding: 15px 0;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
+    .nexusweb-quick-access {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 25px 0;
+    }
 
-        .nexusweb-quick-access-item i {
-            color: #1A7EB1;
-            font-size: 20px;
-        }
+    .nexusweb-quick-access-item {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px 0;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
 
-        .nexusweb-quick-access-item span {
-            font-size: 12px;
-            color: #333;
-        }
+    .nexusweb-quick-access-item i {
+      color: #1A7EB1;
+      font-size: 20px;
+    }
 
-        .nexusweb-stats-card {
-            background: linear-gradient(135deg, #fff8e1, #f9d976);
-            border-radius: 15px;
-            padding: 15px;
-            margin-top: 20px;
-            text-align: center;
-            border: 1px solid #f5deb3;
-        }
+    .nexusweb-quick-access-item span {
+      font-size: 12px;
+      color: #333;
+    }
 
-        .nexusweb-stats-card h3 {
-            color: #b68c26;
-            font-size: 14px;
-            margin: 0 0 10px 0;
-        }
+    .nexusweb-stats-card {
+      background: linear-gradient(135deg, #fff8e1, #f9d976);
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 20px;
+      text-align: center;
+      border: 1px solid #f5deb3;
+    }
 
-        .nexusweb-stats-card .nexusweb-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #3e2f13;
-            margin-bottom: 5px;
-        }
+    .nexusweb-stats-card h3 {
+      color: #b68c26;
+      font-size: 14px;
+      margin: 0 0 10px 0;
+    }
 
-        .nexusweb-stats-card .nexusweb-label {
-            font-size: 12px;
-            color: #7a6229;
-        }
+    .nexusweb-stats-card .nexusweb-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #3e2f13;
+      margin-bottom: 5px;
+    }
+
+    .nexusweb-stats-card .nexusweb-label {
+      font-size: 12px;
+      color: #7a6229;
+    }
     </style>
             </head>
             <body>
@@ -2699,83 +2717,85 @@ header {
                     <!-- Home Section -->
                     <div id="home-section" class="section active">
                         <div class="app-container">
-            <!-- Header Section -->
-            <div class="header-section">
-                <div class="header">
-                    <div class="header-left">
-                        <div class="user-icon">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <div class="user-info">
-                            <h2 id="user-name">
-                                Hello, 
-                                <span id="dynamic-user-name">${userData.firstName}</span>
-                                <span class="material-icons" style="display: none;">verified</span>
-                            </h2>
-                            <p>Every Small Step Makes a Big Impact.</p>
-                        </div>
-                    </div>
-                    <div class="header-right">
-                        <div class="notification-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="balance-wrapper">
-                    <div class="balance-container">
-                        <div id="balance" class="balance">
-                            <span class="currency">Balance:</span>
-                            <span id="balance-amount" class="amount">${userData.balance || 0}</span>
-                            <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
-                        </div>
-                        <i id="toggle-icon" class="fas fa-eye" onclick="toggleBalance()"></i>
-                    </div>
-                    <div class="floating-button">
-                        <button class="service" id="newTradingButton">Topup balance</button>
-                    </div>
-                </div>
+      <!-- Header Section -->
+      <div class="header-section">
+        <div class="header">
+          <div class="header-left">
+            <div class="user-icon">
+              <i class="fas fa-user-circle"></i>
             </div>
-
-            <!-- Main Content Section with nexusweb classes and new IDs -->
-            <div class="nexusweb-main-content">
-                <!-- Action Buttons -->
-                <div class="nexusweb-action-buttons">
-                    <button class="nexusweb-action-button" id="nexusweb-withdraw-button">
-                        <i class="fas fa-arrow-circle-down"></i>
-                        Withdraw
-                    </button>
-                    <button class="nexusweb-action-button" id="nexusweb-send-button">
-                        <i class="fas fa-paper-plane"></i>
-                        Send
-                    </button>
-                </div>
-
-                <!-- Quick Access -->
-                <div class="nexusweb-quick-access">
-                    <div class="nexusweb-quick-access-item" id="nexusweb-activity-item">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Activity</span>
-                    </div>
-                    <div class="nexusweb-quick-access-item" id="nexusweb-referrals-item">
-                        <i class="fas fa-users"></i>
-                        <span>Referrals</span>
-                    </div>
-                    <div class="nexusweb-quick-access-item" id="nexusweb-wallet-item">
-                        <i class="fas fa-wallet"></i>
-                        <span>USD Wallet</span>
-                    </div>
-                </div>
-
-                <!-- Stats Card -->
-                <div class="nexusweb-stats-card" id="nexusweb-stats-section">
-                    <h3>Total Gained</h3>
-                    <div class="nexusweb-value">${userData.totalGained || '---'}</div>
-                    <div class="nexusweb-label">${currentMonth}</div>
-                </div>
+            <div class="user-info">
+              <h2 id="user-name">
+                Hello, 
+                <span id="dynamic-user-name">${userData.firstName}</span>
+                <span class="material-icons" style="display: none;">verified</span>
+              </h2>
+              <p>Every Small Step Makes a Big Impact.</p>
             </div>
+          </div>
+          <div class="header-right">
+            <div class="notification-icon">
+              <i class="fas fa-bell"></i>
+            </div>
+          </div>
         </div>
+
+        <div class="balance-wrapper">
+          <div class="balance-container">
+            <div id="balance" class="balance">
+              <span class="currency">Balance:</span>
+              <span id="balance-amount" class="amount">${userData.balance || 0}</span>
+              <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
+            </div>
+            <i id="toggle-icon" class="fas fa-eye" onclick="toggleBalance()"></i>
+          </div>
+          <div class="floating-button">
+            <button class="service" id="newTradingButton">Topup balance</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable Main Content -->
+      <div class="scrollable-content">
+        <div class="nexusweb-main-content">
+          <!-- Action Buttons -->
+          <div class="nexusweb-action-buttons">
+            <button class="nexusweb-action-button" id="nexusweb-withdraw-button">
+              <i class="fas fa-arrow-circle-down"></i>
+              Withdraw
+            </button>
+            <button class="nexusweb-action-button" id="nexusweb-send-button">
+              <i class="fas fa-paper-plane"></i>
+              Send
+            </button>
+          </div>
+
+          <!-- Quick Access -->
+          <div class="nexusweb-quick-access">
+            <div class="nexusweb-quick-access-item" id="nexusweb-activity-item">
+              <i class="fas fa-chart-line"></i>
+              <span>Activity</span>
+            </div>
+            <div class="nexusweb-quick-access-item" id="nexusweb-referrals-item">
+              <i class="fas fa-users"></i>
+              <span>Referrals</span>
+            </div>
+            <div class="nexusweb-quick-access-item" id="nexusweb-wallet-item">
+              <i class="fas fa-wallet"></i>
+              <span>USD Wallet</span>
+            </div>
+          </div>
+
+          <!-- Stats Card -->
+          <div class="nexusweb-stats-card" id="nexusweb-stats-section">
+            <h3>Total Gained</h3>
+            <div class="nexusweb-value">${userData.totalGained || '---'}</div>
+            <div class="nexusweb-label">${currentMonth}</div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
   
 
@@ -2784,8 +2804,8 @@ header {
                             
 
                     <div id="chat-section" class="section" style="display: none;">
-                        <div class="app-container">
-                            <header>Support</header>
+                        
+                            
                             <div class="content">
                                 <a href="go:CHAT" class="support-link">
                                     <div class="support-container">
@@ -2814,8 +2834,7 @@ header {
                     </div>
 
                     <div id="games-section" class="section" style="display: none;">
-                        <div class="app-container">
-                            <header>GAMES</header>
+                        
                             <div class="content">
                                 <div class="game-image-container">
                                     <a href="go:FRUITS">
@@ -2833,7 +2852,7 @@ header {
                     </div>
 
                     <div id="investments-section" class="section" style="display: none;">
-                        <header>Investments</header>
+                        
                         <div class="content">
                             <div class="top-info">
                                 <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
