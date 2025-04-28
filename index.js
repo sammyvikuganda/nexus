@@ -48,13 +48,16 @@ const redisClient = new Redis({
 const RedisStore = connectRedis(session); // Use directly as constructor for v4
 
 app.use(session({
-    store: new RedisStore({ client: redisClient }), // store session in Redis
+    store: new RedisStore({
+        client: redisClient,
+        ttl: 30 * 60
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: false, // set to true only if using HTTPS
-        maxAge: 5 * 60 * 1000 // 5 minutes in milliseconds
+        secure: false,
+        maxAge: 30 * 60 * 1000
     }
 }));
 
