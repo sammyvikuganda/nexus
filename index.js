@@ -1367,6 +1367,13 @@ app.get('/dashboard', async (req, res) => {
 
         const userData = snapshot.val();
 
+
+// Fetch investment data
+        const investmentResponse = await fetch(`/api/fetchInvestment/${req.session.userId}`);
+        const investmentData = await investmentResponse.json();
+
+
+
         res.send(`
             <!DOCTYPE html>
             <html lang="en">
@@ -2859,40 +2866,46 @@ header {
                         </div>
                     </div>
 
-                    <div id="investments-section" class="section" style="display: none;">
-                        
-                        <div class="content">
-                            <div class="top-info">
-                                <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
-                                <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
-                            </div>
-                            <p id="countdownTimer" class="countdown-text"></p>
-                            <div class="circle-wrapper">
-                                <span id="planLabel">---</span>
-                                <div class="circle" id="progressCircle">
-                                    <div class="circle-inner">
-                                        <h5>Daily Payout</h5>
-                                        <p id="earningAmount">---</p>
+                    <!-- Investment Section -->
+                                <div id="investments-section" class="section">
+                                    <div class="content">
+                                        <div class="top-info">
+                                            <div class="info-box">
+                                                <h4>Invested</h4>
+                                                <p id="investedAmount">${investmentData ? investmentData.amount : '---'}</p>
+                                            </div>
+                                            <div class="info-box">
+                                                <h4>Profits</h4>
+                                                <p id="profitAmount">${investmentData ? investmentData.payout : '---'}</p>
+                                            </div>
+                                        </div>
+                                        <div class="circle-wrapper">
+                                            <span id="planLabel">${investmentData ? investmentData.premium + '%' : '---'}</span>
+                                            <div class="circle" id="progressCircle">
+                                                <div class="circle-inner">
+                                                    <h5>Daily Payout</h5>
+                                                    <p id="earningAmount">${investmentData ? investmentData.payout : '---'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="buttons">
+                                            <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
+                                            <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
+                                            <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
+                                        </div>
+
+                                        <div class="section-title">Transaction History</div>
+                                        <div class="transaction-cards" id="transactionCards">
+                                            ${investmentData && investmentData.transactions ? investmentData.transactions.map(tx => `
+                                                <div class="transaction-card">
+                                                    <p>Amount: ${tx.amount}</p>
+                                                    <p>Time: ${tx.time}</p>
+                                                </div>
+                                            `).join('') : ''}
+                                        </div>
                                     </div>
-                                </div>
-                                <span class="label-text">---</span>
-                            </div>
-
-                            <div class="buttons">
-                                <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
-                                <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
-                                <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
-                            </div>
-
-                            <div class="info-text">
-                                To withdraw your capital from investment press Stop Investment. 
-                            </div>
-
-                            <div class="section-title">Transaction History</div>
-                            <div class="transaction-cards" id="transactionCards"></div>
-                        </div>
-                    </div>
-
+</div>
                     <div id="settings-section" class="section" style="display: none;">
                         <div class="settings-section">
                             <div class="header">
@@ -2965,69 +2978,30 @@ header {
                 
 
                 <script>
-    async function loadInvestmentData() {
-        try {
-            const response = await fetch(`/api/fetchInvestment/${req.session.userId}`);
-            if (!response.ok) throw new Error('Failed to fetch investment data');
-            
-            const data = await response.json();
+                    function switchSection(section) {
+                        document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+                        document.getElementById(section + '-section').style.display = 'block';
+                        
+                        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                        document.querySelector('.nav-item.' + section).classList.add('active');
+                    }
 
-            document.getElementById('investedAmount').textContent = data.amount || '0';
-            document.getElementById('profitAmount').textContent = data.payout || '0';
-            document.getElementById('earningAmount').textContent = ((data.amount * (data.premium > 0 ? data.premium/100 : 0.01)).toFixed(2)) || '0';
-            
-            document.getElementById('planLabel').textContent = `${data.premium || 1}% daily`;
-            
-            // Populate transaction history
-            const transactionCards = document.getElementById('transactionCards');
-            transactionCards.innerHTML = ''; // Clear previous
+                    function toggleBalance() {
+    const balanceAmount = document.getElementById('balance-amount');
+    const balancePlaceholder = document.getElementById('balance-placeholder');
 
-            data.transactions.reverse().forEach(tx => {
-                const card = document.createElement('div');
-                card.className = 'transaction-card';
-                card.innerHTML = `
-                    <div class="transaction-info">
-                        <div class="transaction-amount">$${tx.amount}</div>
-                        <div class="transaction-reason">${tx.reason}</div>
-                    </div>
-                    <div class="transaction-time">${new Date(tx.time).toLocaleString()}</div>
-                `;
-                transactionCards.appendChild(card);
-            });
-
-        } catch (error) {
-            console.error('Error loading investment data:', error);
-        }
+    // If balance is hidden (placeholder is visible), show the actual balance and hide the placeholder
+    if (balanceAmount.style.display === 'none') {
+        balanceAmount.style.display = 'inline';
+        balancePlaceholder.style.display = 'none';
+    } else {
+        // If balance is visible, hide it and show the placeholder
+        balanceAmount.style.display = 'none';
+        balancePlaceholder.style.display = 'inline';
     }
+}
 
-    function switchSection(section) {
-        document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-        document.getElementById(section + '-section').style.display = 'block';
-        
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        document.querySelector('.nav-item.' + section).classList.add('active');
-
-        if (section === 'investments') {
-            loadInvestmentData();
-        }
-    }
-
-    function toggleBalance() {
-        const balanceAmount = document.getElementById('balance-amount');
-        const balancePlaceholder = document.getElementById('balance-placeholder');
-
-        // If balance is hidden (placeholder is visible), show the actual balance and hide the placeholder
-        if (balanceAmount.style.display === 'none') {
-            balanceAmount.style.display = 'inline';
-            balancePlaceholder.style.display = 'none';
-        } else {
-            // If balance is visible, hide it and show the placeholder
-            balanceAmount.style.display = 'none';
-            balancePlaceholder.style.display = 'inline';
-        }
-    }
-</script>
-
+                </script>
 
             </body>
             </html>
