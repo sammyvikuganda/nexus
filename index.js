@@ -1947,398 +1947,58 @@ app.get('/api/session', (req, res) => {
 
 
 
-app.get('/success', (req, res) => {
-    const { firstName = 'User', lastName = '' } = req.query;
+app.get('/api/success', (req, res) => {
+    const { firstName, lastName } = req.query;
 
     res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to Nexus - Earn Online</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-      <style>
-        :root {
-            --primary: #7c4dff;  /* Elegant purple */
-            --primary-dark: #651fff;
-            --telegram: #0088cc;
-            --success: #00bfa5;  /* Teal accent */
-            --earn: #ffab00;    /* Golden yellow */
-            --text: #263238;    /* Dark blue-gray */
-            --text-light: #607d8b;
-            --bg: #f5f7fa;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        
-        body {
-            min-height: 100vh;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            position: relative;
-        }
-
-        /* Elegant floating circles background */
-        .bg-circles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-        
-        .bg-circles li {
-            position: absolute;
-            display: block;
-            list-style: none;
-            width: 20px;
-            height: 20px;
-            background: rgba(124, 77, 255, 0.1);
-            border-radius: 50%;
-            animation: float 15s linear infinite;
-            bottom: -150px;
-        }
-        
-        .bg-circles li:nth-child(1) {
-            left: 25%;
-            width: 80px;
-            height: 80px;
-            animation-delay: 0s;
-            background: rgba(0, 191, 165, 0.1);
-        }
-        
-        .bg-circles li:nth-child(2) {
-            left: 10%;
-            width: 20px;
-            height: 20px;
-            animation-delay: 2s;
-            animation-duration: 12s;
-        }
-        
-        .bg-circles li:nth-child(3) {
-            left: 70%;
-            width: 20px;
-            height: 20px;
-            animation-delay: 4s;
-        }
-        
-        .bg-circles li:nth-child(4) {
-            left: 40%;
-            width: 60px;
-            height: 60px;
-            animation-delay: 0s;
-            animation-duration: 18s;
-            background: rgba(255, 171, 0, 0.1);
-        }
-        
-        .bg-circles li:nth-child(5) {
-            left: 65%;
-            width: 20px;
-            height: 20px;
-            animation-delay: 0s;
-        }
-        
-        .bg-circles li:nth-child(6) {
-            left: 75%;
-            width: 110px;
-            height: 110px;
-            animation-delay: 3s;
-            background: rgba(124, 77, 255, 0.1);
-        }
-        
-        .bg-circles li:nth-child(7) {
-            left: 35%;
-            width: 150px;
-            height: 150px;
-            animation-delay: 7s;
-            background: rgba(0, 191, 165, 0.1);
-        }
-        
-        .bg-circles li:nth-child(8) {
-            left: 50%;
-            width: 25px;
-            height: 25px;
-            animation-delay: 15s;
-            animation-duration: 45s;
-        }
-        
-        .bg-circles li:nth-child(9) {
-            left: 20%;
-            width: 15px;
-            height: 15px;
-            animation-delay: 2s;
-            animation-duration: 35s;
-            background: rgba(255, 171, 0, 0.1);
-        }
-        
-        .bg-circles li:nth-child(10) {
-            left: 85%;
-            width: 150px;
-            height: 150px;
-            animation-delay: 0s;
-            animation-duration: 11s;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 1;
-                border-radius: 50%;
-            }
-            100% {
-                transform: translateY(-1000px) rotate(720deg);
-                opacity: 0;
-                border-radius: 50%;
-            }
-        }
-
-        .content-wrapper {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 15px 30px rgba(124, 77, 255, 0.1);
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid rgba(124, 77, 255, 0.1);
-        }
-        
-        .success-notification {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            width: 100%;
-        }
-        
-        .icon-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .success-icon {
-            font-size: 2.8rem;
-            color: var(--success);
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 80px;
-            height: 80px;
-            background: rgba(0, 191, 165, 0.1);
-            border-radius: 50%;
-            box-shadow: 0 8px 24px rgba(0, 191, 165, 0.2);
-            animation: pulse 2s infinite;
-            margin-bottom: 0.8rem;
-        }
-        
-        .platform-badge {
-            display: inline-block;
-            background: rgba(255, 171, 0, 0.15);
-            color: var(--earn);
-            padding: 0.4rem 1rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border: 1px solid rgba(255, 171, 0, 0.2);
-            box-shadow: 0 2px 8px rgba(255, 171, 0, 0.1);
-        }
-        
-        .success-content h3 {
-            margin: 0 0 0.6rem 0;
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--text);
-            letter-spacing: -0.5px;
-            background: linear-gradient(90deg, #7c4dff, #00bfa5);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .success-messages {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: var(--text-light);
-        }
-        
-        .success-messages p {
-            margin: 0.5rem 0;
-        }
-        
-        .earn-highlight {
-            color: var(--earn);
-            font-weight: 600;
-        }
-        
-        .download-options {
-            text-align: center;
-            width: 100%;
-            margin-top: 1.5rem;
-        }
-        
-        .download-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 1.25rem;
-            letter-spacing: -0.5px;
-        }
-        
-        .download-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 0.9rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            margin: 0.5rem 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 100%;
-            font-size: 0.9rem;
-            box-shadow: 0 6px 20px rgba(124, 77, 255, 0.2);
-            border: none;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .download-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                      rgba(255,255,255,0) 0%, 
-                      rgba(255,255,255,0.2) 50%, 
-                      rgba(255,255,255,0) 100%);
-            transform: translateX(-100%);
-        }
-        
-        .download-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 28px rgba(124, 77, 255, 0.3);
-        }
-        
-        .download-btn:hover::after {
-            animation: shine 1.5s infinite;
-        }
-        
-        .download-btn i {
-            font-size: 1.2rem;
-            margin-right: 0.8rem;
-        }
-        
-        .divider {
-            margin: 1rem 0;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            border-bottom: 1px solid rgba(96, 125, 139, 0.15);
-        }
-        
-        .divider::before {
-            margin-right: 0.8rem;
-        }
-        
-        .divider::after {
-            margin-left: 0.8rem;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-light);
-            font-size: 0.75rem;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes shine {
-            100% { transform: translateX(100%); }
-        }
-    </style>
-
-    </head>
-    <body>
-        <div class="bg-circles">
-            <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
-        </div>
-        
-        <div class="content-wrapper">
-            <div class="success-notification">
-                <div class="icon-container">
-                    <div class="success-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="platform-badge">
-                        <i class="fas fa-coins"></i> Online Money Platform
-                    </div>
-                </div>
-                <div class="success-content">
-                    <h3>Registration Successful!</h3>
-                    <div class="success-messages">
-                        <p>Welcome ${firstName} ${lastName}, your account is ready! Download the app to start your <span class="earn-highlight">earning journey</span> today.</p>
-                    </div>
-                </div>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Registration Success</title>
+            <style>
+                body {
+                    font-family: 'Poppins', sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    background: #f0f4f8;
+                }
+                .container {
+                    text-align: center;
+                    padding: 2rem;
+                    background: #fff;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                }
+                h1 {
+                    color: #00bfa5;
+                }
+                p {
+                    margin-top: 1rem;
+                }
+                a {
+                    margin-top: 2rem;
+                    display: inline-block;
+                    padding: 0.8rem 1.5rem;
+                    background: #00bfa5;
+                    color: #fff;
+                    border-radius: 8px;
+                    text-decoration: none;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Welcome, ${firstName || 'User'} ${lastName || ''}!</h1>
+                <p>Your account has been successfully created.</p>
+                <a href="/api/login">Login to Your Account</a>
             </div>
-            
-            <div class="download-options">
-                <h2 class="download-title">Start Earning Now</h2>
-                
-                <a href="https://apk.e-droid.net/apk/app3402371-3q8gkl.apk?v=3" class="download-btn" download>
-                    <i class="fas fa-download"></i>
-                    Download App
-                </a>
-                
-                <div class="divider">OR</div>
-                
-                <a href="/api/login" class="download-btn" style="background: linear-gradient(135deg, #00bfa5, #00897b); box-shadow: 0 6px 20px rgba(0, 191, 165, 0.2);">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Login to Your Account
-                </a>
-            </div>
-            
-            <footer>
-                <p>© 2023 Nexus - Online Money Earning Platform. All rights reserved</p>
-            </footer>
-        </div>
-    </body>
-    </html>
+        </body>
+        </html>
     `);
 });
 
