@@ -1385,18 +1385,16 @@ const confirmLogoutButton = document.getElementById('confirmLogoutButton');
 if (confirmLogoutButton) {
     confirmLogoutButton.addEventListener('click', async () => {
         try {
-            // Make a request to the backend to log out (destroy session)
             const response = await fetch('/api/logout', {
-                method: 'GET', // Assuming you're using GET for logout
-                credentials: 'include', // Important to include cookies for session-based auth
+                method: 'GET',
+                credentials: 'include', // Important for session cookies
             });
 
-            // If the response is a redirect, navigate to the new URL (e.g., login page)
             if (response.redirected) {
                 window.location.href = response.url;
             } else {
-                // Fallback if there's no redirect response
-                window.location.href = '/login'; // Or replace with your desired fallback URL
+                // Fallback if no redirect
+                window.location.href = '/login'; // Or another fallback route
             }
         } catch (error) {
             console.error('Logout failed:', error);
@@ -1434,7 +1432,6 @@ function attachChangePinEvents() {
         changePinSection.addEventListener('click', handleChangePin);
     }
 }
-
 
 // Handle change PIN process
 async function handleChangePin() {
@@ -1560,6 +1557,7 @@ function showErrorModal(message) {
 }
 
 
+}
 
 
         
