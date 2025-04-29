@@ -1381,49 +1381,59 @@ function attachLogoutEvents() {
     }
 
     // Handle logout confirmation
-const confirmLogoutButton = document.getElementById('confirmLogoutButton');
-if (confirmLogoutButton) {
-    confirmLogoutButton.addEventListener('click', async () => {
-        try {
-            const response = await fetch('/api/logout', {
+    const confirmLogoutButton = document.getElementById('confirmLogoutButton');
+    if (confirmLogoutButton) {
+        confirmLogoutButton.addEventListener('click', () => {
+            // Make an API request to logout on the server side
+            fetch('/api/logout', {
                 method: 'GET',
-                credentials: 'include', // Important for session cookies
+                credentials: 'same-origin', // Ensure cookies/session are sent
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Redirect to the login page or any other appropriate page
+                    window.location.href = '/api/login'; // Replace with the appropriate login page URL
+                } else {
+                    console.error('Logout failed');
+                    showErrorModal('Failed to log out. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error during logout request:', error);
+                showErrorModal('Failed to log out. Please try again.');
             });
 
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                // Fallback if no redirect
-                window.location.href = '/login'; // Or another fallback route
+            // Hide the logout confirmation modal
+            const logoutModal = document.getElementById('logoutModal');
+            if (logoutModal) {
+                logoutModal.style.display = 'none';
             }
-        } catch (error) {
-            console.error('Logout failed:', error);
-            showErrorModal('Logout failed. Please try again.');
-        }
-    });
+        });
+    }
+
+    const cancelLogoutButton = document.getElementById('cancelLogoutButton');
+    if (cancelLogoutButton) {
+        cancelLogoutButton.addEventListener('click', () => {
+            // Hide the logout confirmation modal
+            const logoutModal = document.getElementById('logoutModal');
+            if (logoutModal) {
+                logoutModal.style.display = 'none';
+            }
+        });
+    }
+
+    const closeLogoutModal = document.getElementById('logoutModalClose');
+    if (closeLogoutModal) {
+        closeLogoutModal.addEventListener('click', () => {
+            // Hide the logout confirmation modal
+            const logoutModal = document.getElementById('logoutModal');
+            if (logoutModal) {
+                logoutModal.style.display = 'none';
+            }
+        });
+    }
 }
 
-const cancelLogoutButton = document.getElementById('cancelLogoutButton');
-if (cancelLogoutButton) {
-    cancelLogoutButton.addEventListener('click', () => {
-        // Hide the logout confirmation modal
-        const logoutModal = document.getElementById('logoutModal');
-        if (logoutModal) {
-            logoutModal.style.display = 'none';
-        }
-    });
-}
-
-const closeLogoutModal = document.getElementById('logoutModalClose');
-if (closeLogoutModal) {
-    closeLogoutModal.addEventListener('click', () => {
-        // Hide the logout confirmation modal
-        const logoutModal = document.getElementById('logoutModal');
-        if (logoutModal) {
-            logoutModal.style.display = 'none';
-        }
-    });
-}
 
 // Attach change PIN events
 function attachChangePinEvents() {
@@ -1432,6 +1442,7 @@ function attachChangePinEvents() {
         changePinSection.addEventListener('click', handleChangePin);
     }
 }
+
 
 // Handle change PIN process
 async function handleChangePin() {
@@ -1557,7 +1568,6 @@ function showErrorModal(message) {
 }
 
 
-}
 
 
         
