@@ -255,10 +255,10 @@
             const result = await response.json();
 
             if (response.ok) {
-                // Redirect to the success page with the user's first and last name
+                // Redirect to the API success page with user details
                 const firstName = encodeURIComponent(data.firstName || '');
                 const lastName = encodeURIComponent(data.lastName || '');
-                window.location.href = `/success?firstName=${firstName}&lastName=${lastName}`;
+                window.location.href = `/api/success?firstName=${firstName}&lastName=${lastName}`;
             } else {
                 alert(result.message || 'Something went wrong, please try again.');
             }
