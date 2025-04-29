@@ -3620,7 +3620,9 @@ header {
 
                 <script>
 
-let remainingTime = ${remainingTime}; // NO quotes here if remainingTime is a number
+let remainingTime = ${remainingTime}; // THIS IS FINE: no quotes for number
+                    console.log("Remaining time:", remainingTime);
+
 
 
 
