@@ -232,7 +232,9 @@
         </div>
     </div>
 
-    <script>
+
+
+<script>
     document.getElementById('registerForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
@@ -255,10 +257,10 @@
             const result = await response.json();
 
             if (response.ok) {
-                // Redirect to the API success page with user details
+                // Redirect to the success page
                 const firstName = encodeURIComponent(data.firstName || '');
                 const lastName = encodeURIComponent(data.lastName || '');
-                window.location.href = `/api/success?firstName=${firstName}&lastName=${lastName}`;
+                window.location.href = `/success?firstName=${firstName}&lastName=${lastName}`;
             } else {
                 alert(result.message || 'Something went wrong, please try again.');
             }
@@ -271,7 +273,11 @@
 
 
 
-<script>
+
+
+
+
+    <script>
   document.addEventListener('DOMContentLoaded', () => {
     const countrySelect = document.getElementById('country');
     const codeInput = document.getElementById('countryCode');
@@ -328,6 +334,9 @@
     };
   });
 </script>
+
+
+
 
 
 </body>
