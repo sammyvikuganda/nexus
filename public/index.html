@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vercel API Test</title>
+  <script>
+    function fetchData() {
+      fetch('/api/teza-webhook', {
+        method: 'POST',
+        body: JSON.stringify({ message: 'Hello from the client!' }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Response from API:', data);
+        document.getElementById('api-response').innerText = 'API Response: ' + data.reply;
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+</head>
+<body>
+  <h1>Welcome to My Vercel Project</h1>
+  <button onclick="fetchData()">Fetch API Response</button>
+  <p id="api-response"></p>
+</body>
+</html>
