@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Referral Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Include Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <style>
+    .bg-brand {
+      background-color: #1A7EB1;
+    }
+    .content {
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+    }
+    .copy-message {
+      display: none;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #28a745; /* Green text */
+      text-align: center;
+    }
+    .withdrawal-success {
+      display: none;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background-color: #28a745;
+      color: white;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .insufficient-balance {
+      display: none;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-brand text-white py-4 px-4 text-center fixed w-full top-0 left-0 z-10">
+    <h1 class="text-xl font-semibold">Referrals</h1>
+  </header>
+
+  <!-- Content -->
+  <div class="content w-full px-4 py-6 space-y-6 mt-14">
+    
+    <!-- Total Referrals -->
+    <div class="bg-white rounded-xl shadow p-4 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="bg-blue-100 text-blue-600 p-2 rounded-full">
+          <i class="fas fa-users fa-lg"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Referrals</p>
+          <p id="referral-count" class="text-xl font-semibold">Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Referral Earnings -->
+    <div class="bg-white rounded-xl shadow p-4 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="bg-green-100 text-green-600 p-2 rounded-full">
+          <i class="fas fa-dollar-sign fa-lg"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Current Referral Earnings</p>
+          <p id="referral-earnings" class="text-xl font-semibold">Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Withdraw Button -->
+    <button id="withdraw-button" class="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition outline-none">
+      <i class="fas fa-credit-card fa-lg"></i>
+      <span>Withdraw to Wallet</span>
+    </button>
+
+    <!-- Success and Insufficient Balance Messages -->
+    <div id="withdrawal-message" class="withdrawal-success">
+      Withdrawal successful! All your referral earnings have been transferred to your balance.
+    </div>
+    <div id="insufficient-balance-message" class="insufficient-balance">
+      Insufficient referral balance to withdraw.
+    </div>
+
+    <!-- Referral Invite Box -->
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="flex flex-col space-y-4">
+        <!-- Centered "Invite Friends to Earn More" with smaller size -->
+        <p class="text-lg font-semibold text-gray-700 text-center">Invite Friends to Earn More</p>
+        <div class="flex items-center space-x-2">
+          <!-- Referral Link Input -->
+          <input id="referral-link" type="text" class="w-full p-3 border border-gray-300 rounded-xl outline-none shadow-md text-gray-800" readonly />
+          <!-- Referral Link Copy Button -->
+          <button onclick="copyReferralLink()" class="w-full py-3 px-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition outline-none">
+            <i class="fas fa-copy"></i> Copy Link
+          </button>
+        </div>
+        <!-- Link copied message -->
+        <div id="copy-message" class="copy-message">Link copied!</div>
+        <div class="text-sm text-gray-600 mt-4">
+          <p>Earn 2% of the funds your referral withdraws!</p>
+          <p>Every time your referral makes a withdrawal, you earn 2% of their withdrawal amount.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
+    authDomain: "records-1674c.firebaseapp.com",
+    databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
+    projectId: "records-1674c",
+    storageBucket: "records-1674c.firebasestorage.app",
+    messagingSenderId: "592414404602",
+    appId: "1:592414404602:web:917365f2b54522ef953e43",
+    measurementId: "G-H6HCSQWZY2"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Get user ID from localStorage
+  const userId = localStorage.getItem("userId"); // Assuming userId is stored in localStorage
+
+  if (!userId) {
+    console.error("User ID is not found in localStorage");
+    // You can handle this case by redirecting the user or showing an error message
+  } else {
+    // Update referral link dynamically
+    const referralLink = `https://suppay-kdt46s2ck-nexus-int.vercel.app/api/register?sponsorid=${userId}`;
+    document.getElementById('referral-link').value = referralLink;
+
+    // Real-time listener for user data
+    const userRef = ref(db, `users/${userId}`);
+
+    onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const user = snapshot.val();
+        const referralCount = user.referralCount || 0; // Default to 0 if data is missing
+        const referralCommission = user.referralCommission || 0; // Default to 0 if data is missing
+
+        // Display the total referrals and earnings
+        document.getElementById('referral-count').textContent = referralCount;
+        document.getElementById('referral-earnings').textContent = referralCommission.toFixed(0); // No decimal places
+
+        // Handle withdrawal action
+        const withdrawButton = document.getElementById("withdraw-button");
+        const withdrawalMessage = document.getElementById("withdrawal-message");
+        const insufficientBalanceMessage = document.getElementById("insufficient-balance-message");
+
+        // Hide both messages initially
+        withdrawalMessage.style.display = 'none';
+        insufficientBalanceMessage.style.display = 'none';
+
+        withdrawButton.addEventListener("click", function() {
+          const balanceToWithdraw = referralCommission; // Allow user to withdraw the referral commission (balance)
+          
+          if (balanceToWithdraw > 0) {
+            // Add the withdrawn amount to the balance
+            const newBalance = user.balance + balanceToWithdraw;
+            const newReferralCommission = 0; // After withdrawal, referralCommission will be 0
+
+            // Update the database
+            update(ref(db, `users/${userId}`), {
+              referralCommission: newReferralCommission,
+              balance: newBalance
+            }).then(() => {
+              // Show success message
+              withdrawalMessage.style.display = 'block';
+              // Hide success message after 5 seconds
+              setTimeout(function() {
+                withdrawalMessage.style.display = 'none';
+              }, 3000);
+
+              // Update the UI
+              document.getElementById('referral-earnings').textContent = newReferralCommission.toFixed(0);
+            }).catch((error) => {
+              console.error("Error during withdrawal: ", error);
+            });
+          } else {
+            // Show insufficient balance message
+            insufficientBalanceMessage.style.display = 'block';
+            // Hide it after 5 seconds
+            setTimeout(function() {
+              insufficientBalanceMessage.style.display = 'none';
+            }, 1000);
+          }
+        });
+
+      } else {
+        console.log("No data available for this user");
+      }
+    }, (error) => {
+      console.error(error);
+    });
+  }
+</script>
+
+
+
+
+
+  <!-- Non-Module Script for Copying the Referral Link -->
+  <script>
+    function copyReferralLink() {
+      var copyText = document.getElementById("referral-link");
+
+      // Using the Clipboard API to copy the text without selecting the input
+      navigator.clipboard.writeText(copyText.value).then(function() {
+        // Show the copied message
+        var message = document.getElementById("copy-message");
+        message.style.display = "block";
+        
+        // Hide the message after 2 seconds
+        setTimeout(function() {
+          message.style.display = "none";
+        }, 2000);
+      }).catch(function(error) {
+        console.error("Error copying text: ", error);
+      });
+    }
+  </script>
+
+</body>
+</html>
