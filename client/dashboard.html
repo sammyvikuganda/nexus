@@ -1381,37 +1381,50 @@ function attachLogoutEvents() {
     }
 
     // Handle logout confirmation
-    const confirmLogoutButton = document.getElementById('confirmLogoutButton');
-    if (confirmLogoutButton) {
-        confirmLogoutButton.addEventListener('click', () => {
-            // Clear all data from localStorage
-            localStorage.clear();
-            // Redirect to the specified URL
-            window.location.href = 'http://action_exit'; // Replace with your desired URL
-        });
-    }
+const confirmLogoutButton = document.getElementById('confirmLogoutButton');
+if (confirmLogoutButton) {
+    confirmLogoutButton.addEventListener('click', async () => {
+        try {
+            // Make a request to the backend to log out (destroy session)
+            const response = await fetch('/api/logout', {
+                method: 'GET', // Assuming you're using GET for logout
+                credentials: 'include', // Important to include cookies for session-based auth
+            });
 
-    const cancelLogoutButton = document.getElementById('cancelLogoutButton');
-    if (cancelLogoutButton) {
-        cancelLogoutButton.addEventListener('click', () => {
-            // Hide the logout confirmation modal
-            const logoutModal = document.getElementById('logoutModal');
-            if (logoutModal) {
-                logoutModal.style.display = 'none';
+            // If the response is a redirect, navigate to the new URL (e.g., login page)
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                // Fallback if there's no redirect response
+                window.location.href = '/login'; // Or replace with your desired fallback URL
             }
-        });
-    }
+        } catch (error) {
+            console.error('Logout failed:', error);
+            showErrorModal('Logout failed. Please try again.');
+        }
+    });
+}
 
-    const closeLogoutModal = document.getElementById('logoutModalClose');
-    if (closeLogoutModal) {
-        closeLogoutModal.addEventListener('click', () => {
-            // Hide the logout confirmation modal
-            const logoutModal = document.getElementById('logoutModal');
-            if (logoutModal) {
-                logoutModal.style.display = 'none';
-            }
-        });
-    }
+const cancelLogoutButton = document.getElementById('cancelLogoutButton');
+if (cancelLogoutButton) {
+    cancelLogoutButton.addEventListener('click', () => {
+        // Hide the logout confirmation modal
+        const logoutModal = document.getElementById('logoutModal');
+        if (logoutModal) {
+            logoutModal.style.display = 'none';
+        }
+    });
+}
+
+const closeLogoutModal = document.getElementById('logoutModalClose');
+if (closeLogoutModal) {
+    closeLogoutModal.addEventListener('click', () => {
+        // Hide the logout confirmation modal
+        const logoutModal = document.getElementById('logoutModal');
+        if (logoutModal) {
+            logoutModal.style.display = 'none';
+        }
+    });
 }
 
 // Attach change PIN events
