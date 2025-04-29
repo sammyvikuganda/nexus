@@ -136,117 +136,85 @@
     authDomain: "records-1674c.firebaseapp.com",
     databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
     projectId: "records-1674c",
-    storageBucket: "records-1674c.firebasestorage.app",
+    storageBucket: "records-1674c.appspot.com",
     messagingSenderId: "592414404602",
     appId: "1:592414404602:web:917365f2b54522ef953e43",
     measurementId: "G-H6HCSQWZY2"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Get user ID from localStorage
-  const userId = localStorage.getItem("userId"); // Assuming userId is stored in localStorage
+  // Fetch userId from server session
+  fetch('/api/session')
+    .then(res => res.json())
+    .then(data => {
+      const userId = data.userId;
 
-  if (!userId) {
-    console.error("User ID is not found in localStorage");
-    // You can handle this case by redirecting the user or showing an error message
-  } else {
-    // Update referral link dynamically
-    const referralLink = `https://suppay-kdt46s2ck-nexus-int.vercel.app/api/register?sponsorid=${userId}`;
-    document.getElementById('referral-link').value = referralLink;
-
-    // Real-time listener for user data
-    const userRef = ref(db, `users/${userId}`);
-
-    onValue(userRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const user = snapshot.val();
-        const referralCount = user.referralCount || 0; // Default to 0 if data is missing
-        const referralCommission = user.referralCommission || 0; // Default to 0 if data is missing
-
-        // Display the total referrals and earnings
-        document.getElementById('referral-count').textContent = referralCount;
-        document.getElementById('referral-earnings').textContent = referralCommission.toFixed(0); // No decimal places
-
-        // Handle withdrawal action
-        const withdrawButton = document.getElementById("withdraw-button");
-        const withdrawalMessage = document.getElementById("withdrawal-message");
-        const insufficientBalanceMessage = document.getElementById("insufficient-balance-message");
-
-        // Hide both messages initially
-        withdrawalMessage.style.display = 'none';
-        insufficientBalanceMessage.style.display = 'none';
-
-        withdrawButton.addEventListener("click", function() {
-          const balanceToWithdraw = referralCommission; // Allow user to withdraw the referral commission (balance)
-          
-          if (balanceToWithdraw > 0) {
-            // Add the withdrawn amount to the balance
-            const newBalance = user.balance + balanceToWithdraw;
-            const newReferralCommission = 0; // After withdrawal, referralCommission will be 0
-
-            // Update the database
-            update(ref(db, `users/${userId}`), {
-              referralCommission: newReferralCommission,
-              balance: newBalance
-            }).then(() => {
-              // Show success message
-              withdrawalMessage.style.display = 'block';
-              // Hide success message after 5 seconds
-              setTimeout(function() {
-                withdrawalMessage.style.display = 'none';
-              }, 3000);
-
-              // Update the UI
-              document.getElementById('referral-earnings').textContent = newReferralCommission.toFixed(0);
-            }).catch((error) => {
-              console.error("Error during withdrawal: ", error);
-            });
-          } else {
-            // Show insufficient balance message
-            insufficientBalanceMessage.style.display = 'block';
-            // Hide it after 5 seconds
-            setTimeout(function() {
-              insufficientBalanceMessage.style.display = 'none';
-            }, 1000);
-          }
-        });
-
-      } else {
-        console.log("No data available for this user");
+      if (!userId) {
+        // If session is invalid or user not logged in, redirect to login
+        window.location.href = '/api/login';
+        return;
       }
-    }, (error) => {
-      console.error(error);
-    });
-  }
-</script>
 
+      // Update referral link dynamically
+      const referralLink = `https://suppay-kdt46s2ck-nexus-int.vercel.app/api/register?sponsorid=${userId}`;
+      document.getElementById('referral-link').value = referralLink;
 
+      const userRef = ref(db, `users/${userId}`);
 
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const user = snapshot.val();
+          const referralCount = user.referralCount || 0;
+          const referralCommission = user.referralCommission || 0;
 
+          document.getElementById('referral-count').textContent = referralCount;
+          document.getElementById('referral-earnings').textContent = referralCommission.toFixed(0);
 
-  <!-- Non-Module Script for Copying the Referral Link -->
-  <script>
-    function copyReferralLink() {
-      var copyText = document.getElementById("referral-link");
+          const withdrawButton = document.getElementById("withdraw-button");
+          const withdrawalMessage = document.getElementById("withdrawal-message");
+          const insufficientBalanceMessage = document.getElementById("insufficient-balance-message");
 
-      // Using the Clipboard API to copy the text without selecting the input
-      navigator.clipboard.writeText(copyText.value).then(function() {
-        // Show the copied message
-        var message = document.getElementById("copy-message");
-        message.style.display = "block";
-        
-        // Hide the message after 2 seconds
-        setTimeout(function() {
-          message.style.display = "none";
-        }, 2000);
-      }).catch(function(error) {
-        console.error("Error copying text: ", error);
+          withdrawalMessage.style.display = 'none';
+          insufficientBalanceMessage.style.display = 'none';
+
+          withdrawButton.addEventListener("click", function() {
+            const balanceToWithdraw = referralCommission;
+
+            if (balanceToWithdraw > 0) {
+              const newBalance = (user.balance || 0) + balanceToWithdraw;
+              const newReferralCommission = 0;
+
+              update(ref(db, `users/${userId}`), {
+                referralCommission: newReferralCommission,
+                balance: newBalance
+              }).then(() => {
+                withdrawalMessage.style.display = 'block';
+                setTimeout(() => withdrawalMessage.style.display = 'none', 3000);
+                document.getElementById('referral-earnings').textContent = newReferralCommission.toFixed(0);
+              }).catch((error) => {
+                console.error("Error during withdrawal: ", error);
+              });
+            } else {
+              insufficientBalanceMessage.style.display = 'block';
+              setTimeout(() => insufficientBalanceMessage.style.display = 'none', 1000);
+            }
+          });
+
+        } else {
+          console.log("No user data available.");
+        }
+      }, (error) => {
+        console.error("Firebase read error: ", error);
       });
-    }
-  </script>
+
+    })
+    .catch(error => {
+      console.error('Session check failed:', error);
+      window.location.href = '/api/login';
+    });
+</script>
 
 </body>
 </html>

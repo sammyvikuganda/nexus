@@ -53,6 +53,7 @@ fetch('/api/session')
     });
 
 
+
         const serverUrl = 'https://suppay-ppnnit8wl-nexus-int.vercel.app';
 
 
@@ -65,10 +66,6 @@ fetch('/api/session')
 
 
 const BASE_URL = 'https://suppay-ppnnit8wl-nexus-int.vercel.app';
-
-
-const host = window.location.origin;
-
 
 let progressInterval = null;
 let countdownInterval = null;
@@ -191,18 +188,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
     </button>
   </div>
 
-  <div class="icon-button-row">
-    <!-- Updated Activity button -->
-    <a href="go:ACTIVITY" class="icon-button">
-      <i data-feather="activity"></i>
-      <span>Activity</span>
-    </a>
+  <!-- Referrals button -->
+<a href="/referrals" class="icon-button">
+  <i data-feather="users"></i>
+  <span>Referrals</span>
+</a>
 
-    <!-- Referrals button now links to REFERRALS page -->
-    <a href="go:REFERRALS" class="icon-button"> <!-- Link to REFERRALS page -->
-      <i data-feather="users"></i>
-      <span>Referrals</span>
-    </a>
+<!-- Activity button -->
+<a href="/activity" class="icon-button">
+  <i data-feather="activity"></i>
+  <span>Activity</span>
+</a>
+
 
     <div class="icon-button">
       <i data-feather="dollar-sign"></i>
@@ -1425,10 +1422,9 @@ function attachChangePinEvents() {
     }
 }
 
-
 // Handle change PIN process
 async function handleChangePin() {
-    // Assuming userId is already available in a constant
+    const userId = localStorage.getItem('userId'); // Get user ID from local storage
     if (!userId) {
         showErrorModal('User ID not found. Please log in again.');
         return;
@@ -1443,7 +1439,7 @@ async function handleChangePin() {
 
     try {
         // Verify old PIN
-        const verifyResponse = await fetch(`${host}/api/verify-pin`, {
+        const verifyResponse = await fetch('https://suppay-o7tod637r-sammyviks-projects.vercel.app/api/verify-pin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1466,7 +1462,7 @@ async function handleChangePin() {
 
             if (newPin === confirmPin) {
                 try {
-                    const response = await fetch(`${host}/api/update-user`, {
+                    const response = await fetch('https://suppay-o7tod637r-sammyviks-projects.vercel.app/api/update-user', {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
