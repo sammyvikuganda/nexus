@@ -3615,9 +3615,12 @@ header {
 
                 
 
-                <script>
 
-let remainingTime = ${remainingTime};
+<script>
+    let remainingTime = {{remainingTime}};
+</script>
+
+                <script>
 
                     function switchSection(section) {
                         document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
