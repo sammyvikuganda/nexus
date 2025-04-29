@@ -3616,11 +3616,13 @@ header {
                 
 
 
-<script>
-    let remainingTime = {{remainingTime}};
-</script>
+
 
                 <script>
+
+let remainingTime = ${remainingTime}; // NO quotes here if remainingTime is a number
+
+
 
                     function switchSection(section) {
                         document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
