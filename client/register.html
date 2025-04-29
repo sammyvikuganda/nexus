@@ -238,50 +238,8 @@
 
 
 
+
 <script>
-    document.getElementById('registerForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const sponsorId = new URLSearchParams(window.location.search).get('sponsorid') || '';
-        const formData = new FormData(this);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        try {
-            const response = await fetch(`/api/register?sponsorid=${sponsorId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                // Redirect to the success page
-                const firstName = encodeURIComponent(data.firstName || '');
-                const lastName = encodeURIComponent(data.lastName || '');
-                window.location.href = `/success?firstName=${firstName}&lastName=${lastName}`;
-            } else {
-                alert(result.message || 'Something went wrong, please try again.');
-            }
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            alert('There was an issue with the registration. Please try again later.');
-        }
-    });
-</script>
-
-
-
-
-
-
-
-    <script>
   document.addEventListener('DOMContentLoaded', () => {
     const countrySelect = document.getElementById('country');
     const codeInput = document.getElementById('countryCode');
@@ -289,20 +247,23 @@
     const phoneError = document.getElementById('phoneError');
     const pinInput = document.getElementById('pin');
     const pinError = document.getElementById('pinError');
+    const form = document.getElementById('registerForm');
     let countries = [], selected = null;
 
+    // Fetch and populate country list
     fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
       .then(res => res.json())
       .then(data => {
         countries = data;
         data.forEach(({ country, country_code, flag, phone_length }) => {
-          const opt = new Option(flag + ' ' + country, country); // Set value as country name
+          const opt = new Option(flag + ' ' + country, country);
           opt.dataset.code = country_code;
           opt.dataset.len = phone_length;
           countrySelect.add(opt);
         });
       });
 
+    // When country changes
     countrySelect.onchange = () => {
       selected = countries.find(c => c.country === countrySelect.value);
       codeInput.value = selected ? selected.country_code : '';
@@ -310,32 +271,80 @@
       phoneError.style.display = 'none';
     };
 
+    // Hide error while typing
     phoneInput.oninput = () => {
       if (selected && phoneInput.value.length === selected.phone_length) {
         phoneError.style.display = 'none';
       }
     };
 
-    document.getElementById('registerForm').onsubmit = e => {
-      pinError.style.display = 'none';
-      phoneError.style.display = 'none';
-
-      if (!selected || phoneInput.value.length !== selected.phone_length || pinInput.value.length < 5) {
-        e.preventDefault();
-        if (!selected) {
-          phoneError.textContent = 'Please select a valid country.';
-        } else if (phoneInput.value.length !== selected.phone_length) {
-          phoneError.textContent = 'Phone number must be exactly ' + selected.phone_length + ' digits for ' + selected.country + '.';
-        } else {
-          pinError.textContent = 'PIN must be at least 5 characters long.';
-          pinError.style.display = 'block';
-        }
-        phoneError.style.display = 'block';
-      } else {
-        // Properly prepend country code to phone number
-        phoneInput.value = selected.country_code + ' ' + phoneInput.value.trim();
+    pinInput.oninput = () => {
+      if (pinInput.value.length >= 5) {
+        pinError.style.display = 'none';
       }
     };
+
+    // Form submission validation
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      phoneError.style.display = 'none';
+      pinError.style.display = 'none';
+
+      let valid = true;
+
+      if (!selected) {
+        phoneError.textContent = 'Please select a valid country.';
+        phoneError.style.display = 'block';
+        valid = false;
+      } else if (phoneInput.value.length !== selected.phone_length) {
+        phoneError.textContent = `Phone number must be exactly ${selected.phone_length} digits for ${selected.country}.`;
+        phoneError.style.display = 'block';
+        valid = false;
+      }
+
+      if (pinInput.value.length < 5) {
+        pinError.textContent = 'PIN must be at least 5 characters long.';
+        pinError.style.display = 'block';
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Prepend full phone number
+      const phoneFull = selected.country_code + ' ' + phoneInput.value.trim();
+      phoneInput.value = phoneFull;
+
+      // Proceed with submission
+      const sponsorId = new URLSearchParams(window.location.search).get('sponsorid') || '';
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      try {
+        const response = await fetch(`/api/register?sponsorid=${sponsorId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          const firstName = encodeURIComponent(data.firstName || '');
+          const lastName = encodeURIComponent(data.lastName || '');
+          window.location.href = `/success?firstName=${firstName}&lastName=${lastName}`;
+        } else {
+          alert(result.message || 'Something went wrong, please try again.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('There was an issue with the registration. Please try again later.');
+      }
+    });
   });
 </script>
 
