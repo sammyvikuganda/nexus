@@ -1947,62 +1947,6 @@ app.get('/api/session', (req, res) => {
 
 
 
-app.get('/api/success', (req, res) => {
-    const { firstName, lastName } = req.query;
-
-    res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Registration Success</title>
-            <style>
-                body {
-                    font-family: 'Poppins', sans-serif;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    margin: 0;
-                    background: #f0f4f8;
-                }
-                .container {
-                    text-align: center;
-                    padding: 2rem;
-                    background: #fff;
-                    border-radius: 12px;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                }
-                h1 {
-                    color: #00bfa5;
-                }
-                p {
-                    margin-top: 1rem;
-                }
-                a {
-                    margin-top: 2rem;
-                    display: inline-block;
-                    padding: 0.8rem 1.5rem;
-                    background: #00bfa5;
-                    color: #fff;
-                    border-radius: 8px;
-                    text-decoration: none;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>Welcome, ${firstName || 'User'} ${lastName || ''}!</h1>
-                <p>Your account has been successfully created.</p>
-                <a href="/api/login">Login to Your Account</a>
-            </div>
-        </body>
-        </html>
-    `);
-});
-
-
 
 
 app.listen(PORT, () => {
