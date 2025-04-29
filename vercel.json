@@ -2,6 +2,12 @@
   "version": 2,
   "builds": [
     { "src": "index.js", "use": "@vercel/node" },
-    { "src": "api/**/*.js", "use": "@vercel/node" }
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "client/**/*", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/teza-webhook", "dest": "/api/teza-webhook.js" },
+    { "src": "/api/(.*)", "dest": "/index.js" },
+    { "src": "/(.*)", "dest": "/client/index.html" }
   ]
 }
