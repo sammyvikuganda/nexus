@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus - Premium Earning Platform</title>
+  <title>Nexus - Smart Earning Platform</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #7c3aed;
-      --primary-light: #8b5cf6;
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
       --dark: #0f172a;
       --darker: #020617;
       --light: #e2e8f0;
@@ -41,14 +41,14 @@
     
     /* Header */
     header {
-      background-color: rgba(15, 23, 42, 0.8);
+      background-color: rgba(15, 23, 42, 0.9);
       backdrop-filter: blur(10px);
       position: fixed;
       width: 100%;
       top: 0;
       z-index: 1000;
       padding: 15px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
     .header-container {
@@ -70,7 +70,7 @@
     .logo-text {
       font-weight: 700;
       font-size: 1.2rem;
-      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -85,10 +85,11 @@
       font-weight: 500;
       font-size: 0.95rem;
       transition: color 0.3s;
+      text-decoration: none;
     }
     
     .nav-links a:hover {
-      color: var(--primary-light);
+      color: var(--primary);
     }
     
     .mobile-menu-btn {
@@ -98,6 +99,49 @@
       color: var(--light);
       font-size: 1.5rem;
       cursor: pointer;
+      padding: 10px;
+      margin-right: -10px;
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      background-color: var(--dark);
+      padding: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 999;
+    }
+
+    .mobile-menu.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 15px 0;
+      color: var(--light);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+
+    .mobile-menu a:last-child {
+      border-bottom: none;
+    }
+
+    .mobile-menu a:hover {
+      color: var(--primary);
+      padding-left: 10px;
     }
     
     /* Hero Section */
@@ -115,7 +159,7 @@
       right: -50%;
       width: 100%;
       height: 200%;
-      background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
     }
     
     .hero-content {
@@ -157,16 +201,17 @@
       font-size: 0.95rem;
       transition: all 0.3s;
       gap: 8px;
+      text-decoration: none;
     }
     
     .btn-primary {
-      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
       color: white;
     }
     
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.3);
+      box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.3);
     }
     
     .btn-outline {
@@ -175,8 +220,8 @@
     }
     
     .btn-outline:hover {
-      border-color: var(--primary-light);
-      color: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
       transform: translateY(-2px);
     }
     
@@ -206,7 +251,7 @@
       transform: translateX(-50%);
       width: 80px;
       height: 3px;
-      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
     }
     
     .stats-grid {
@@ -227,13 +272,13 @@
     .stat-item:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
-      border-color: rgba(124, 58, 237, 0.3);
+      border-color: rgba(139, 92, 246, 0.3);
     }
     
     .stat-number {
       font-size: 2.5rem;
       font-weight: 700;
-      color: var(--primary-light);
+      color: var(--primary);
       margin-bottom: 5px;
     }
     
@@ -252,61 +297,92 @@
       align-items: center;
       gap: 10px;
       transition: all 0.3s;
+      text-decoration: none;
     }
     
     .download-btn:hover {
-      background-color: var(--primary-light);
+      background-color: var(--primary-dark);
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.3);
+      box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.3);
     }
     
-    /* Features Section */
-    .features {
+    /* How It Works Section */
+    .how-it-works {
       padding: 80px 0;
       background-color: var(--darker);
     }
     
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
+    .steps-container {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
     }
     
-    .feature-card {
-      background-color: var(--dark);
-      border-radius: 12px;
-      padding: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: transform 0.3s, box-shadow 0.3s;
+    .steps-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, 
+        transparent 0%, 
+        var(--primary) 20%, 
+        var(--primary) 80%, 
+        transparent 100%);
     }
     
-    .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
-      border-color: rgba(124, 58, 237, 0.3);
+    .step {
+      display: flex;
+      margin-bottom: 40px;
+      position: relative;
     }
     
-    .feature-icon {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      border-radius: 12px;
+    .step:last-child {
+      margin-bottom: 0;
+    }
+    
+    .step-number {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
       color: white;
-      font-size: 1.5rem;
+      font-weight: 700;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-right: 30px;
+      position: relative;
+      z-index: 2;
     }
     
-    .feature-card h3 {
+    .step-content {
+      background-color: var(--dark);
+      border-radius: 12px;
+      padding: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      flex-grow: 1;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .step:hover .step-content {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+    
+    .step h3 {
       font-size: 1.3rem;
       font-weight: 600;
       margin-bottom: 15px;
-      color: var(--lighter);
+      color: var(--primary);
     }
     
-    .feature-card p {
+    .step p {
       color: var(--gray);
       font-size: 0.95rem;
     }
@@ -316,18 +392,18 @@
       background-color: var(--dark);
       padding: 60px 0 30px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
     }
     
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 40px;
-      margin-bottom: 40px;
+    .footer-about {
+      max-width: 500px;
+      margin: 0 auto 40px;
     }
     
     .footer-logo {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
     }
@@ -344,56 +420,29 @@
       margin-bottom: 20px;
     }
     
-    .social-links {
-      display: flex;
-      gap: 15px;
-    }
-    
-    .social-links a {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--gray);
-      transition: all 0.3s;
-    }
-    
-    .social-links a:hover {
-      color: var(--primary-light);
-      background-color: rgba(124, 58, 237, 0.1);
-      transform: translateY(-3px);
-    }
-    
-    .footer-links h4 {
-      color: var(--lighter);
-      font-size: 1.1rem;
-      margin-bottom: 20px;
+    .telegram-btn {
+      display: inline-block;
+      background-color: #0088cc;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
       font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin-bottom: 30px;
     }
     
-    .footer-links ul {
-      list-style: none;
+    .telegram-btn:hover {
+      background-color: #0077b3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.2);
     }
     
-    .footer-links li {
-      margin-bottom: 12px;
-    }
-    
-    .footer-links a {
-      color: var(--gray);
-      font-size: 0.9rem;
-      transition: color 0.3s;
-    }
-    
-    .footer-links a:hover {
-      color: var(--primary-light);
+    .telegram-btn i {
+      margin-right: 8px;
     }
     
     .footer-bottom {
-      text-align: center;
       padding-top: 30px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       color: var(--gray);
@@ -413,7 +462,9 @@
       }
       
       .mobile-menu-btn {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .hero {
@@ -442,6 +493,19 @@
       .section-title {
         font-size: 1.6rem;
       }
+      
+      .steps-container::before {
+        left: 25px;
+      }
+      
+      .step {
+        flex-direction: column;
+      }
+      
+      .step-number {
+        margin-right: 0;
+        margin-bottom: 20px;
+      }
     }
     
     @media (max-width: 576px) {
@@ -461,6 +525,11 @@
       .stat-number {
         font-size: 2rem;
       }
+      
+      .telegram-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -474,14 +543,21 @@
       </div>
       <nav class="nav-links">
         <a href="#">Home</a>
-        <a href="#">Features</a>
         <a href="#">How It Works</a>
+        <a href="#">Benefits</a>
         <a href="#">Testimonials</a>
         <a href="#">Support</a>
       </nav>
-      <button class="mobile-menu-btn">
-        <i class="fas fa-bars"></i>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars" id="menuIcon"></i>
       </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#">Home</a>
+      <a href="#">How It Works</a>
+      <a href="#">Benefits</a>
+      <a href="#">Testimonials</a>
+      <a href="#">Support</a>
     </div>
   </header>
 
@@ -489,14 +565,14 @@
   <section class="hero">
     <div class="container">
       <div class="hero-content">
-        <h1>Maximize Your Earnings with Smart Technology</h1>
-        <p>Join thousands of users worldwide who are boosting their income with our advanced platform. Secure, efficient, and rewarding.</p>
+        <h1>Smart Earnings Made Simple</h1>
+        <p>Join our growing community and start earning with our intuitive platform designed for maximum efficiency and profitability.</p>
         <div class="hero-buttons">
-          <a href="#" class="btn btn-primary">
-            <i class="fas fa-rocket"></i> Get Started
+          <a href="/login" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Login
           </a>
-          <a href="#" class="btn btn-outline">
-            <i class="fas fa-play"></i> Watch Demo
+          <a href="/register" class="btn btn-outline">
+            <i class="fas fa-user-plus"></i> Sign Up
           </a>
         </div>
       </div>
@@ -506,7 +582,7 @@
   <!-- Stats Section -->
   <section class="stats">
     <div class="container stats-container">
-      <h2 class="section-title">Our Global Impact</h2>
+      <h2 class="section-title">Our Community Growth</h2>
       <div class="stats-grid">
         <div class="stat-item">
           <div class="stat-number">50K+</div>
@@ -521,37 +597,44 @@
           <div class="stat-label">Countries</div>
         </div>
       </div>
-      <a href="#" class="download-btn">
+      <a href="https://apk.e-droid.net/apk/app3402371-3q8gkl.apk?v=3" class="download-btn">
         <i class="fas fa-download"></i> Download Mobile App
       </a>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="features">
+  <!-- How It Works Section -->
+  <section class="how-it-works">
     <div class="container">
-      <h2 class="section-title">Premium Features</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-bolt"></i>
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps-container">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Create Your Account</h3>
+            <p>Sign up in less than a minute with just your email address. No complicated forms or lengthy verification processes.</p>
           </div>
-          <h3>Lightning Fast</h3>
-          <p>Experience ultra-fast processing with our optimized algorithms that maximize your earning potential every second.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-shield-alt"></i>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Set Up Your Profile</h3>
+            <p>Customize your earning preferences and connect your payment methods to start receiving payouts immediately.</p>
           </div>
-          <h3>Bank-Level Security</h3>
-          <p>Your data and earnings are protected with military-grade encryption and multi-factor authentication.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-chart-line"></i>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Start Earning</h3>
+            <p>Begin completing tasks or running our automated systems to generate income. Watch your earnings grow in real-time.</p>
           </div>
-          <h3>Real-Time Analytics</h3>
-          <p>Monitor your performance with detailed dashboards and actionable insights to optimize your strategy.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Withdraw Your Funds</h3>
+            <p>Get paid instantly to your preferred payment method with our lightning-fast withdrawal system.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -560,52 +643,59 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <div class="footer-content">
-        <div class="footer-about">
-          <div class="footer-logo">
-            <img src="https://i.postimg.cc/8P9XzQJX/1733991069493.png" alt="Nexus Logo" height="30">
-            <span class="footer-logo-text">Nexus</span>
-          </div>
-          <p>Empowering users worldwide to achieve financial freedom through innovative technology.</p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-telegram"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-          </div>
+      <div class="footer-about">
+        <div class="footer-logo">
+          <img src="https://i.postimg.cc/8P9XzQJX/1733991069493.png" alt="Nexus Logo" height="30">
+          <span class="footer-logo-text">Nexus</span>
         </div>
-        <div class="footer-links">
-          <h4>Company</h4>
-          <ul>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Press</a></li>
-            <li><a href="#">Blog</a></li>
-          </ul>
-        </div>
-        <div class="footer-links">
-          <h4>Resources</h4>
-          <ul>
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Community</a></li>
-            <li><a href="#">Tutorials</a></li>
-            <li><a href="#">API</a></li>
-          </ul>
-        </div>
-        <div class="footer-links">
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">Cookie Policy</a></li>
-            <li><a href="#">GDPR</a></li>
-          </ul>
-        </div>
+        <p>Revolutionizing online earnings through innovative technology and user-friendly solutions.</p>
+        <a href="https://t.me/nexus_earn" class="telegram-btn">
+          <i class="fab fa-telegram"></i> Join Telegram Group
+        </a>
       </div>
       <div class="footer-bottom">
-        <p>© 2025 Nexus Technologies. All rights reserved.</p>
+        <p>&copy; 2025 Nexus Technologies. All rights reserved.</p>
       </div>
     </div>
   </footer>
+
+  <script>
+    // Mobile menu toggle with better click handling
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+    let menuOpen = false;
+
+    // Toggle menu when clicking the button
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuOpen = !menuOpen;
+      mobileMenu.classList.toggle('active', menuOpen);
+      
+      // Change icon based on menu state
+      if (menuOpen) {
+        menuIcon.classList.remove('fa-bars');
+        menuIcon.classList.add('fa-times');
+      } else {
+        menuIcon.classList.remove('fa-times');
+        menuIcon.classList.add('fa-bars');
+      }
+    });
+
+    // Close menu when clicking anywhere else
+    document.addEventListener('click', () => {
+      if (menuOpen) {
+        menuOpen = false;
+        mobileMenu.classList.remove('active');
+        menuIcon.classList.remove('fa-times');
+        menuIcon.classList.add('fa-bars');
+      }
+    });
+
+    // Prevent menu from closing when clicking inside it
+    mobileMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  </script>
 </body>
 </html>
