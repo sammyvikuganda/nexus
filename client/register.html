@@ -177,60 +177,64 @@
 </head>
 <body>
     <div class="app-container">
-        <header>
-            <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Left Logo" />
-            <h1 class="header-title">Create Nexus Account</h1>
-            <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Right Logo" />
-        </header>
+  <header>
+    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Left Logo" />
+    <h1 class="header-title">Create Nexus Account</h1>
+    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Right Logo" />
+  </header>
 
-        <div class="content">
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="firstName">First Name</label>
-                    <input name="firstName" id="firstName" placeholder="First Name" required />
-                </div>
+  <div class="content">
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input name="firstName" id="firstName" placeholder="First Name" required />
+      </div>
 
-                <div class="form-group">
-                    <label for="lastName">Last Name</label>
-                    <input name="lastName" id="lastName" placeholder="Last Name" required />
-                </div>
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input name="lastName" id="lastName" placeholder="Last Name" required />
+      </div>
 
-                <div class="form-group-inline">
-                    <div class="form-group country">
-                        <label for="country">Country</label>
-                        <select name="country" id="country" required>
-                            <option value="">Select a country</option>
-                        </select>
-                    </div>
-                    <div class="form-group phone">
-                        <label for="phoneNumber">Phone Number</label>
-                        <div style="display: flex; width: 100%; align-items: center;">
-                            <input type="tel" id="countryCode" readonly placeholder="+Code" style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
-                            <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input name="email" id="email" placeholder="example@domain.com" required />
-                </div>
-
-                <div class="form-group">
-                    <label for="pin">Set App Login PIN</label>
-                    <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
-                </div>
-
-                <div class="form-group">
-                    <input type="submit" value="Get Started" />
-                </div>
-            </form>
+      <div class="form-group-inline">
+        <div class="form-group country">
+          <label for="country">Country</label>
+          <select name="country" id="country" required>
+            <option value="">Select a country</option>
+          </select>
         </div>
-
-        <div class="footer">
-            <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
+        <div class="form-group phone">
+          <label for="phoneNumber">Phone Number</label>
+          <div style="display: flex; width: 100%; align-items: center;">
+            <input type="tel" id="countryCode" readonly placeholder="+Code"
+              style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
+            <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required
+              style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
+          </div>
+          <div class="error" id="phoneError" style="display: none;"></div>
         </div>
-    </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input name="email" id="email" placeholder="example@domain.com" required />
+      </div>
+
+      <div class="form-group">
+        <label for="pin">Set App Login PIN</label>
+        <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
+        <div class="error" id="pinError" style="display: none;"></div>
+      </div>
+
+      <div class="form-group">
+        <input type="submit" value="Get Started" />
+      </div>
+    </form>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
+  </div>
+</div>
 
 
 
