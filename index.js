@@ -1427,6 +1427,38 @@ app.post('/api/verify-pin', async (req, res) => {
 
 
 
+app.patch('/api/update-user', async (req, res) => {
+    const { userId, pin } = req.body;
+
+    try {
+        // Ensure that userId and pin are provided
+        if (!userId || !pin) {
+            return res.status(400).json({ message: 'User ID and PIN are required' });
+        }
+
+        const userRef = db.ref(`users/${userId}`);
+
+        const userSnapshot = await userRef.once('value');
+
+        if (!userSnapshot.exists()) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const userData = userSnapshot.val();
+
+        // Update the user's PIN
+        await userRef.update({ pin });
+
+        return res.status(200).json({ message: 'PIN updated successfully' });
+    } catch (error) {
+        console.error('Error updating user PIN:', error);
+        return res.status(500).json({ message: 'Failed to update PIN' });
+    }
+});
+
+
+
+
 // Store or update investment
 app.post('/api/storeInvestment', async (req, res) => {
     try {
