@@ -5,10 +5,7 @@
     { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
   "routes": [
-    // Serve static files from public/
     { "src": "/(.*)", "dest": "/public/$1" },
-
-    // Handle API requests
     { "src": "/api/teza-webhook", "dest": "/api/teza-webhook.js" },
     { "src": "/api/(.*)", "dest": "/api/$1.js" }
   ]
