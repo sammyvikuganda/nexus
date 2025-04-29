@@ -33,7 +33,20 @@
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
 
-        const userId = localStorage.getItem('userId');
+        let userId = null;
+
+fetch('/api/session')
+    .then(res => res.json())
+    .then(data => {
+        userId = data.userId;
+        console.log('Session userId:', userId);
+        // Enable UI or allow functions that need userId
+    })
+    .catch(err => {
+        console.error('Session fetch error:', err);
+        window.location.href = '/api/login';
+    });
+
         const serverUrl = 'https://suppay-ppnnit8wl-nexus-int.vercel.app';
 
 
