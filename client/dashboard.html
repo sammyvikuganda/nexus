@@ -1415,9 +1415,10 @@ function attachChangePinEvents() {
     }
 }
 
+
 // Handle change PIN process
 async function handleChangePin() {
-    const userId = localStorage.getItem('userId'); // Get user ID from local storage
+    // Assuming userId is already available in a constant
     if (!userId) {
         showErrorModal('User ID not found. Please log in again.');
         return;
@@ -1432,7 +1433,7 @@ async function handleChangePin() {
 
     try {
         // Verify old PIN
-        const verifyResponse = await fetch('https://suppay-o7tod637r-sammyviks-projects.vercel.app/api/verify-pin', {
+        const verifyResponse = await fetch(`${host}/api/verify-pin`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1455,7 +1456,7 @@ async function handleChangePin() {
 
             if (newPin === confirmPin) {
                 try {
-                    const response = await fetch('https://suppay-o7tod637r-sammyviks-projects.vercel.app/api/update-user', {
+                    const response = await fetch(`${host}/api/update-user`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
