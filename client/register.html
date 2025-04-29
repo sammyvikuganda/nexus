@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Nexus - Register</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
     <style>
@@ -208,7 +208,6 @@
                             <input type="tel" id="countryCode" readonly placeholder="+Code" style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
                             <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
                         </div>
-                        <p id="phoneError" class="error" style="display: none;"></p>
                     </div>
                 </div>
 
@@ -220,7 +219,6 @@
                 <div class="form-group">
                     <label for="pin">Set App Login PIN</label>
                     <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
-                    <p id="pinError" class="error" style="display: none;"></p>
                 </div>
 
                 <div class="form-group">
@@ -229,99 +227,46 @@
             </form>
         </div>
 
+        <div class="footer">
+            <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
+        </div>
+    </div>
 
-<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sponsorId = urlParams.get('sponsorid') || '';
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
 
-            document.getElementById('registerForm').addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                const formData = new FormData(this);
-                formData.append('sponsorid', sponsorId);
-
-                fetch('/api/register', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        alert(data.message);
-                    } else {
-                        // Handle success (e.g., redirect or show success message)
-                        window.location.href = '/success'; // Replace with your success page
-                    }
-                })
-                .catch(error => {
-                    alert('There was an error with your registration. Please try again.');
-                    console.error('Error:', error);
-                });
+            const sponsorId = new URLSearchParams(window.location.search).get('sponsorid') || '';
+            const formData = new FormData(this);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
             });
+
+            try {
+                const response = await fetch(`/api/register?sponsorid=${sponsorId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Handle success (e.g., show success message, redirect, etc.)
+                    alert('Registration successful!');
+                    window.location.href = '/success'; // Redirect to success page
+                } else {
+                    // Handle errors from server
+                    alert(result.message || 'Something went wrong, please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('There was an issue with the registration. Please try again later.');
+            }
         });
     </script>
-
-
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const countrySelect = document.getElementById('country');
-    const codeInput = document.getElementById('countryCode');
-    const phoneInput = document.getElementById('phoneNumber');
-    const phoneError = document.getElementById('phoneError');
-    const pinInput = document.getElementById('pin');
-    const pinError = document.getElementById('pinError');
-    let countries = [], selected = null;
-
-    fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
-      .then(res => res.json())
-      .then(data => {
-        countries = data;
-        data.forEach(({ country, country_code, flag, phone_length }) => {
-          const opt = new Option(flag + ' ' + country, country); // Set value as country name
-          opt.dataset.code = country_code;
-          opt.dataset.len = phone_length;
-          countrySelect.add(opt);
-        });
-      });
-
-    countrySelect.onchange = () => {
-      selected = countries.find(c => c.country === countrySelect.value);
-      codeInput.value = selected ? selected.country_code : '';
-      phoneInput.value = '';
-      phoneError.style.display = 'none';
-    };
-
-    phoneInput.oninput = () => {
-      if (selected && phoneInput.value.length === selected.phone_length) {
-        phoneError.style.display = 'none';
-      }
-    };
-
-    document.getElementById('registerForm').onsubmit = e => {
-      pinError.style.display = 'none';
-      phoneError.style.display = 'none';
-
-      if (!selected || phoneInput.value.length !== selected.phone_length || pinInput.value.length < 5) {
-        e.preventDefault();
-        if (!selected) {
-          phoneError.textContent = 'Please select a valid country.';
-        } else if (phoneInput.value.length !== selected.phone_length) {
-          phoneError.textContent = 'Phone number must be exactly ' + selected.phone_length + ' digits for ' + selected.country + '.';
-        } else {
-          pinError.textContent = 'PIN must be at least 5 characters long.';
-          pinError.style.display = 'block';
-        }
-        phoneError.style.display = 'block';
-      } else {
-        // Properly prepend country code to phone number
-        phoneInput.value = selected.country_code + ' ' + phoneInput.value.trim();
-      }
-    };
-  });
-</script>
-
-    </div>
 </body>
 </html>
