@@ -140,58 +140,115 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
 
 
 
-document.getElementById('registerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Clear previous errors
-    document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
-    
-    // Get form data
-    const formData = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        email: document.getElementById('email').value,
-        phoneNumber: document.getElementById('phoneNumber').value,
-        country: document.getElementById('country').value,
-        password: document.getElementById('password').value,
-        confirmPassword: document.getElementById('confirmPassword').value,
-        // Add other fields as needed
-    };
-
-    // Client-side validation
-    if (formData.password !== formData.confirmPassword) {
-        document.getElementById('confirmPasswordError').style.display = 'block';
-        return;
-    }
-
-    if (formData.password.length < 8) {
-        document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
-        document.getElementById('passwordError').style.display = 'block';
-        return;
-    }
+// Register user endpoint
+app.post('/api/register', async (req, res) => {
+    const { phoneNumber, country, firstName, lastName, dob, nin, email, password, deviceDetails } = req.body;
+    const sponsorId = req.query.sponsorid;
 
     try {
-        const sponsorId = new URLSearchParams(window.location.search).get('sponsorid');
-        const response = await fetch(`/api/register?sponsorid=${sponsorId || ''}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
+
+        if (credentialsExist && deviceExists) {
+            return res.status(400).json({
+                success: false,
+                message: 'Credentials already registered with this device'
+            });
+        }
+
+        if (credentialsExist) {
+            return res.status(400).json({
+                success: false,
+                message: 'Credentials already exist'
+            });
+        }
+
+        if (deviceExists) {
+            return res.status(400).json({
+                success: false,
+                message: 'Device already registered'
+            });
+        }
+
+        const userId = Math.floor(100000 + Math.random() * 900000).toString();
+
+        if (sponsorId) {
+            const sponsorRef = await db.ref(`users/${sponsorId}`).once('value');
+            if (sponsorRef.exists()) {
+                const sponsorData = sponsorRef.val();
+                const newReferralCount = (sponsorData.referralCount || 0) + 1;
+
+                await db.ref(`users/${sponsorId}`).update({
+                    referralCount: newReferralCount
+                });
+            }
+        }
+
+        const userData = {
+            phoneNumber,
+            country,
+            firstName,
+            lastName,
+            nin: nin || null,
+            email,
+            password,
+            balance: 0,
+            cryptoBalance: 0,
+            robotCredit: 0,
+            incompleteOrders: 0,
+            monthlyCommission: 0,
+            kyc: 'Pending',
+            registeredAt: Date.now(),
+            paymentMethods: {
+                "Airtel Money": "",
+                "MTN Mobile Money": "",
+                "Chipper Cash": "",
+                "Bank Transfer": "",
+                "Crypto Transfer": ""
             },
-            body: JSON.stringify(formData)
-        });
+            deviceDetails: deviceDetails || null,
+            sponsorId: sponsorId || null,
+            referralCount: 0
+        };
 
-        const result = await response.json();
+        if (dob) {
+            userData.dob = dob;
+        }
 
-        if (result.success) {
-            // Redirect to success page or show success message
-            window.location.href = `/welcome?firstName=${encodeURIComponent(result.firstName)}&lastName=${encodeURIComponent(result.lastName)}`;
-        } else {
-            // Show error message
-            alert(result.message || 'Registration failed');
+        await db.ref(`users/${userId}`).set(userData);
+
+        try {
+            const secondaryResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
+                userId: userId,
+            });
+
+            if (secondaryResponse.data.userId) {
+                return res.json({
+                    success: true,
+                    userId: userId,
+                    firstName: firstName,
+                    lastName: lastName
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Secondary database registration failed',
+                    userId: userId
+                });
+            }
+        } catch (secondaryError) {
+            console.error('Secondary database error:', secondaryError);
+            return res.status(500).json({
+                success: false,
+                message: 'Secondary database registration failed',
+                userId: userId
+            });
         }
     } catch (error) {
         console.error('Registration error:', error);
-        alert('An error occurred during registration');
+        return res.status(500).json({
+            success: false,
+            message: 'Registration failed'
+        });
     }
 });
 
