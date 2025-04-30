@@ -14,6 +14,7 @@
     { "src": "/login", "dest": "/client/login.html" },
     { "src": "/dashboard", "dest": "/client/dashboard.html" },
     { "src": "/success", "dest": "/client/success.html" },
+    { "src": "/reset-password", "dest": "/client/reset-password.html" },
     { "src": "/(.*)", "dest": "/client/index.html" }
   ]
 }
