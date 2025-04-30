@@ -293,8 +293,9 @@
         Already have an account? <a href="#">Sign in</a>
     </div>
 </div>
+
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const countrySelect = document.getElementById('country');
     const codeInput = document.getElementById('countryCode');
     const phoneInput = document.getElementById('phoneNumber');
@@ -308,29 +309,59 @@
 
     // Fetch and populate country list
     fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to fetch countries');
+            return res.json();
+        })
         .then(data => {
             countries = data;
             data.forEach(({ country, country_code, flag, phone_length }) => {
-                const opt = new Option(flag + ' ' + country, country);
+                const opt = new Option(`${flag} ${country}`, country);
                 opt.dataset.code = country_code;
                 opt.dataset.len = phone_length;
                 countrySelect.add(opt);
             });
+        })
+        .catch(error => {
+            console.error('Error loading countries:', error);
+            // Optionally show error to user
         });
 
     // When country changes
     countrySelect.onchange = () => {
         selected = countries.find(c => c.country === countrySelect.value);
-        codeInput.value = selected ? selected.country_code : '';
+        if (selected) {
+            codeInput.value = selected.country_code;
+            phoneInput.placeholder = `Enter ${selected.phone_length} digit number`;
+            phoneInput.setAttribute('maxlength', selected.phone_length);
+        } else {
+            codeInput.value = '';
+            phoneInput.placeholder = 'Enter number';
+            phoneInput.removeAttribute('maxlength');
+        }
         phoneInput.value = '';
         phoneError.style.display = 'none';
     };
 
-    // Hide error while typing
+    // Phone number input validation
     phoneInput.oninput = () => {
-        if (selected && phoneInput.value.length === selected.phone_length) {
-            phoneError.style.display = 'none';
+        // Remove any non-digit characters
+        phoneInput.value = phoneInput.value.replace(/\D/g, '');
+        
+        // Validate length if country is selected
+        if (selected) {
+            const currentLength = phoneInput.value.length;
+            const maxLength = selected.phone_length;
+            
+            // Truncate if exceeds max length
+            if (currentLength > maxLength) {
+                phoneInput.value = phoneInput.value.slice(0, maxLength);
+            }
+            
+            // Hide error if valid length
+            if (phoneInput.value.length === maxLength) {
+                phoneError.style.display = 'none';
+            }
         }
     };
 
@@ -369,6 +400,7 @@
         const type = pinInput.getAttribute('type') === 'password' ? 'text' : 'password';
         pinInput.setAttribute('type', type);
         this.classList.toggle('fa-eye-slash');
+        this.classList.toggle('fa-eye');
     });
 
     // Toggle Confirm PIN visibility
@@ -376,6 +408,7 @@
         const type = confirmPinInput.getAttribute('type') === 'password' ? 'text' : 'password';
         confirmPinInput.setAttribute('type', type);
         this.classList.toggle('fa-eye-slash');
+        this.classList.toggle('fa-eye');
     });
 
     // Form submission validation
@@ -387,6 +420,7 @@
 
         let valid = true;
 
+        // Country and phone validation
         if (!selected) {
             phoneError.textContent = 'Please select a valid country.';
             phoneError.style.display = 'block';
@@ -397,7 +431,7 @@
             valid = false;
         }
 
-        // PIN validation - must be exactly 5 digits
+        // PIN validation
         if (pinInput.value.length !== 5) {
             pinError.textContent = 'PIN must be exactly 5 digits.';
             pinError.style.display = 'block';
@@ -417,17 +451,13 @@
 
         if (!valid) return;
 
-        // Prepend full phone number
-        const phoneFull = selected.country_code + ' ' + phoneInput.value.trim();
-        phoneInput.value = phoneFull;
-
-        // Proceed with submission
+        // Prepare form data
         const sponsorId = new URLSearchParams(window.location.search).get('sponsorid') || '';
         const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
+        const data = Object.fromEntries(formData.entries());
+        
+        // Format phone number correctly (country code + space + number)
+        data.phoneNumber = `${selected.country_code} ${phoneInput.value.trim()}`;
 
         try {
             const response = await fetch(`/api/register?sponsorid=${sponsorId}`, {
@@ -445,7 +475,7 @@
                 const lastName = encodeURIComponent(data.lastName || '');
                 window.location.href = `/success?firstName=${firstName}&lastName=${lastName}`;
             } else {
-                alert(result.message || 'Something went wrong, please try again.');
+                alert(result.message || 'Registration failed. Please try again.');
             }
         } catch (error) {
             console.error('Error submitting form:', error);
@@ -454,7 +484,6 @@
     });
 });
 </script>
-
     
 </body>
 </html>
