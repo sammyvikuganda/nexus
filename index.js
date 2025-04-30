@@ -926,20 +926,32 @@ app.post('/api/withdraw', async (req, res) => {
 
 // ================== LOGIN ==================
 app.post('/api/login', async (req, res) => {
-    const { phoneNumber, password } = req.body;
+    const { login, password } = req.body;
 
     try {
-        const usersSnapshot = await db
-            .ref('users')
-            .orderByChild('phoneNumber')
-            .equalTo(phoneNumber)
-            .once('value');
+        // Check if login is a phone number or email
+        let userSnapshot;
+        if (login.includes('@')) {
+            // Email login
+            userSnapshot = await db
+                .ref('users')
+                .orderByChild('email')
+                .equalTo(login)
+                .once('value');
+        } else {
+            // Phone number login
+            userSnapshot = await db
+                .ref('users')
+                .orderByChild('phoneNumber')
+                .equalTo(login)
+                .once('value');
+        }
 
-        if (!usersSnapshot.exists()) {
+        if (!userSnapshot.exists()) {
             return res.status(400).send('User not found');
         }
 
-        const users = usersSnapshot.val();
+        const users = userSnapshot.val();
         const userId = Object.keys(users)[0];
         const userData = users[userId];
 
