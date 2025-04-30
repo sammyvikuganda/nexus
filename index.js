@@ -926,22 +926,16 @@ app.post('/api/withdraw', async (req, res) => {
 
 // ================== LOGIN ==================
 app.post('/api/login', async (req, res) => {
-    const { phoneNumber, pin } = req.body;
-
-    const isFormRequest = req.headers['content-type']?.includes('application/x-www-form-urlencoded');
+    const { phoneNumber, password } = req.body;
 
     try {
-        const usersSnapshot = await db.ref('users').orderByChild('phoneNumber').equalTo(phoneNumber).once('value');
+        const usersSnapshot = await db
+            .ref('users')
+            .orderByChild('phoneNumber')
+            .equalTo(phoneNumber)
+            .once('value');
 
         if (!usersSnapshot.exists()) {
-            if (isFormRequest) {
-                return res.send(`
-                    <script>
-                        alert('User not found');
-                        window.location.href='/api/login';
-                    </script>
-                `);
-            }
             return res.status(400).send('User not found');
         }
 
@@ -949,239 +943,19 @@ app.post('/api/login', async (req, res) => {
         const userId = Object.keys(users)[0];
         const userData = users[userId];
 
-        if (userData.pin !== pin) {
-            if (isFormRequest) {
-                return res.send(`
-                    <script>
-                        alert('Incorrect PIN');
-                        window.location.href='/api/login';
-                    </script>
-                `);
-            }
-            return res.status(400).send('Incorrect PIN');
+        if (userData.password !== password) {
+            return res.status(400).send('Incorrect password');
         }
 
         // Save only the userId in session
         req.session.userId = userId;
 
-        return res.redirect('/dashboard');
-
+        return res.status(200).send('Login successful');
     } catch (error) {
         console.error('Error logging in:', error);
         res.status(500).send('Login error');
     }
 });
-
-
-
-
-// ================== LOGIN PAGE ==================
-app.get('/api/login', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Nexus</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --nexus-blue: #2563eb;
-            --nexus-dark: #1e40af;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --border-color: #e5e7eb;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            background-color: white;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-        }
-
-        .nexus-login {
-            width: 80%;
-            max-width: 380px;
-            text-align: center;
-        }
-
-        .nexus-logo {
-            width: 80px;
-            margin-bottom: 20px;
-        }
-
-        .login-header h1 {
-            font-size: 22px;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 6px;
-        }
-
-        .login-header p {
-            color: var(--text-light);
-            font-size: 12px;
-            margin-bottom: 28px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .input-field {
-            position: relative;
-            width: 100%;
-        }
-
-        .input-field input {
-            width: 100%;
-            padding: 10px 14px 10px 50px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .input-field input:focus {
-            outline: none;
-            border-color: var(--nexus-blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            cursor: pointer;
-        }
-
-        .login-button {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--nexus-blue);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 6px;
-        }
-
-        .login-button:hover {
-            background-color: var(--nexus-dark);
-        }
-
-        .login-footer {
-            margin-top: 18px;
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .login-footer a {
-            color: var(--nexus-blue);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="nexus-login">
-        <img src="https://i.postimg.cc/tgddsvv3/1733991069493.png" alt="Nexus Logo" class="nexus-logo">
-
-        <div class="login-header">
-            <h1>Welcome to Nexus</h1>
-            <p>Sign in to access your account</p>
-        </div>
-
-        <form action="/api/login" method="POST">
-            <div class="form-group">
-                <label for="phoneNumber">Phone Number</label>
-                <div class="input-field">
-                    <i class="fas fa-phone input-icon"></i>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="(e.g. +256 777777777)" required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="pin">PIN</label>
-                <div class="input-field">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password" id="pin" name="pin" placeholder="Enter 5-digit PIN" required maxlength="5">
-                    <i class="fas fa-eye password-toggle" id="togglePassword"></i>
-                </div>
-            </div>
-
-            <button type="submit" class="login-button" id="loginButton">
-                Sign In
-            </button>
-        </form>
-
-        <div class="login-footer">
-            <p>Don't have an account? <a href="#">Contact support</a></p>
-            <p><a href="#">Forgot your PIN?</a></p>
-        </div>
-    </div>
-
-    <script>
-        // Toggle password visibility
-        const togglePassword = document.getElementById('togglePassword');
-        const pin = document.getElementById('pin');
-
-        togglePassword.addEventListener('click', function() {
-            const type = pin.getAttribute('type') === 'password' ? 'text' : 'password';
-            pin.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
-
-        // Form submission loading animation
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            const button = document.getElementById('loginButton');
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-            button.disabled = true;
-        });
-    </script>
-</body>
-</html>
-    `);
-});
-
 
 
 
