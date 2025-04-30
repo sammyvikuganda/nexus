@@ -3,242 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Nexus - Register</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+    <title>Nexus - Create Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+        body {
+            background-color: white;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
 
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+        .form-wrapper {
+            width: 80%;
+            max-width: 500px;
+            margin-bottom: 3rem; /* Added more space at bottom */
+        }
 
-    header {
-      background-color: #1A7EB1;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      flex-shrink: 0;
-    }
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
 
-    .header-logo {
-      height: 36px;
-    }
+        .company-name {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.1rem;
+        }
 
-    .header-title {
-      flex: 1;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin: 0;
-    }
+        .form-title {
+            color: var(--gray);
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
 
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-    }
+        .form-group {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
 
-    form {
-      max-width: 500px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
+        .input-wrapper {
+            position: relative;
+        }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 1rem;
+        }
 
-    .form-group-inline {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-    }
+        .left-icon {
+            left: 12px;
+        }
 
-    .form-group-inline .country {
-      flex: 0.4;
-    }
+        .right-icon {
+            right: 12px;
+            cursor: pointer;
+        }
 
-    .form-group-inline .phone {
-      flex: 0.6;
-    }
+        .form-group-inline {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
 
-    label {
-      font-weight: 500;
-      color: #555;
-      font-size: 0.9rem;
-    }
+        .form-group-inline .form-group {
+            margin-bottom: 0;
+        }
 
-    input, select {
-      width: 100%;
-      padding: 0.8rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      background-color: #f9fafc;
-      height: 48px;
-    }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
 
-    input:focus, select:focus {
-      border-color: #1A7EB1;
-      outline: none;
-      box-shadow: 0 0 8px rgba(26, 126, 177, 0.2);
-      background-color: #ffffff;
-    }
+        input:not([type="submit"]),
+        select {
+            width: 100%;
+            padding: 0.7rem 2.5rem 0.7rem 2.3rem;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background-color: white;
+        }
 
-    input::placeholder {
-      color: #a0aec0;
-    }
+        input:not([type="submit"]):focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
 
-    input[type="submit"] {
-      background-color: #1A7EB1;
-      color: white;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1rem;
-    }
+        input::placeholder {
+            color: var(--gray);
+            opacity: 0.6;
+        }
 
-    input[type="submit"]:hover {
-      background-color: #15608B;
-      box-shadow: 0 4px 10px rgba(26, 126, 177, 0.2);
-      transform: translateY(-2px);
-    }
+        input[type="submit"] {
+            width: 100%;
+            padding: 0.9rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+        }
 
-    .footer {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #555;
-      padding: 20px 10px;
-    }
+        input[type="submit"]:hover {
+            background-color: var(--primary-dark);
+        }
 
-    .footer a {
-      color: #1A7EB1;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s ease;
-    }
+        .error {
+            color: #dc3545;
+            font-size: 0.75rem;
+            margin-top: 0.2rem;
+            display: none;
+        }
 
-    .footer a:hover {
-      color: #15608B;
-    }
+        .phone-input-group {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            position: relative;
+        }
 
-    .error {
-      color: red;
-      font-size: 0.8rem;
-      margin-top: 5px;
-    }
+        .phone-input-group .input-icon {
+            left: 12px;
+        }
 
-    @media (max-width: 480px) {
-      .header-logo {
-        height: 28px;
-      }
+        #countryCode {
+            width: 40%;
+            padding: 0.7rem 0.7rem 0.7rem 2.3rem;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            background-color: #f1f3f5;
+            color: var(--dark);
+            font-weight: 500;
+        }
 
-      .header-title {
-        font-size: 1rem;
-      }
+        #phoneNumber {
+            width: 60%;
+            padding: 0.7rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            border-left: none;
+        }
 
-      input {
-        padding: 0.7rem;
-      }
-    }
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem; /* Increased from 1.5rem */
+            margin-bottom: 2rem; /* Added bottom margin */
+            font-size: 0.85rem;
+            color: var(--gray);
+            width: 100%;
+        }
 
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
 
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
 
-
-
-
-
-
-
-
-  </style>
+        @media (max-width: 600px) {
+            .form-group-inline {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .form-wrapper {
+                width: 90%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-  <header>
-    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Left Logo" />
-    <h1 class="header-title">Create Nexus Account</h1>
-    <img class="header-logo" src="https://i.postimg.cc/rpRxknG4/1745596287655.png" alt="Right Logo" />
-  </header>
-
-  <div class="content">
-    <form id="registerForm">
-      <div class="form-group">
-        <label for="firstName">First Name</label>
-        <input name="firstName" id="firstName" placeholder="First Name" required />
-      </div>
-
-      <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <input name="lastName" id="lastName" placeholder="Last Name" required />
-      </div>
-
-      <div class="form-group-inline">
-        <div class="form-group country">
-          <label for="country">Country</label>
-          <select name="country" id="country" required>
-            <option value="">Select a country</option>
-          </select>
-        </div>
-        <div class="form-group phone">
-          <label for="phoneNumber">Phone Number</label>
-          <div style="display: flex; width: 100%; align-items: center;">
-            <input type="tel" id="countryCode" readonly placeholder="+Code"
-              style="width: 40%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 6px 0 0 6px;" />
-            <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required
-              style="width: 60%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 0 6px 6px 0;" />
-          </div>
-          <div class="error" id="phoneError" style="display: none;"></div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input name="email" id="email" placeholder="example@domain.com" required />
-      </div>
-
-      <div class="form-group">
-        <label for="pin">Set App Login PIN</label>
-        <input name="pin" id="pin" type="tel" placeholder="Create a secure PIN" required maxlength="5" />
-        <div class="error" id="pinError" style="display: none;"></div>
-      </div>
-
-      <div class="form-group">
-        <input type="submit" value="Get Started" />
-      </div>
-    </form>
-  </div>
-
-  <div class="footer">
-    <p>&copy; 2025 Nexus. All rights reserved. <a href="/">Home</a></p>
-  </div>
+    <div class="header">
+    <div class="company-name">Nexus</div>
+    <div class="form-title">Create account</div>
 </div>
 
+<div class="form-wrapper">
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user input-icon left-icon"></i>
+                <input name="firstName" id="firstName" placeholder="First Name" required />
+            </div>
+        </div>
 
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user input-icon left-icon"></i>
+                <input name="lastName" id="lastName" placeholder="Last Name" required />
+            </div>
+        </div>
 
+        <div class="form-group-inline">
+            <div class="form-group">
+                <label for="country">Country</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-globe input-icon left-icon"></i>
+                    <select name="country" id="country" required>
+                        <option value="">Select a country</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <div class="phone-input-group">
+                    <i class="fas fa-phone input-icon"></i>
+                    <input type="tel" id="countryCode" readonly placeholder="+Code" />
+                    <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Enter number" required />
+                </div>
+                <div class="error" id="phoneError">Please enter a valid phone number</div>
+            </div>
+        </div>
 
+        <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-wrapper">
+                <i class="fas fa-envelope input-icon left-icon"></i>
+                <input name="email" id="email" placeholder="example@domain.com" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="pin">Set App Login PIN</label>
+            <div class="input-wrapper">
+                <i class="fas fa-lock input-icon left-icon"></i>
+                <input name="pin" id="pin" type="password" placeholder="Create a secure PIN" required maxlength="5" />
+                <i class="fas fa-eye input-icon right-icon" id="togglePin"></i>
+            </div>
+            <div class="error" id="pinError">PIN must be 4-5 digits</div>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPin">Confirm PIN</label>
+            <div class="input-wrapper">
+                <i class="fas fa-lock input-icon left-icon"></i>
+                <input name="confirmPin" id="confirmPin" type="password" placeholder="Confirm your PIN" required maxlength="5" />
+                <i class="fas fa-eye input-icon right-icon" id="toggleConfirmPin"></i>
+            </div>
+            <div class="error" id="confirmPinError">PINs do not match</div>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Register" />
+        </div>
+    </form>
+
+    <div class="auth-footer">
+        Already have an account? <a href="#">Sign in</a>
+    </div>
+</div>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const countrySelect = document.getElementById('country');
@@ -246,111 +300,161 @@
     const phoneInput = document.getElementById('phoneNumber');
     const phoneError = document.getElementById('phoneError');
     const pinInput = document.getElementById('pin');
+    const confirmPinInput = document.getElementById('confirmPin');
     const pinError = document.getElementById('pinError');
+    const confirmPinError = document.getElementById('confirmPinError');
     const form = document.getElementById('registerForm');
     let countries = [], selected = null;
 
     // Fetch and populate country list
     fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries')
-      .then(res => res.json())
-      .then(data => {
-        countries = data;
-        data.forEach(({ country, country_code, flag, phone_length }) => {
-          const opt = new Option(flag + ' ' + country, country);
-          opt.dataset.code = country_code;
-          opt.dataset.len = phone_length;
-          countrySelect.add(opt);
+        .then(res => res.json())
+        .then(data => {
+            countries = data;
+            data.forEach(({ country, country_code, flag, phone_length }) => {
+                const opt = new Option(flag + ' ' + country, country);
+                opt.dataset.code = country_code;
+                opt.dataset.len = phone_length;
+                countrySelect.add(opt);
+            });
         });
-      });
 
     // When country changes
     countrySelect.onchange = () => {
-      selected = countries.find(c => c.country === countrySelect.value);
-      codeInput.value = selected ? selected.country_code : '';
-      phoneInput.value = '';
-      phoneError.style.display = 'none';
+        selected = countries.find(c => c.country === countrySelect.value);
+        codeInput.value = selected ? selected.country_code : '';
+        phoneInput.value = '';
+        phoneError.style.display = 'none';
     };
 
     // Hide error while typing
     phoneInput.oninput = () => {
-      if (selected && phoneInput.value.length === selected.phone_length) {
-        phoneError.style.display = 'none';
-      }
+        if (selected && phoneInput.value.length === selected.phone_length) {
+            phoneError.style.display = 'none';
+        }
     };
 
+    // PIN validation - strictly 5 digits
     pinInput.oninput = () => {
-      if (pinInput.value.length >= 5) {
-        pinError.style.display = 'none';
-      }
+        // Ensure only numbers are entered and limit to 5 digits
+        pinInput.value = pinInput.value.replace(/\D/g, '').slice(0, 5);
+        
+        // Hide error if valid
+        if (pinInput.value.length === 5) {
+            pinError.style.display = 'none';
+        }
+        
+        // Check if confirmation matches when both fields have values
+        if (confirmPinInput.value && pinInput.value !== confirmPinInput.value) {
+            confirmPinError.style.display = 'block';
+        } else {
+            confirmPinError.style.display = 'none';
+        }
     };
+
+    // Confirm PIN validation
+    confirmPinInput.oninput = () => {
+        // Ensure only numbers are entered and limit to 5 digits
+        confirmPinInput.value = confirmPinInput.value.replace(/\D/g, '').slice(0, 5);
+        
+        if (pinInput.value === confirmPinInput.value) {
+            confirmPinError.style.display = 'none';
+        } else {
+            confirmPinError.style.display = 'block';
+        }
+    };
+
+    // Toggle PIN visibility
+    document.getElementById('togglePin').addEventListener('click', function() {
+        const type = pinInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        pinInput.setAttribute('type', type);
+        this.classList.toggle('fa-eye-slash');
+    });
+
+    // Toggle Confirm PIN visibility
+    document.getElementById('toggleConfirmPin').addEventListener('click', function() {
+        const type = confirmPinInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPinInput.setAttribute('type', type);
+        this.classList.toggle('fa-eye-slash');
+    });
 
     // Form submission validation
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      phoneError.style.display = 'none';
-      pinError.style.display = 'none';
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        phoneError.style.display = 'none';
+        pinError.style.display = 'none';
+        confirmPinError.style.display = 'none';
 
-      let valid = true;
+        let valid = true;
 
-      if (!selected) {
-        phoneError.textContent = 'Please select a valid country.';
-        phoneError.style.display = 'block';
-        valid = false;
-      } else if (phoneInput.value.length !== selected.phone_length) {
-        phoneError.textContent = `Phone number must be exactly ${selected.phone_length} digits for ${selected.country}.`;
-        phoneError.style.display = 'block';
-        valid = false;
-      }
+        if (!selected) {
+            phoneError.textContent = 'Please select a valid country.';
+            phoneError.style.display = 'block';
+            valid = false;
+        } else if (phoneInput.value.length !== selected.phone_length) {
+            phoneError.textContent = `Phone number for ${selected.country} must be exactly ${selected.phone_length} digits.`;
+            phoneError.style.display = 'block';
+            valid = false;
+        }
 
-      if (pinInput.value.length < 5) {
-        pinError.textContent = 'PIN must be at least 5 characters long.';
-        pinError.style.display = 'block';
-        valid = false;
-      }
+        // PIN validation - must be exactly 5 digits
+        if (pinInput.value.length !== 5) {
+            pinError.textContent = 'PIN must be exactly 5 digits.';
+            pinError.style.display = 'block';
+            valid = false;
+        } else if (!/^\d{5}$/.test(pinInput.value)) {
+            pinError.textContent = 'PIN must contain only numbers.';
+            pinError.style.display = 'block';
+            valid = false;
+        }
 
-      if (!valid) return;
+        // Confirm PIN validation
+        if (pinInput.value !== confirmPinInput.value) {
+            confirmPinError.textContent = 'PINs do not match.';
+            confirmPinError.style.display = 'block';
+            valid = false;
+        }
 
-      // Prepend full phone number
-      const phoneFull = selected.country_code + ' ' + phoneInput.value.trim();
-      phoneInput.value = phoneFull;
+        if (!valid) return;
 
-      // Proceed with submission
-      const sponsorId = new URLSearchParams(window.location.search).get('sponsorid') || '';
-      const formData = new FormData(form);
-      const data = {};
-      formData.forEach((value, key) => {
-        data[key] = value;
-      });
+        // Prepend full phone number
+        const phoneFull = selected.country_code + ' ' + phoneInput.value.trim();
+        phoneInput.value = phoneFull;
 
-      try {
-        const response = await fetch(`/api/register?sponsorid=${sponsorId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data)
+        // Proceed with submission
+        const sponsorId = new URLSearchParams(window.location.search).get('sponsorid') || '';
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
         });
 
-        const result = await response.json();
+        try {
+            const response = await fetch(`/api/register?sponsorid=${sponsorId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
 
-        if (response.ok) {
-          const firstName = encodeURIComponent(data.firstName || '');
-          const lastName = encodeURIComponent(data.lastName || '');
-          window.location.href = `/success?firstName=${firstName}&lastName=${lastName}`;
-        } else {
-          alert(result.message || 'Something went wrong, please try again.');
+            const result = await response.json();
+
+            if (response.ok) {
+                const firstName = encodeURIComponent(data.firstName || '');
+                const lastName = encodeURIComponent(data.lastName || '');
+                window.location.href = `/success?firstName=${firstName}&lastName=${lastName}`;
+            } else {
+                alert(result.message || 'Something went wrong, please try again.');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('There was an issue with the registration. Please try again later.');
         }
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        alert('There was an issue with the registration. Please try again later.');
-      }
     });
-  });
+});
 </script>
 
-
-
-
-
+    
 </body>
 </html>
