@@ -265,33 +265,33 @@
         </div>
 
         <div class="form-group">
-            <label for="pin">Set App Login PIN</label>
-            <div class="input-wrapper">
-                <i class="fas fa-lock input-icon left-icon"></i>
-                <input name="pin" id="pin" type="password" placeholder="Create a secure PIN" required maxlength="5" />
-                <i class="fas fa-eye input-icon right-icon" id="togglePin"></i>
-            </div>
-            <div class="error" id="pinError">PIN must be 4-5 digits</div>
-        </div>
-
-        <div class="form-group">
-            <label for="confirmPin">Confirm PIN</label>
-            <div class="input-wrapper">
-                <i class="fas fa-lock input-icon left-icon"></i>
-                <input name="confirmPin" id="confirmPin" type="password" placeholder="Confirm your PIN" required maxlength="5" />
-                <i class="fas fa-eye input-icon right-icon" id="toggleConfirmPin"></i>
-            </div>
-            <div class="error" id="confirmPinError">PINs do not match</div>
-        </div>
-
-        <div class="form-group">
-            <input type="submit" value="Register" />
-        </div>
-    </form>
-
-    <div class="auth-footer">
-        Already have an account? <a href="#">Sign in</a>
+    <label for="password">Set App Login Password</label>
+    <div class="input-wrapper">
+        <i class="fas fa-lock input-icon left-icon"></i>
+        <input name="password" id="password" type="password" placeholder="Create a secure password" required maxlength="20" />
+        <i class="fas fa-eye input-icon right-icon" id="togglePassword"></i>
     </div>
+    <div class="error" id="passwordError">Password must be 8-20 characters</div>
+</div>
+
+<div class="form-group">
+    <label for="confirmPassword">Confirm Password</label>
+    <div class="input-wrapper">
+        <i class="fas fa-lock input-icon left-icon"></i>
+        <input name="confirmPassword" id="confirmPassword" type="password" placeholder="Confirm your password" required maxlength="20" />
+        <i class="fas fa-eye input-icon right-icon" id="toggleConfirmPassword"></i>
+    </div>
+    <div class="error" id="confirmPasswordError">Passwords do not match</div>
+</div>
+
+<div class="form-group">
+    <input type="submit" value="Register" />
+</div>
+</form>
+
+<div class="auth-footer">
+    Already have an account? <a href="#">Sign in</a>
+</div>
 </div>
 
 <script>
@@ -300,10 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeInput = document.getElementById('countryCode');
     const phoneInput = document.getElementById('phoneNumber');
     const phoneError = document.getElementById('phoneError');
-    const pinInput = document.getElementById('pin');
-    const confirmPinInput = document.getElementById('confirmPin');
-    const pinError = document.getElementById('pinError');
-    const confirmPinError = document.getElementById('confirmPinError');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const passwordError = document.getElementById('passwordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
     const form = document.getElementById('registerForm');
     let countries = [], selected = null;
 
@@ -365,48 +365,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // PIN validation - strictly 5 digits
-    pinInput.oninput = () => {
-        // Ensure only numbers are entered and limit to 5 digits
-        pinInput.value = pinInput.value.replace(/\D/g, '').slice(0, 5);
+    // Password validation - 8-20 characters
+    passwordInput.oninput = () => {
+        // Limit to 20 characters
+        passwordInput.value = passwordInput.value.slice(0, 20);
         
         // Hide error if valid
-        if (pinInput.value.length === 5) {
-            pinError.style.display = 'none';
+        if (passwordInput.value.length >= 8 && passwordInput.value.length <= 20) {
+            passwordError.style.display = 'none';
         }
         
         // Check if confirmation matches when both fields have values
-        if (confirmPinInput.value && pinInput.value !== confirmPinInput.value) {
-            confirmPinError.style.display = 'block';
+        if (confirmPasswordInput.value && passwordInput.value !== confirmPasswordInput.value) {
+            confirmPasswordError.style.display = 'block';
         } else {
-            confirmPinError.style.display = 'none';
+            confirmPasswordError.style.display = 'none';
         }
     };
 
-    // Confirm PIN validation
-    confirmPinInput.oninput = () => {
-        // Ensure only numbers are entered and limit to 5 digits
-        confirmPinInput.value = confirmPinInput.value.replace(/\D/g, '').slice(0, 5);
+    // Confirm Password validation
+    confirmPasswordInput.oninput = () => {
+        // Limit to 20 characters
+        confirmPasswordInput.value = confirmPasswordInput.value.slice(0, 20);
         
-        if (pinInput.value === confirmPinInput.value) {
-            confirmPinError.style.display = 'none';
+        if (passwordInput.value === confirmPasswordInput.value) {
+            confirmPasswordError.style.display = 'none';
         } else {
-            confirmPinError.style.display = 'block';
+            confirmPasswordError.style.display = 'block';
         }
     };
 
-    // Toggle PIN visibility
-    document.getElementById('togglePin').addEventListener('click', function() {
-        const type = pinInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        pinInput.setAttribute('type', type);
+    // Toggle Password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
         this.classList.toggle('fa-eye-slash');
         this.classList.toggle('fa-eye');
     });
 
-    // Toggle Confirm PIN visibility
-    document.getElementById('toggleConfirmPin').addEventListener('click', function() {
-        const type = confirmPinInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        confirmPinInput.setAttribute('type', type);
+    // Toggle Confirm Password visibility
+    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.setAttribute('type', type);
         this.classList.toggle('fa-eye-slash');
         this.classList.toggle('fa-eye');
     });
@@ -415,8 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         phoneError.style.display = 'none';
-        pinError.style.display = 'none';
-        confirmPinError.style.display = 'none';
+        passwordError.style.display = 'none';
+        confirmPasswordError.style.display = 'none';
 
         let valid = true;
 
@@ -431,21 +431,17 @@ document.addEventListener('DOMContentLoaded', () => {
             valid = false;
         }
 
-        // PIN validation
-        if (pinInput.value.length !== 5) {
-            pinError.textContent = 'PIN must be exactly 5 digits.';
-            pinError.style.display = 'block';
-            valid = false;
-        } else if (!/^\d{5}$/.test(pinInput.value)) {
-            pinError.textContent = 'PIN must contain only numbers.';
-            pinError.style.display = 'block';
+        // Password validation
+        if (passwordInput.value.length < 8 || passwordInput.value.length > 20) {
+            passwordError.textContent = 'Password must be 8-20 characters.';
+            passwordError.style.display = 'block';
             valid = false;
         }
 
-        // Confirm PIN validation
-        if (pinInput.value !== confirmPinInput.value) {
-            confirmPinError.textContent = 'PINs do not match.';
-            confirmPinError.style.display = 'block';
+        // Confirm Password validation
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            confirmPasswordError.textContent = 'Passwords do not match.';
+            confirmPasswordError.style.display = 'block';
             valid = false;
         }
 
