@@ -137,85 +137,103 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
         function loadHomeContent() {
     const content = `
-        <div class="app-container">
-  <div class="home-section">
-    <div class="header">
-      <div class="header-left">
-        <!-- Replaced the image with FontAwesome user icon -->
-        <div class="user-icon">
-          <i class="fas fa-user-circle"></i>
+        <body class="">
+    <div class="home-dashboard">
+        <!-- Header -->
+        <div class="home-header">
+            <div class="home-user-profile">
+                <div class="home-user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="home-user-info">
+                    <h3 id="dynamic-user-name">---</h3>
+                    <p>Enjoy your financial freedom at Nexus</p>
+                </div>
+            </div>
+            <div class="home-menu-btn" id="homeMenuButton">
+                <i class="fas fa-bars"></i>
+            </div>
         </div>
-        <div class="user-info">
-          <h2 id="user-name">
-            Hello,
-            <span id="dynamic-user-name">
-              <i class="fas fa-circle-notch fa-spin"></i>
-            </span>
-            <span class="material-icons" style="display: none;">verified</span>
-          </h2>
-          <p>Every Small Step Makes a Big Impact.</p>
-        </div>
-      </div>
-      <div class="header-right">
-        <a href="go:AB" aria-label="Notification">
-          <i data-feather="bell" class="notification-icon"></i>
-        </a>
-      </div>
-    </div>
 
-    <div class="balance-wrapper">
-      <div class="balance-container">
-        <div id="balance" class="balance">
-          <span class="currency"></span>
-          <span id="balance-skeleton" class="skeleton-loader"></span>
-          <span id="balance-amount" class="amount" style="display: none;"></span>
-          <span id="balance-placeholder" class="amount" style="display: none;">•••••••</span>
-        </div>
-        <!-- Replaced the image with Material Icon for toggle balance -->
-        <i id="toggle-icon" class="material-icons" onclick="toggleBalance()">visibility</i>
-      </div>
-      <div class="floating-button">
-        <button class="service" id="newTradingButton">Topup balance</button>
-      </div>
+        <!-- Menu Dropdown -->
+<div class="home-menu-dropdown" id="homeMenuDropdown">
+    <a href="/user-profile" class="home-menu-item">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+    </a>
+    <a href="/user-setting" class="home-menu-item">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+    </a>
+    <div class="home-menu-item home-theme-toggle">
+        <i class="fas fa-moon"></i>
+        <span>Dark Mode</span>
+        <label class="switch">
+            <input type="checkbox" id="homeThemeToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <a href="/help" class="home-menu-item">
+        <i class="fas fa-question-circle"></i>
+        <span>Help</span>
+    </a>
+    <div class="home-menu-item">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
     </div>
 </div>
 
+        <!-- Balance Card -->
+        <div class="home-balance-card">
+            <div class="home-balance-header">
+                <div class="home-balance-title">Total Balance</div>
+                <div class="home-balance-toggle" id="homeBalanceToggle">
+                    <i class="fas fa-eye" id="toggle-icon"></i>
+                    <span>Hide</span>
+                </div>
+            </div>
+            <div class="home-balance-amount">
+                <span class="home-currency currency"></span>
+                <span id="balance-amount" style="display: none;">0.00</span>
+                <span id="balance-placeholder">•••••</span>
+                <span id="balance-skeleton" class="skeleton-loader"></span>
+            </div>
+            <div class="home-balance-subtext monthly-gain">
+                <span class="amount">$0.00</span><br>
+                <span class="month">Loading...</span>
+            </div>
+        </div>
 
-  <div class="content">
-  <div class="action-buttons">
-    <button class="action-button" id="withdraw-button">
-      <i data-feather="arrow-down-circle"></i>Withdraw
-    </button>
-    <button class="action-button">
-      <i data-feather="send"></i>Send
-    </button>
-  </div>
+        
 
-  <div class="icon-button-row">
-    <!-- Updated Activity button -->
-    <a href="/activity" class="icon-button">
-      <i data-feather="activity"></i>
-      <span>Activity</span>
-    </a>
 
-    <!-- Referrals button -->
-    <a href="/referrals" class="icon-button">
-      <i data-feather="users"></i>
-      <span>Referrals</span>
-    </a>
 
-    <div class="icon-button">
-      <i data-feather="dollar-sign"></i>
-      <span>USD Wallet</span>
+<!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-button" id="withdraw-button">
+        <i class="fas fa-arrow-circle-down"></i> Withdraw
+      </button>
+      <button class="action-button" id="send-button">
+        <i class="fas fa-paper-plane"></i> Send
+      </button>
+    </div>
+
+    <!-- Icon Buttons Row -->
+    <div class="icon-button-row">
+      <a href="go:ACTIVITY" class="icon-button">
+        <i class="fas fa-chart-line"></i>
+        <span>Activity</span>
+      </a>
+      <a href="go:REFERRALS" class="icon-button">
+        <i class="fas fa-users"></i>
+        <span>Referrals</span>
+      </a>
+      <div class="icon-button" id="topup-button">
+        <i class="fas fa-dollar-sign"></i>
+        <span>Top Up</span>
+      </div>
     </div>
   </div>
-
-  <div class="monthly-gain">
-    <h3>Total Gained</h3>
-    <div class="amount">---</div>
-    <div class="month">---</div>
-  </div>
-</div>
 
 
 <div class="withdraw-bottom-sheet" id="bottom-sheet">
@@ -276,12 +294,36 @@ document.addEventListener('DOMContentLoaded', (event) => {
     
 
 
+
+<!-- Recent Transactions -->
+<div class="home-transactions-card">
+    <div class="home-transactions-header">
+        <div class="home-transactions-title">Recent Transactions</div>
+        <div class="home-view-all">View All</div>
+    </div>
+    
+    <!-- Transaction items will be dynamically inserted here -->
+</div>
+
+
+
+
+
     `;
+
+
 document.getElementById('content').innerHTML = content;
 
 document.getElementById('toggle-icon').addEventListener('click', toggleBalance);
 
 feather.replace();
+
+setupMenuToggle();
+setupThemeToggle();
+fetchAndDisplayRecentTransactions();
+
+
+
 
 let countryCurrencyMap = {};
 let isBalanceLoading = true;  // Flag to indicate if the balance is still loading
@@ -312,7 +354,7 @@ sendButton.addEventListener('click', () => {
     history.pushState(null, '', location.href);
 });
 
-const topUpButton = document.getElementById('newTradingButton'); // Add the Topup button
+const topUpButton = document.getElementById('topup-button');
 topUpButton.addEventListener('click', () => {
     currentAction = 'topup'; // Set the action to topup
     prepareBottomSheetForTopup(); // Prepare the bottom sheet for topup
@@ -342,12 +384,26 @@ async function fetchCountryCurrencyMap() {
     });
 }
 
+
 function setupRealtimeListener() {
     const dbRef = ref(database, `users/${userId}`);
     onValue(dbRef, async (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
-            document.getElementById('dynamic-user-name').textContent = data.firstName || 'Unknown';
+            const userName = data.firstName || 'Unknown';
+            
+            // Get current time and determine the appropriate greeting
+            const currentHour = new Date().getHours();
+            let greeting = 'Good evening';  // Default greeting
+
+            if (currentHour < 12) {
+                greeting = 'Good morning';
+            } else if (currentHour < 18) {
+                greeting = 'Good afternoon';
+            }
+
+            // Update the user's name and greeting
+            document.getElementById('dynamic-user-name').textContent = `${greeting}, ${userName}`;
 
             // Start by disabling the toggle icon until the balance is loaded
             isBalanceLoading = true;
@@ -357,6 +413,9 @@ function setupRealtimeListener() {
             document.getElementById('balance-amount').textContent = Number(balance).toLocaleString();
             document.getElementById('balance-amount').style.display = 'block';
             document.getElementById('balance-skeleton').style.display = 'none';
+
+            // Immediately hide the balance placeholder once the balance is fetched
+            document.getElementById('balance-placeholder').style.display = 'none';
 
             const userCountry = data.country;
             const dynamicCurrency = countryCurrencyMap[userCountry] || "USD";
@@ -382,6 +441,8 @@ function setupRealtimeListener() {
     });
 }
 
+
+
 function fetchPhoneNumber() {
     const dbRef = ref(database, `users/${userId}/phoneNumber`);
     import('https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js').then(({ get }) => {
@@ -393,6 +454,9 @@ function fetchPhoneNumber() {
     });
 }
 
+
+
+
 function toggleBalance() {
     // Prevent toggling if balance is still being fetched
     if (isBalanceLoading) return;
@@ -402,17 +466,20 @@ function toggleBalance() {
     const toggleIcon = document.getElementById('toggle-icon');
 
     const isHidden = balanceAmount.style.display === 'none';
+    
+    // Toggle visibility
     balanceAmount.style.display = isHidden ? 'block' : 'none';
     balancePlaceholder.style.display = isHidden ? 'none' : 'block';
 
-    // Correct toggle icon: visibility_off when hidden and visibility when shown
-    toggleIcon.textContent = isHidden ? 'visibility' : 'visibility_off';
+    // Adjust the toggle icon
+    if (isHidden) {
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    } else {
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    }
 }
-
-
-
-
-
 
 
 
@@ -766,6 +833,28 @@ function processSend(receiverId, amount) {
         });
     });
   }
+
+
+
+
+
+
+function setupMenuToggle() {
+    const homeMenuButton = document.getElementById('homeMenuButton');
+    const homeMenuDropdown = document.getElementById('homeMenuDropdown');
+
+    homeMenuButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        homeMenuDropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+        homeMenuDropdown.classList.remove('show');
+    });
+
+    homeMenuDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 }
 
 
@@ -775,12 +864,124 @@ function processSend(receiverId, amount) {
 
 
 
+function setupThemeToggle() {
+    const homeThemeToggle = document.getElementById('homeThemeToggle');
+    const body = document.body;
+
+    // Check saved preference first
+    let savedTheme = localStorage.getItem('theme');
+
+    if (!savedTheme) {
+        // No preference saved: use system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        savedTheme = prefersDark ? 'dark' : 'light';
+    }
+
+    // Apply theme
+    if (savedTheme === 'dark') {
+        body.classList.add('dark-theme');
+        homeThemeToggle.checked = true;
+    } else {
+        body.classList.remove('dark-theme');
+        homeThemeToggle.checked = false;
+    }
+
+    // Theme toggle event
+    homeThemeToggle.addEventListener('change', () => {
+        if (homeThemeToggle.checked) {
+            body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            body.classList.remove('dark-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+}
+
+
+
+
+
+
+
+function fetchAndDisplayRecentTransactions() {
+    const transactionsRef = ref(database, `users/${userId}/transactions`);
+    onValue(transactionsRef, (snapshot) => {
+        const container = document.querySelector('.home-transactions-card');
+
+        let html = `
+            <div class="home-transactions-header">
+                <div class="home-transactions-title">Recent Transactions</div>
+                <div class="home-view-all">View All</div>
+            </div>
+        `;
+
+        if (!snapshot.exists()) {
+            html += `<div class="home-transaction-empty">You don't have any Transaction yet</div>`;
+            container.innerHTML = html;
+            return;
+        }
+
+        const transactions = Object.values(snapshot.val());
+
+        if (transactions.length === 0) {
+            html += `<div class="home-transaction-empty">You don't have any Transaction yet</div>`;
+            container.innerHTML = html;
+            return;
+        }
+
+        // Correct sort for ISO timestamps
+        transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        const recentTransactions = transactions.slice(0, 2);
+
+        recentTransactions.forEach((tx) => {
+            const amount = Number(tx.amount).toLocaleString();
+            const reason = tx.reason || 'Transaction';
+            const date = new Date(tx.timestamp);
+            const now = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(now.getDate() - 1);
+
+            let formattedTime;
+            if (date.toDateString() === now.toDateString()) {
+                formattedTime = `Today, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                formattedTime = `Yesterday, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } else {
+                formattedTime = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            const isPositive = reason.toLowerCase().includes('top up') || reason.toLowerCase().includes('deposit');
+            const iconClass = isPositive ? 'fas fa-arrow-down' : 'fas fa-shopping-bag';
+            const amountClass = isPositive ? 'home-transaction-amount positive' : 'home-transaction-amount';
+
+            html += `
+                <div class="home-transaction-item">
+                    <div class="home-transaction-info">
+                        <div class="home-transaction-icon">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="home-transaction-details">
+                            <h4>${reason}</h4>
+                            <p>${formattedTime}</p>
+                        </div>
+                    </div>
+                    <div class="${amountClass}">${isPositive ? '+' : '-'}$${amount}</div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    });
+}
+
+}
+        
+
         function goToSupport() {
     const supportContent = `
-        <div class="app-container">
-    <header>Support</header>
-
- 
+        
+    
 
   <div class="content">
     <!-- CHAT SUPPORT -->
@@ -849,112 +1050,244 @@ function processSend(receiverId, amount) {
 
            function goToWallet() {
     const walletContent = `
-    <div class="app-container">
-    <header>GAMES</header>
+        <div class="header">
+            <div class="logo">EARN<span>MONEY</span></div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search games, investments...">
+            </div>
+            <div class="menu-container">
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="menu-dropdown">
+                    <a href="/report" class="menu-item">
+                        <i class="fas fa-flag"></i>
+                        <span>Report website</span>
+                    </a>
+                    <a href="/developer" class="menu-item">
+                        <i class="fas fa-code"></i>
+                        <span>Developer APIs</span>
+                    </a>
+                    <a href="/trending" class="menu-item">
+                        <i class="fas fa-fire"></i>
+                        <span>Trending sites</span>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-  <div class="content">
-    <div class="game-image-container">
-      <a href="go:FRUITS">
-        <img src="https://i.postimg.cc/9fM5XKcp/c60cacec-e353-4a9e-947a-fa2fec50bbd1.png" alt="Casino Machine 1" />
-        <div class="game-name">FRUITS</div>
-      </a>
+        <div class="tab-container">
+            <div class="tab active" data-tab="games">
+                <i class="fas fa-gamepad"></i> Games
+            </div>
+            <div class="tab" data-tab="investments">
+                <i class="fas fa-chart-line"></i> Investments
+            </div>
+        </div>
 
-      <a href="go:LUCKY3">
-        <img src="https://i.postimg.cc/Xqng4SbN/70d8c0d0-c934-476f-a937-f17aa570e254.png" alt="Casino Machine 2" />
-        <div class="game-name">LUCKY3</div>
-      </a>
+        <div id="games" class="content-section active">
+            <h2 id="lux-featured-games-title">Featured Games</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <span class="badge">HOT</span>
+                    <div class="game-image-container">
+                        <img src="https://i.postimg.cc/9fM5XKcp/c60cacec-e353-4a9e-947a-fa2fec50bbd1.png" alt="Golden Fruits" class="game-image">
+                    </div>
+                    <a href="/golden-fruits" class="game-link">
+                        <div class="game-info">
+                            <h3 class="game-title">Golden Fruits</h3>
+                            <p class="game-category">Slot Machine</p>
+                            <button class="play-button">PLAY NOW</button>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-image-container">
+                        <img src="https://i.postimg.cc/Xqng4SbN/70d8c0d0-c934-476f-a937-f17aa570e254.png" alt="Lucky Triple" class="game-image">
+                    </div>
+                    <a href="/lucky-triple" class="game-link">
+                        <div class="game-info">
+                            <h3 class="game-title">Lucky Triple</h3>
+                            <p class="game-category">Card Game</p>
+                            <button class="play-button">PLAY NOW</button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="investments" class="content-section">
+            <h2 id="lux-recommended-investments-title">Recommended Investments</h2>
+            <div class="investments-grid">
+                <div class="investment-card">
+                    <span class="badge invest-badge">TOP</span>
+                    <div class="game-image-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Wealthfront_Logo.png/1200px-Wealthfront_Logo.png" alt="WealthFront" class="investment-icon">
+                    </div>
+                    <div class="investment-info">
+                        <h3 class="investment-title">WealthFront</h3>
+                        <p class="investment-type">Robo-Advisor</p>
+                        <div class="rating">
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">☆</span>
+                            <span class="rating-value">4.3</span>
+                        </div>
+                        <button class="invest-button">INVEST NOW</button>
+                    </div>
+                </div>
+
+                <div class="investment-card">
+                    <div class="game-image-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Robinhood_logo.svg/2560px-Robinhood_logo.svg.png" alt="Robinhood" class="investment-icon">
+                    </div>
+                    <div class="investment-info">
+                        <h3 class="investment-title">Robinhood</h3>
+                        <p class="investment-type">Stock Trading</p>
+                        <div class="rating">
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">☆</span>
+                            <span class="rating-value">4.3</span>
+                        </div>
+                        <button class="invest-button">INVEST NOW</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
     `;
     loadContent(walletContent);
+     // Tab toggle
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelector('.tab.active').classList.remove('active');
+                tab.classList.add('active');
+                
+                document.querySelector('.content-section.active').classList.remove('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
 
-    }
+    
+
+
+// Menu toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const menuDropdown = document.querySelector('.menu-dropdown');
+        
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('show');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', () => {
+            menuDropdown.classList.remove('show');
+        });
+}
 
 
         function goToReports() {
             const reportsContent = `
-<div class="app-container">
-    <header>Investments</header>
 
-    <div class="content">
+
+        
+            <div class="content">
     <div class="top-info">
-      <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
-      <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
+        <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
+        <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
     </div>
-<p id="countdownTimer" class="countdown-text"></p>
-    <div class="circle-wrapper">
-      <span id="planLabel" class="">---</span>
-      <div class="circle" id="progressCircle">
-        <div class="circle-inner"><h5>Daily Payout</h5><p id="earningAmount">---</p></div>
-      </div>
-      <span class="label-text">---</span>
+
+    <p id="countdownTimer" class="countdown-text"></p>
+
+    <div class="circle-container">
+        <div class="circle-labels">
+            <div class="circle-label left" id="planLabel">---</div>
+            <div class="circle-label right label-text">---</div>
+        </div>
+        <div class="circle" id="progressCircle">
+            <div class="circle-inner"><h5>Daily Payout</h5><p id="earningAmount">---</p></div>
+        </div>
     </div>
 
     <div class="buttons">
-      <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
-      <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop Investment</button>
-      <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
+        <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
+        <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop</button>
+        <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
     </div>
 
     <div class="info-text">
-      To withdraw your capital from investment press Stop Investment. Note that this will stop the investment contract and your daily earnings will be stopped.
+        Press stop to withdraw your capital.
     </div>
 
-    <div class="section-title">Transaction History</div>
-    <div class="transaction-cards" id="transactionCards"></div>
-  </div>
-
-  
-
-  
-
-<!-- Modal for stopping investment -->
-<div class="modal-required" id="stopInvestmentModal">
-  <div class="modal-content-required">
-    <h2 class="modal-heading">Are you sure you want to stop this investment?</h2>
-    <p>Note that your capital will be transferred back to your main wallet and daily payout will stop.</p>
-    <div>
-      <button class="close-required" id="confirmStopInvestment">Yes Stop</button>
-      <button class="cancel-required" id="cancelStopInvestment">Cancel</button>
-    </div>
-  </div>
-</div>
-                <!-- Cash Out Bottom Sheet -->
-<div id="cashOutSheet" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end z-50 hidden">
-  <div class="bg-gray-900 w-full max-w-md mx-auto rounded-t-2xl p-6 shadow-lg">
-    
-    <!-- Header row with Cash Out and Premium button -->
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-bold text-yellow-400">Cash Out</h2>
-      <a href="go:PREMIUM" id="getPremiumBtn" class="hidden no-underline">
-        <div class="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-semibold text-sm px-4 py-1.5 rounded-full shadow-md hover:scale-105 transition transform duration-200">
-          <svg class="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.97c.3.921-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.197-1.539-1.118l1.287-3.97a1 1 0 00-.364-1.118L2.046 9.397c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.287-3.97z"></path>
-          </svg>
-          <span>Get Premium</span>
+    <!-- Modal for stopping investment -->
+    <div class="modal-required" id="stopInvestmentModal">
+        <div class="modal-content-required">
+            <h2 class="modal-heading">Are you sure you want to stop this investment?</h2>
+            <p>Note that your capital will be transferred back to your main wallet and daily payout will stop.</p>
+            <div>
+                <button class="close-required" id="confirmStopInvestment">Yes Stop</button>
+                <button class="cancel-required" id="cancelStopInvestment">Cancel</button>
+            </div>
         </div>
-      </a>
     </div>
 
-    <label class="block mb-2 text-sm font-medium text-white" for="cashOutAmount">Enter Amount (UGX)</label>
-    <input type="tel" id="cashOutAmount" class="w-full px-4 py-2 rounded-md bg-gray-800 text-white border border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 mb-4" placeholder="e.g., 1000" min="1">
     
-    <!-- Message box -->
-    <div id="messageBox" class="text-sm mb-4 text-center text-red-400 hidden"></div>
-    
-    <!-- Buttons: Cancel on left, Confirm on right -->
-    <div class="flex justify-between gap-2">
-      <button id="cancelCashOut" class="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition w-full">Cancel</button>
-      <button id="confirmCashOut" class="bg-yellow-500 text-black font-bold px-4 py-2 rounded-md hover:bg-yellow-600 transition w-full">Confirm</button>
+    <div class="section-title">Transaction History</div>
+    <div class="transaction-cards" id="transactionCards">
+        <!-- Dynamic transactions will be injected here by JavaScript -->
     </div>
-  </div
+</div>
+
+
+
+
+
+<!-- Cash Out Bottom Sheet -->
+<div id="cashOutSheet" class="">
+    <div class="">
+        <!-- Header row with Cash Out and Premium button -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="">Cash Out</h2>
+            <a href="go:PREMIUM" id="getPremiumBtn" class="hidden no-underline">
+                <div class="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-semibold text-sm px-4 py-1.5 rounded-full shadow-md hover:scale-105 transition transform duration-200">
+                    <svg class="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.97c.3.921-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.197-1.539-1.118l1.287-3.97a1 1 0 00-.364-1.118L2.046 9.397c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.287-3.97z"></path>
+                    </svg>
+                    <span>Get Premium</span>
+                </div>
+            </a>
+        </div>
+
+        <label class="block mb-2 text-sm font-medium text-white" for="cashOutAmount">Enter Amount (UGX)</label>
+        <input type="tel" id="cashOutAmount" class="w-full px-4 py-2 rounded-md bg-gray-800 text-white border border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 mb-4" placeholder="e.g., 1000" min="1">
+        
+        <!-- Message box -->
+        <div id="messageBox" class="text-sm mb-4 text-center text-red-400 hidden"></div>
+        
+        <!-- Buttons: Cancel on left, Confirm on right -->
+        <div class="flex justify-between gap-2">
+            <button id="cancelCashOut" class="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition w-full">Cancel</button>
+            <button id="confirmCashOut" class="bg-yellow-500 text-black font-bold px-4 py-2 rounded-md hover:bg-yellow-600 transition w-full">Confirm</button>
+        </div>
+    </div>
 </div>
 
 `;
 
   loadContent(reportsContent);
 const dbRef = ref(database, `users/${userId}`);
+
+
 
 let userCurrency = 'USD';
 let countryCurrencyMap = {};
@@ -1063,31 +1396,44 @@ async function loadInvestmentData(data) {
 
   const stopBtn = document.getElementById('stopInvestmentButton');
   if (invested <= 0) {
-    stopBtn.innerText = 'No Investment';
+    stopBtn.innerText = 'STOP';
     stopBtn.disabled = true;
     stopBtn.style.background = '#ccc';
     stopBtn.style.color = '#666';
     stopBtn.style.cursor = 'not-allowed';
   } else {
-    stopBtn.innerHTML = '<i class="fas fa-stop-circle"></i> Stop Investment';
+    stopBtn.innerHTML = '<i class="fas fa-stop-circle"></i> STOP';
     stopBtn.disabled = false;
     stopBtn.style.background = 'linear-gradient(135deg, #ff00cc, #3333ff)';
     stopBtn.style.color = 'white';
     stopBtn.style.cursor = 'pointer';
   }
 
+  // Render transaction history
   const txContainer = document.getElementById('transactionCards');
-  txContainer.innerHTML = (investData.transactions || []).slice().reverse().map(tx => `
-    <div class="transaction-card">
-      <div class="transaction-info">
-        <h4>${tx.reason}</h4>
-        <p>Time: ${new Date(tx.time).toLocaleString()}</p>
-      </div>
-      <div class="transaction-amount">
-        ${tx.reason === 'Commission paid' || tx.reason === 'Investment added' ? '+' : '-'} ${formatCurrency(tx.amount, userCurrency)}
-      </div>
-    </div>
-  `).join('');
+  const transactions = investData.transactions || [];
+  
+  if (transactions.length === 0) {
+    txContainer.innerHTML = '<div class="transaction-empty">No transactions yet</div>';
+  } else {
+    txContainer.innerHTML = transactions.slice().reverse().map(tx => {
+      const isPositive = tx.reason === 'Commission paid' || tx.reason === 'Investment added';
+      const amountClass = isPositive ? 'positive' : 'negative';
+      const amountPrefix = isPositive ? '+' : '-';
+      
+      return `
+        <div class="transaction-card">
+          <div class="transaction-info">
+            <h4>${tx.reason}</h4>
+            <p>${new Date(tx.time).toLocaleString()}</p>
+          </div>
+          <div class="transaction-amount ${amountClass}">
+            ${amountPrefix} ${formatCurrency(tx.amount, userCurrency)}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
   updateCircleProgress(investData.lastUpdated, invested);
 }
@@ -1098,6 +1444,8 @@ onValue(dbRef, async (snapshot) => {
   if (!userData) return;
   await loadInvestmentData(userData);
 });
+
+
 
 
 
@@ -1125,6 +1473,7 @@ function openBottomSheet(action) {
   document.getElementById('messageBox').classList.add('hidden');
   document.getElementById('cashOutAmount').value = '';
   sheet.classList.remove('hidden');
+  sheet.classList.add('active'); // Add active class to show the sheet
 }
 
 // Button listeners
@@ -1137,7 +1486,7 @@ document.getElementById('cashOutButton').addEventListener('click', () => {
 });
 
 document.getElementById('cancelCashOut').addEventListener('click', () => {
-  document.getElementById('cashOutSheet').classList.add('hidden');
+  document.getElementById('cashOutSheet').classList.remove('active'); // Hide the sheet
 });
 
 // Confirm button: Invest or Withdraw
@@ -1172,7 +1521,7 @@ document.getElementById('confirmCashOut').addEventListener('click', async () => 
     const data = await response.json();
 
     if (data.message && data.message.toLowerCase().includes('successful')) {
-      document.getElementById('cashOutSheet').classList.add('hidden');
+      document.getElementById('cashOutSheet').classList.remove('active'); // Hide the sheet after success
       loadInvestment();
     } else {
       messageBox.innerText = data.message || 'An error occurred.';
@@ -1240,6 +1589,13 @@ document.getElementById('cancelStopInvestment').addEventListener('click', () => 
   document.getElementById('stopInvestmentModal').style.display = 'none';
 });
 
+// Close the Bottom Sheet when clicking outside of it
+document.getElementById('cashOutSheet').addEventListener('click', (event) => {
+  // Close only if the click is outside the content (the inner div)
+  if (event.target === event.currentTarget) {
+    document.getElementById('cashOutSheet').classList.remove('active');
+  }
+});
 
 
 
@@ -1387,30 +1743,10 @@ function attachLogoutEvents() {
     const confirmLogoutButton = document.getElementById('confirmLogoutButton');
     if (confirmLogoutButton) {
         confirmLogoutButton.addEventListener('click', () => {
-            // Make an API request to logout on the server side
-            fetch('/api/logout', {
-                method: 'GET',
-                credentials: 'same-origin', // Ensure cookies/session are sent
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Redirect to the login page or any other appropriate page
-                    window.location.href = '/api/login'; // Replace with the appropriate login page URL
-                } else {
-                    console.error('Logout failed');
-                    showErrorModal('Failed to log out. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error during logout request:', error);
-                showErrorModal('Failed to log out. Please try again.');
-            });
-
-            // Hide the logout confirmation modal
-            const logoutModal = document.getElementById('logoutModal');
-            if (logoutModal) {
-                logoutModal.style.display = 'none';
-            }
+            // Clear all data from localStorage
+            localStorage.clear();
+            // Redirect to the specified URL
+            window.location.href = 'http://action_exit'; // Replace with your desired URL
         });
     }
 
@@ -1437,7 +1773,6 @@ function attachLogoutEvents() {
     }
 }
 
-
 // Attach change PIN events
 function attachChangePinEvents() {
     const changePinSection = document.getElementById('change-pin-section');
@@ -1446,10 +1781,9 @@ function attachChangePinEvents() {
     }
 }
 
-
 // Handle change PIN process
 async function handleChangePin() {
-    // Assuming userId is already available in a constant
+    const userId = localStorage.getItem('userId'); // Get user ID from local storage
     if (!userId) {
         showErrorModal('User ID not found. Please log in again.');
         return;
@@ -1464,7 +1798,7 @@ async function handleChangePin() {
 
     try {
         // Verify old PIN
-        const verifyResponse = await fetch(`${host}/api/verify-pin`, {
+        const verifyResponse = await fetch('https://suppay-o7tod637r-sammyviks-projects.vercel.app/api/verify-pin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1487,7 +1821,7 @@ async function handleChangePin() {
 
             if (newPin === confirmPin) {
                 try {
-                    const response = await fetch(`${host}/api/update-user`, {
+                    const response = await fetch('https://suppay-o7tod637r-sammyviks-projects.vercel.app/api/update-user', {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1655,25 +1989,7 @@ function getDefaultImage(section) {
 
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
-
-body {
-  font-family: 'Poppins', sans-serif;
-}
-
-
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff;
-            transition: all 2.9s ease-in-out;
-        }
-
         
-
-
-
-
-
 
 
 
@@ -1683,740 +1999,14 @@ body {
 
 
 
-          /* Support Header styles */
-#support-header {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center content horizontally */
-    padding: 10px;
-    background-color: #1A7EB1;
-    color: white;
-    border-bottom: 1px solid #ccc;
-    height: 50px; /* Adjust height as needed */
-}
+          
 
-#support-header h1 {
-    margin: 0;
-    font-size: 22px; /* Slightly reduced font size */
-    line-height: 1.2; /* Adjust line-height to move text down */
-    padding-top: 10px; /* Add padding to move text slightly down */
-    font-weight: 400; /* Subtle reduction in boldness */
-}
 
-/* Container for support text */
-.support-container {
-    padding-bottom: 10px;
-    padding-top: 10px;
-    display: flex;
-    align-items: center; /* Align items vertically in the center */
-    margin: 20px; /* Space around the container */
-    font-size: 16px; /* Adjusted base font size */
-    color: #333;
-    position: relative; /* To position the icon absolutely */
-    cursor: pointer; /* Change cursor to pointer on hover */
-    overflow: hidden; /* Hide overflow to ensure the effect stays within bounds */
-}
 
-/* Add pseudo-element for the effect */
-.support-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 100%; /* Start off the left edge */
-    bottom: 0;
-    right: 0;
-    background: #f2f2f2; /* Color of the effect */
-    transition: left 0.2s ease-out; /* Shortened transition duration */
-    z-index: -1; /* Ensure the effect is behind the content */
-}
 
-.support-container:active::before {
-    left: 0; /* Move effect from left to right */
-}
 
-/* Circle with 'S' */
-.support-circle {
-    width: 30px; /* Reduced size of the circle */
-    height: 30px;
-    border-radius: 50%; /* Make it a circle */
-    background-color: #1A7EB1; /* Background color */
-    color: white; /* White text color */
-    display: flex;
-    align-items: center; /* Center text vertically */
-    justify-content: center; /* Center text horizontally */
-    margin-right: 10px; /* Space between circle and text */
-    font-size: 16px; /* Reduced size of the 'S' */
-}
 
-/* Text styles */
-.support-text {
-    display: flex;
-    flex-direction: column;
-    text-align: left; /* Align text to the left */
-    margin-right: 60px; /* Create space for the icon on the right */
-}
-
-.support-text p {
-    margin: 0; /* Remove default margin */
-    line-height: 1.2; /* Adjust line height if needed */
-}
-
-/* Text for 'CHAT WITH US' */
-.support-text #support-text {
-    font-size: 16px; /* Slightly reduced font size */
-    color: black; /* Black text color */
-    font-weight: bold; /* Bold text */
-}
-
-/* Text for 'Tap here to text us' */
-.support-text #support-tap-to-text {
-    font-size: 12px; /* Reduced font size */
-    color: grey; /* Gray text color */
-}
-
-/* Icon styles */
-.support-icon {
-    width: 10px; /* Smaller size of the icon */
-    height: 20px;
-    position: absolute; /* Position the icon absolutely */
-    right: 20px; /* Distance from the right edge of the container */
-}
-
-/* Make anchor tags fill the container */
-.support-link {
-    text-decoration: none; /* Remove underline */
-    color: inherit; /* Inherit text color */
-    display: block; /* Make the anchor tag a block-level element */
-    transition: background-color 0.2s ease, opacity 0.2s ease; /* Shortened transition duration */
-    outline: none; /* Removes the default outline */
-    -webkit-tap-highlight-color: transparent; /* Removes the tap highlight color on touch devices */
-}
-
-
-
-
-/* General Modal Styles */
-.modal,
-.logout-modal,
-.error-modal {
-    display: none;
-    position: fixed;
-    z-index: 10000; /* Ensure modals are on top */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-/* Modal Content Styles */
-.modal-content,
-.logout-modal-content,
-.error-modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 30px 20px;
-    border: 1px solid #888;
-    border-radius: 8px;
-    position: absolute;
-    top: 40%; /* Move modal up slightly */
-    left: 50%;
-    transform: translate(-50%, -50%); /* Center the modal with an offset */
-    width: 80%;
-    max-width: 500px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-/* Label Styles */
-.modal-content label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-/* Input Field Styles */
-.modal-content input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 8px;
-    box-sizing: border-box;
-    border: none;
-    border-bottom: 2px solid #f44336;
-    outline: none;
-    font-size: 15px;
-    -moz-appearance: textfield;
-    appearance: textfield;
-}
-
-/* Input Focus Styles */
-.modal-content input:focus {
-    border-bottom: 2px solid #333;
-}
-
-/* Modal Buttons Styles */
-.modal-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-}
-
-/* Button Styles */
-.modal-buttons button {
-    width: 46%;
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease, opacity 0.1s ease, transform 0.2s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Cancel Button Styles */
-.modal-buttons button.cancel {
-    background-color: #fff;
-    color: #f44336;
-    border: 2px solid #f44336;
-}
-
-/* Send Button Styles */
-.modal-buttons button.send {
-    background-color: #f44336;
-    color: white;
-}
-
-/* Button Hover and Active Styles */
-.modal-buttons button:hover:active {
-    opacity: 0.1;
-}
-
-.modal-buttons button:active {
-    transform: scale(0.95);
-}
-
-/* Logout Modal Styles */
-.logout-modal-content {
-    margin: auto;
-    padding: 20px;
-    width: 70%;
-    max-width: 400px;
-    text-align: center;
-    border-radius: 20px;
-    position: absolute;
-    top: 40%; /* Move modal up slightly */
-    left: 50%;
-    transform: translate(-50%, -50%); /* Center the modal with an offset */
-}
-
-.logout-modal-content h2 {
-    font-weight: normal;
-    margin: 10px 0;
-}
-
-.logout-modal-content p {
-    color: grey;
-    margin-bottom: 15px;
-}
-
-.logout-button-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-.logout-button {
-    padding: 10px 20px;
-    cursor: pointer;
-    border: none;
-    border-radius: 30px;
-    font-size: 16px;
-    width: 150px;
-    transition: background-color 0.1s ease, opacity 0.1s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.logout-confirm {
-    background-color: red;
-    color: white;
-    font-weight: normal;
-}
-
-.logout-cancel {
-    background-color: white;
-    color: red;
-    border: 2px solid red;
-    font-weight: normal;
-}
-
-.logout-button:active {
-    opacity: 0.1;
-    transform: scale(0.95);
-}
-
-/* Error Modal Styles */
-.error-modal-content {
-    margin: auto;
-    padding: 15px;
-    width: 70%;
-    max-width: 350px;
-    text-align: center;
-    border-radius: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    position: absolute;
-    top: 40%; /* Move modal up slightly */
-    left: 50%;
-    transform: translate(-50%, -50%); /* Center the modal with an offset */
-}
-
-#errorTitle {
-    color: black;
-    font-weight: normal;
-    font-size: 18px;
-    margin-bottom: 8px;
-}
-
-#errorMessage {
-    color: grey;
-    font-size: 14px;
-    margin-bottom: 12px;
-}
-
-#errorModalCloseButton {
-    background-color: white;
-    color: red;
-    border: 2px solid red;
-    padding: 12px;
-    width: 150px;
-    cursor: pointer;
-    border-radius: 28px;
-    font-size: 16px;
-    display: inline-block;
-    text-align: center;
-    transition: background-color 0.3s ease, opacity 0.1s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-#errorModalCloseButton:hover {
-    background-color: white;
-    color: red;
-}
-
-#errorModalCloseButton:active {
-    opacity: 0.1;
-    transform: scale(0.95);
-}
-
-
-
-
-
-
-
-
-
-.modal-required {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top, ensure higher z-index */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
-}
-
-.modal-content-required {
-    background-color: #fefefe;
-    position: absolute; /* Position the modal */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Center the modal */
-    padding: 15px;
-    border: 1px solid #888;
-    width: 70%; /* Slightly larger modal width */
-    max-width: 350px; /* Increase max-width slightly */
-    border-radius: 15px;
-    text-align: center; /* Center text */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow for better appearance */
-}
-
-.modal-heading {
-    font-size: 18px; /* Heading text size */
-    color: #333; /* Heading text color */
-    margin-bottom: 15px; /* Space below the heading */
-}
-
-.close-required {
-    background-color: red; /* Red background */
-    color: white; /* White text */
-    border: 2px solid red; /* Red border */
-    padding: 12px 40px; /* Increased button padding for wider button */
-    border-radius: 28px; /* Button border radius increased */
-    font-size: 16px; /* Increased button font size */
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
-    text-transform: uppercase; /* Optional: Make the button text uppercase */
-    transition: opacity 0.1s ease; /* Add transition for opacity */
-}
-
-.close-required:hover,
-.close-required:focus {
-    background-color: red; /* Darker red on hover */
-    transition: background-color 0.3s ease, opacity 0.1s ease; /* Add transition for opacity */
-    outline: none; /* Removes the default outline */
-    -webkit-tap-highlight-color: transparent; /* Removes the tap highlight color on touch devices */
-}
-
-.close-required:active {
-    opacity: 0.1; /* Fading effect on active state */
-}
-
-.cancel-required {
-    background-color: white; /* White background */
-    color: red; /* Red text */
-    border: 2px solid red; /* Red border */
-    padding: 12px 40px; /* Same padding as close button */
-    border-radius: 28px; /* Same border radius as close button */
-    font-size: 16px; /* Same font size as close button */
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px; /* Add margin to space out from the close button */
-    text-transform: uppercase; /* Optional: Make the button text uppercase */
-    transition: opacity 0.1s ease; /* Add transition for opacity */
-}
-
-.cancel-required:hover,
-.cancel-required:focus {
-    background-color: #f2f2f2; /* Slightly darker white on hover */
-    transition: background-color 0.3s ease, opacity 0.1s ease; /* Add transition for opacity */
-    outline: none; /* Removes the default outline */
-    -webkit-tap-highlight-color: transparent; /* Removes the tap highlight color on touch devices */
-}
-
-
-.cancel-required:active {
-    opacity: 0.1; /* Fading effect on active state */
-}
-
-
-
-.game-header {
-  background-color: #1A7EB1;
-  color: white;
-  padding: 10px 0;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 10;
-}
-
-.game-content {
-  margin-top: 60px; /* Make space for the fixed header */
-  padding: 0 2px;
-  overflow-y: auto;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.game-image-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 5px;
-  margin-bottom: 20px;
-}
-
-.game-image-container a {
-  display: block;
-  width: 250px;
-  border-radius: 12px;
-  overflow: hidden;
-  background-image: linear-gradient(
-    45deg,
-    #ffcc00,
-    #d40000,
-    #a020f0,
-    #ffcc00
-  );
-  background-size: 300% 300%;
-  animation: game-casinoGlow 2s linear infinite;
-  text-align: center;
-  padding-bottom: 10px;
-  text-decoration: none;
-}
-
-@keyframes game-casinoGlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.game-image-container img {
-  width: 100%;
-  max-height: 200px;
-  display: block;
-}
-
-.game-name {
-  font-size: 18px;
-  font-weight: bold;
-  color: #ffcc00;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: 10px;
-}
-
-
-
-
-/*💵 Investment CSS */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-header {
-  background-color: #1A7EB1;
-  color: white;
-  text-align: center;
-  padding: 8px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1px;
-  padding-bottom: 80px; /* Prevent content being hidden behind nav */
-  box-sizing: border-box;
-}
-
-    .top-info {
-      display: flex;
-      justify-content: space-around;
-      padding: 6px 10px;
-    }
-
-    .info-box {
-      text-align: center;
-    }
-
-    .info-box h4 {
-      margin: 0;
-      font-size: 0.8rem;
-      color: #666;
-    }
-
-    .info-box p {
-      margin: 2px 0 0;
-      font-size: 0.95rem;
-      font-weight: bold;
-      background: linear-gradient(90deg, #ff00cc, #3333ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .circle-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      margin-top: 6px;
-    }
-
-    
-
-    .circle {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: conic-gradient(#ff00cc 30%, #eee 30%);
-      position: relative;
-    }
-
-    .circle-inner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    .circle-inner h5 {
-      margin: 0;
-      font-size: 0.75rem;
-      color: #666;
-    }
-
-    .circle-inner p {
-      margin: 3px 0 0;
-      font-size: 0.95rem;
-      font-weight: bold;
-      background: linear-gradient(to right, #ff00cc, #3333ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin: 12px auto 4px;
-    }
-
-    .buttons button {
-      background: linear-gradient(135deg, #ff00cc, #3333ff);
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    .info-text {
-      text-align: center;
-      font-size: 0.65rem;
-      color: #666;
-      padding: 4px 12px 10px;
-      max-width: 300px;
-      margin: 0 auto;
-      line-height: 1.2;
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: #333;
-      margin: 12px 0 5px;
-    }
-
-    .transaction-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 0 16px 20px;
-    }
-
-    .transaction-card {
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-left: 5px solid #ff5733;
-    }
-
-    .transaction-info {
-      flex: 1;
-      margin-left: 12px;
-    }
-
-    .transaction-info h4 {
-      margin: 0;
-      font-size: 0.95rem;
-      color: #333;
-      font-weight: bold;
-    }
-
-    .transaction-info p {
-      margin: 3px 0;
-      color: #666;
-      font-size: 0.85rem;
-    }
-
-    .transaction-amount {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #ff5733;
-      background: linear-gradient(90deg, #ff5733, #ffcc00);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-  .label-free {
-  color: #FF6347;
-  font-weight: bold;
-  background-color: rgba(255, 99, 71, 0.2);
-  padding: 3px 6px;
-  border-radius: 5px;
-  border: 2px solid #FF6347;
-  text-transform: uppercase;
-  font-size: 8px;
-  letter-spacing: 0.2px;
-}
-
-
-   .label-premium {
-  font-size: 0.55rem;
-  font-weight: bold;
-  padding: 4px 10px;
-  background: linear-gradient(135deg, #FFD700, #FFB700, #FFA500);
-  color: black; /* Set text color to black */
-  border: 2px solid #FFD700;
-  border-radius: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-
-  /* Remove text clipping */
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: unset;
-}
-
-
-
-.label-text {
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: #555;
-    }
-
-
-
-   .countdown-text {
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #2E8B57;
-  text-align: center;
-  margin: 6px auto;
-  padding: 4px 8px;
-  background-color: #E6F4EA;
-  border: 1px solid #2E8B57;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  display: block;
-  width: fit-content;
-}
-
-
+   
 
 
 /* Bottom Navigation Container */
@@ -2529,404 +2119,11 @@ header {
 
 
 
-.withdraw-bottom-sheet {
-      position: fixed;
-      bottom: -100%;
-      left: 0;
-      right: 0;
-      background-color: white;
-      height: 100%;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .withdraw-bottom-sheet.open {
-      bottom: 0;
-    }
-
-    .withdraw-header {
-      background-color: #1A7EB1;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 25px 16px; /* Slightly reduced padding */
-      font-size: 22px; /* Slightly smaller font */
-      font-weight: bold;
-      position: relative;
-    }
-
-    .withdraw-header .withdraw-title {
-      position: absolute;
-      left: 0;
-      right: 0;
-      text-align: center;
-      pointer-events: none;
-    }
-
-    .withdraw-back-arrow {
-      position: absolute;
-      left: 16px;
-      font-size: 20px; /* Slightly smaller back arrow */
-      color: white;
-      cursor: pointer;
-    }
-
-    .withdraw-form {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 14px;
-      overflow-y: auto;
-      align-items: center;
-    }
-
-    .withdraw-form-group {
-      width: 90%;
-      margin-bottom: 14px; /* Slightly reduced margin */
-    }
-
-    .withdraw-form-group label {
-      font-size: 14px; /* Slightly smaller font */
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 5px; /* Slightly smaller margin */
-      display: block;
-    }
-
-    .withdraw-form-group input {
-      width: 100%;
-      padding: 10px; /* Slightly smaller padding */
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px; /* Slightly smaller font */
-      box-sizing: border-box;
-    }
-
-    .withdraw-form-group input:focus {
-      border-color: #1A7EB1;
-      outline: none;
-    }
-
-    .withdraw-insufficient-balance {
-      color: red;
-      font-size: 14px; /* Slightly smaller font */
-      margin-bottom: 6px; /* Slightly smaller margin */
-      text-align: center;
-      display: none;
-    }
-
-    .withdraw-form button {
-      padding: 12px;
-      background-color: #1A7EB1;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px; /* Slightly smaller font */
-      font-weight: bold;
-      cursor: pointer;
-      width: 90%;
-      box-sizing: border-box;
-    }
-
-    .withdraw-form button:hover {
-      background-color: #167AA6;
-    }
-
-    .withdraw-open-bottom-sheet-btn {
-      padding: 12px 18px; /* Slightly smaller padding */
-      background-color: #1A7EB1;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px; /* Slightly smaller font */
-      font-weight: bold;
-      cursor: pointer;
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 36px);
-      box-sizing: border-box;
-    }
 
 
 
-.app-container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .home-section {
-      background: linear-gradient(to right, #1A7EB1, #1A7EB1);
-      color: white;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    /* CSS to increase the icon size */
-.user-icon i {
-    font-size: 50px;
-}
 
 
-    .user-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .user-info h2 {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.4;
-      display: flex;
-      align-items: center;
-    }
-
-    .user-info h2 .verified-icon {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: white;
-      border-radius: 50%;
-      width: 14px;
-      height: 14px;
-      margin-left: 5px;
-    }
-
-    .user-info h2 .verified-icon i {
-      color: #1A7EB1;
-      font-size: 10px;
-      font-weight: bold;
-    }
-
-    .user-info p {
-      font-size: 12px;
-      margin-top: -4px;
-      line-height: 1.5;
-      font-weight: 300;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .notification-icon {
-      font-size: 24px;
-      color: white;
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-
-    .notification-icon:active {
-      opacity: 0.7;
-    }
-
-    .balance-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 30px;
-    }
-
-    .balance-container {
-      display: flex;
-      align-items: center;
-    }
-
-    .balance {
-      font-size: 18px;
-      margin-right: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .balance .currency {
-      font-weight: normal;
-      margin-right: 5px;
-      font-size: 10px;
-    }
-
-    .balance .amount {
-      font-family: 'Peace Sans', sans-serif;
-      font-weight: 900;
-    }
-
-    .skeleton-loader {
-      background-color: #e0e0e0;
-      width: 60px;
-      height: 18px;
-      border-radius: 4px;
-      animation: skeleton-loading 1.2s infinite;
-    }
-
-    @keyframes skeleton-loading {
-      0% { background-color: #e0e0e0; }
-      50% { background-color: #f0f0f0; }
-      100% { background-color: #e0e0e0; }
-    }
-
-    .balance-container img {
-      width: 19px;
-      height: 15px;
-      cursor: pointer;
-      margin-left: 7px;
-      transition: opacity 0.3s ease;
-    }
-
-    .balance-container img:active {
-      opacity: 0.3;
-    }
-
-    .floating-button button {
-      background-color: transparent;
-      border: 1px solid white;
-      color: white;
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-
-    .floating-button button:active {
-      opacity: 0.2;
-    }
-
-    .action-buttons {
-      display: flex;
-      justify-content: space-around;
-      margin: 25px 20px 10px;
-      gap: 16px;
-    }
-
-    .action-button {
-      background-color: white;
-      color: #1A7EB1;
-      border: none;
-      border-radius: 16px;
-      padding: 14px 20px;
-      flex: 1;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .action-button:hover {
-      transform: translateY(-2px);
-    }
-
-    .action-button:active {
-      transform: scale(0.98);
-    }
-
-    .action-button i {
-      color: #1A7EB1;
-    }
-
-    .icon-button-row {
-      display: flex;
-      justify-content: space-around;
-      gap: 10px;
-      padding: 20px;
-    }
-
-    .icon-button {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: white;
-      padding: 12px;
-      border-radius: 16px;
-      flex: 1;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease;
-    }
-
-    .icon-button:hover {
-      transform: translateY(-2px);
-    }
-
-    .icon-button:active {
-      transform: scale(0.97);
-    }
-
-    .icon-button i {
-      color: #1A7EB1;
-      margin-bottom: 6px;
-    }
-
-    .icon-button span {
-      font-size: 13px;
-      color: #1A7EB1;
-      font-weight: 500;
-    }
-
-    /* Luxury Total Gained Section */
-    .monthly-gain {
-      margin: 20px;
-      padding: 5px;
-      background: linear-gradient(135deg, #fff8e1, #f9d976);
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-      text-align: center;
-      transition: all 0.3s ease;
-      border: 1px solid #f5deb3;
-    }
-
-    .monthly-gain:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
-    }
-
-    .monthly-gain h3 {
-      color: #b68c26;
-      font-size: 15px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .monthly-gain .amount {
-      font-size: 20px;
-      font-weight: bold;
-      color: #3e2f13;
-      font-family: 'Peace Sans', sans-serif;
-      margin: 8px 0;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .monthly-gain .month {
-      font-size: 14px;
-      color: #7a6229;
-      font-style: italic;
-    }
 
 
 
@@ -3056,6 +2253,1847 @@ header {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+:root {
+    --bg-light: #f8fafc;
+    --card-light: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --accent-blue: #2563eb;
+    --accent-green: #10b981;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
+    --border-radius: 12px;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    /* Dark theme variables */
+    --bg-dark: #0f172a;
+    --card-dark: #1e293b;
+    --text-primary-dark: #e2e8f0;
+    --text-secondary-dark: #94a3b8;
+
+
+
+
+
+
+
+
+/* Bottom sheet specific */
+            --bottom-sheet-bg-light: #ffffff;
+            --bottom-sheet-bg-dark: #1e293b;
+            --bottom-sheet-header-light: #ffffff; /* White in light theme */
+            --bottom-sheet-header-dark: #1e293b; /* Dark in dark theme */
+            --bottom-sheet-text-light: #1e293b; /* Dark text in light theme */
+            --bottom-sheet-text-dark: #e2e8f0; /* Light text in dark theme */
+            --bottom-sheet-input-bg-light: #ffffff;
+            --bottom-sheet-input-bg-dark: #334155;
+            --bottom-sheet-border-light: #e2e8f0;
+            --bottom-sheet-border-dark: #334155;
+        
+}
+
+
+
+
+
+.home-transaction-empty {
+    padding: 1rem;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+}
+
+
+
+        
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px; /* Added space for bottom nav */
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+        }
+
+        body.dark-theme {
+            background-color: var(--bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .home-dashboard {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .home-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .home-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--accent-blue);
+        }
+
+        .dark-theme .home-user-avatar {
+            background-color: #334155;
+        }
+
+        .home-user-info h3 {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .dark-theme .home-user-info p {
+            color: var(--text-secondary-dark);
+        }
+
+        .home-user-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .home-menu-btn {
+            background: var(--card-light);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .dark-theme .home-menu-btn {
+            background: var(--card-dark);
+        }
+
+        .home-menu-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Balance Card */
+        .home-balance-card {
+            background: var(--card-light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .dark-theme .home-balance-card {
+            background: var(--card-dark);
+        }
+
+        .home-balance-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .home-balance-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .dark-theme .home-balance-title {
+            color: var(--text-secondary-dark);
+        }
+
+        .home-balance-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .dark-theme .home-balance-toggle {
+            color: var(--text-secondary-dark);
+        }
+
+        .home-balance-toggle i {
+            font-size: 16px;
+        }
+
+        .home-balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .home-balance-amount .home-currency {
+            font-size: 24px;
+            opacity: 0.7;
+        }
+
+        .home-balance-subtext {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .dark-theme .home-balance-subtext {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Quick Actions */
+        .home-quick-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .home-action-btn {
+            background: var(--card-light);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .dark-theme .home-action-btn {
+            background: var(--card-dark);
+        }
+
+        .home-action-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .home-action-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent-blue);
+        }
+
+        .home-action-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .dark-theme .home-action-label {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Recent Transactions */
+        .home-transactions-card {
+            background: var(--card-light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-theme .home-transactions-card {
+            background: var(--card-dark);
+        }
+
+        .home-transactions-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .home-transactions-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .home-view-all {
+            font-size: 14px;
+            color: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        .home-transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .dark-theme .home-transaction-item {
+            border-bottom: 1px solid #334155;
+        }
+
+        .home-transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-blue);
+        }
+
+        .dark-theme .home-transaction-icon {
+            background: #334155;
+        }
+
+        .home-transaction-details h4 {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .home-transaction-details p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .dark-theme .home-transaction-details p {
+            color: var(--text-secondary-dark);
+        }
+
+        .home-transaction-amount {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .home-transaction-amount.positive {
+            color: var(--accent-green);
+        }
+
+        /* Menu Dropdown */
+        .home-menu-dropdown {
+            display: none;
+            position: absolute;
+            right: 20px;
+            top: 70px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .dark-theme .home-menu-dropdown {
+            background: var(--card-dark);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .home-menu-dropdown.show {
+            display: block;
+        }
+
+        .home-menu-item {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dark-theme .home-menu-item {
+            color: var(--text-primary-dark);
+        }
+
+        .home-menu-item:hover {
+            background: #f1f5f9;
+        }
+
+        .dark-theme .home-menu-item:hover {
+            background: #334155;
+        }
+
+        .home-menu-item i {
+            width: 20px;
+            color: var(--text-secondary);
+        }
+
+        .dark-theme .home-menu-item i {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Theme Toggle Switch */
+        .home-theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-blue);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .dark-theme input:checked + .slider {
+            background-color: var(--accent-blue);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 8px 0;
+        }
+
+        .dark-theme .bottom-nav {
+            background: var(--card-dark);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-items-wrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            transform: translateY(-5px);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item p {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .dark-theme .nav-item {
+            color: var(--text-primary-dark);
+        }
+
+        /* Games button highlight */
+        .nav-item.wallet i {
+            color: var(--accent-blue);
+        }
+
+        .nav-item.wallet.active i {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+
+
+
+
+
+
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-theme {
+            background-color: var(--bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 90px;
+        }
+
+        /* Top Info Boxes */
+        .top-info {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: var(--card-light);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            flex: 1;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-theme .info-box {
+            background: var(--card-dark);
+        }
+
+        .info-box h4 {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .dark-theme .info-box h4 {
+            color: var(--text-secondary-dark);
+        }
+
+        .info-box p {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Countdown Timer */
+        .countdown-text {
+            text-align: center;
+            font-size: 13px;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* Circle Progress - Reduced size */
+        .circle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .circle-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .circle-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            width: 60px;
+            text-align: center;
+        }
+
+        .circle-label.left {
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .circle-label.right {
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        .dark-theme .circle-label {
+            color: var(--text-secondary-dark);
+        }
+
+        .circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent-blue) 0%, #e2e8f0 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 10px 0;
+            box-shadow: 0 3px 15px rgba(37, 99, 235, 0.2);
+        }
+
+        .dark-theme .circle {
+            background: conic-gradient(var(--accent-blue) 0%, #334155 0%);
+        }
+
+        .circle-inner {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--card-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dark-theme .circle-inner {
+            background: var(--card-dark);
+        }
+
+        .circle-inner h5 {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .dark-theme .circle-inner h5 {
+            color: var(--text-secondary-dark);
+        }
+
+        .circle-inner p {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* Buttons - Compact layout */
+        .buttons {
+            display: flex;
+            gap: 6px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .buttons button {
+            padding: 10px;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            flex: 1;
+            min-width: 90px;
+            font-size: 13px;
+        }
+
+        .buttons button:hover {
+            transform: translateY(-2px);
+        }
+
+        .buttons button i {
+            font-size: 15px;
+        }
+
+        #investButton {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        #stopInvestmentButton {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        #cashOutButton {
+            background-color: var(--accent-yellow);
+            color: black;
+        }
+
+        /* Info Text */
+        .info-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+
+        .dark-theme .info-text {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Transaction History Section */
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 20px 0 12px 0;
+    padding: 12px 0 8px;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: -1px; /* Adjust this based on your layout */
+    background: var(--card-light);
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.dark-theme .section-title {
+    color: var(--text-primary-dark);
+    border-bottom-color: #334155;
+    background: var(--card-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.transaction-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.transaction-card {
+    background: var(--card-light);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+
+.dark-theme .transaction-card {
+    background: var(--card-dark);
+}
+
+.transaction-card:hover {
+    transform: translateY(-2px);
+}
+
+.transaction-info {
+    flex: 1;
+}
+
+.transaction-info h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.dark-theme .transaction-info h4 {
+    color: var(--text-primary-dark);
+}
+
+.transaction-info p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.dark-theme .transaction-info p {
+    color: var(--text-secondary-dark);
+}
+
+.transaction-amount {
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 12px;
+}
+
+.transaction-amount.positive {
+    color: var(--accent-green);
+}
+
+.transaction-amount.negative {
+    color: var(--accent-red);
+}
+
+/* Empty state */
+.transaction-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.dark-theme .transaction-empty {
+    color: var(--text-secondary-dark);
+}
+
+        /* Modal - Compact */
+        .modal-required {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content-required {
+            background: var(--card-light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-theme .modal-content-required {
+            background: var(--card-dark);
+        }
+
+        .modal-heading {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .dark-theme .modal-heading {
+            color: var(--text-primary-dark);
+        }
+
+        .modal-content-required p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .dark-theme .modal-content-required p {
+            color: var(--text-secondary-dark);
+        }
+
+        .modal-content-required div {
+            display: flex;
+            gap: 10px;
+        }
+
+        .close-required, .cancel-required {
+            padding: 10px 14px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            flex: 1;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: 13px;
+        }
+
+        .close-required {
+            background-color: var(--accent-red);
+            color: white;
+            border: none;
+        }
+
+        .cancel-required {
+            background-color: var(--card-light);
+            color: var(--text-primary);
+            border: 1px solid var(--text-secondary);
+        }
+
+        .dark-theme .cancel-required {
+            background-color: var(--card-dark);
+            color: var(--text-primary-dark);
+            border: 1px solid var(--text-secondary-dark);
+        }
+
+        /* Cash Out Bottom Sheet - Compact */
+        #cashOutSheet {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 100000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #cashOutSheet.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #cashOutSheet > div {
+            background: var(--card-light);
+            width: 100%;
+            max-width: 480px;
+            border-radius: 16px 16px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+
+        #cashOutSheet.active > div {
+            transform: translateY(0);
+        }
+
+        .dark-theme #cashOutSheet > div {
+            background: var(--card-dark);
+        }
+
+        #cashOutSheet h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--accent-yellow);
+        }
+
+        #cashOutSheet label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .dark-theme #cashOutSheet label {
+            color: var(--text-secondary-dark);
+        }
+
+        #cashOutAmount {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 14px;
+            background: var(--card-light);
+            color: var(--text-primary);
+        }
+
+        .dark-theme #cashOutAmount {
+            background: var(--card-dark);
+            color: var(--text-primary-dark);
+            border-color: var(--text-secondary-dark);
+        }
+
+        #messageBox {
+            font-size: 13px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        #cashOutSheet .flex {
+            display: flex;
+            gap: 10px;
+        }
+
+        #cashOutSheet button {
+            flex: 1;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: 13px;
+        }
+
+        #cancelCashOut {
+            background: var(--card-light);
+            color: var(--text-primary);
+            border: 1px solid var(--text-secondary);
+        }
+
+        .dark-theme #cancelCashOut {
+            background: var(--card-dark);
+            color: var(--text-primary-dark);
+            border-color: var(--text-secondary-dark);
+        }
+
+        #confirmCashOut {
+            background: var(--accent-yellow);
+            color: black;
+            border: none;
+        }
+
+        /* Premium Button - Compact */
+        #getPremiumBtn {
+            text-decoration: none;
+        }
+
+        #getPremiumBtn div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(to right, var(--accent-yellow), #f59e0b);
+            color: black;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 6px 10px;
+            border-radius: 18px;
+            transition: transform 0.2s;
+        }
+
+        #getPremiumBtn:hover div {
+            transform: scale(1.05);
+        }
+
+        #getPremiumBtn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+
+
+
+
+
+
+
+
+/* Modernized Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .action-button {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--border-radius);
+      background-color: var(--accent-blue);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-button:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .action-button:active {
+      transform: translateY(0);
+    }
+
+    .action-button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+      pointer-events: none;
+    }
+
+    .action-button i {
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    /* Modernized Icon Buttons */
+    .icon-button-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .icon-button {
+      flex: 1;
+      padding: 16px 0;
+      border-radius: var(--border-radius);
+      font-size: 13px;
+      font-weight: 500;
+      background-color: var(--card-light);
+      color: var(--text-primary);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+
+    body.dark-theme .icon-button {
+      background-color: var(--card-dark);
+      color: var(--text-primary-dark);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .icon-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-button:active {
+      transform: translateY(0);
+    }
+
+    .icon-button i {
+      font-size: 20px;
+      color: var(--accent-blue);
+      transition: var(--transition);
+    }
+
+    .icon-button span {
+      transition: var(--transition);
+    }
+
+    .icon-button:hover i {
+      transform: scale(1.1);
+    }
+
+    .icon-button:hover span {
+      color: var(--accent-blue);
+    }
+
+    /* Specific button colors */
+    #withdraw-button {
+      background-color: var(--accent-green);
+    }
+
+    #withdraw-button:hover {
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    #topup-button {
+      cursor: pointer;
+    }
+
+    #topup-button:hover i {
+      color: var(--accent-green);
+    }
+
+
+
+
+
+
+/* Bottom Sheet Styles */
+        .withdraw-bottom-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bottom-sheet-bg-light);
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            
+        }
+
+        .dark-theme .withdraw-bottom-sheet {
+            background-color: var(--bottom-sheet-bg-dark);
+        }
+
+        .withdraw-bottom-sheet.open {
+            bottom: 0;
+        }
+
+        .withdraw-header {
+            background-color: var(--bottom-sheet-header-light);
+            color: var(--bottom-sheet-text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px 16px;
+            font-size: 22px;
+            font-weight: bold;
+            position: relative;
+            border-bottom: 1px solid var(--bottom-sheet-border-light);
+        }
+
+        .dark-theme .withdraw-header {
+            background-color: var(--bottom-sheet-header-dark);
+            color: var(--bottom-sheet-text-dark);
+            border-bottom: 1px solid var(--bottom-sheet-border-dark);
+        }
+
+        .withdraw-header .withdraw-title {
+            position: absolute;
+            left: 0;
+            right: 0;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .withdraw-back-arrow {
+            position: absolute;
+            left: 16px;
+            font-size: 20px;
+            color: var(--bottom-sheet-text-light);
+            cursor: pointer;
+        }
+
+        .dark-theme .withdraw-back-arrow {
+            color: var(--bottom-sheet-text-dark);
+        }
+
+        .withdraw-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 14px;
+            overflow-y: auto;
+            align-items: center;
+        }
+
+        .withdraw-form-group {
+            width: 90%;
+            margin-bottom: 14px;
+        }
+
+        .withdraw-form-group label {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--bottom-sheet-text-light);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .dark-theme .withdraw-form-group label {
+            color: var(--bottom-sheet-text-dark);
+        }
+
+        .withdraw-form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--bottom-sheet-border-light);
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: var(--bottom-sheet-input-bg-light);
+            color: var(--bottom-sheet-text-light);
+        }
+
+        .dark-theme .withdraw-form-group input {
+            background-color: var(--bottom-sheet-input-bg-dark);
+            border-color: var(--bottom-sheet-border-dark);
+            color: var(--bottom-sheet-text-dark);
+        }
+
+        .withdraw-form-group input:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+        }
+
+        .withdraw-insufficient-balance {
+            color: var(--accent-red);
+            font-size: 14px;
+            margin-bottom: 6px;
+            text-align: center;
+            display: none;
+        }
+
+        .withdraw-form button {
+            padding: 12px;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 90%;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+
+        .dark-theme .withdraw-form button {
+            background-color: var(--accent-blue);
+        }
+
+        .withdraw-form button:hover {
+            opacity: 0.9;
+        }
+
+        .withdraw-open-bottom-sheet-btn {
+            padding: 12px 18px;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 36px);
+            box-sizing: border-box;
+        }
+
+        .dark-theme .withdraw-open-bottom-sheet-btn {
+            background-color: var(--accent-blue);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+header {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 16px 0;
+            text-align: center;
+            padding-top: 4px;
+        }
+
+        .dark-theme header {
+            color: var(--text-primary-dark);
+        }
+
+        /* Support Links */
+        .support-link {
+            text-decoration: none;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .support-container {
+            background: var(--card-light);
+            border-radius: var(--border-radius);
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .dark-theme .support-container {
+            background: var(--card-dark);
+        }
+
+        .support-link:hover .support-container {
+            transform: translateY(-2px);
+        }
+
+        .support-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background-color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        /* Different colors for different support options */
+        .support-link:nth-child(1) .support-circle {
+            background-color: var(--accent-blue);
+        }
+        .support-link:nth-child(2) .support-circle {
+            background-color: #0088cc;
+        }
+        .support-link:nth-child(3) .support-circle {
+            background-color: #2CA5E0;
+        }
+        .support-link:nth-child(4) .support-circle {
+            background-color: var(--accent-green);
+        }
+
+        .support-circle-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .support-text {
+            flex: 1;
+        }
+
+        #support-text {
+            font-weight: 500;
+            margin-bottom: 2px;
+            color: var(--text-primary);
+            font-size: 15px;
+        }
+
+        .dark-theme #support-text {
+            color: var(--text-primary-dark);
+        }
+
+        #support-tap-to-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .dark-theme #support-tap-to-text {
+            color: var(--text-secondary-dark);
+        }
+
+        .support-icon {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .dark-theme .support-icon {
+            color: var(--text-secondary-dark);
+        }
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+:root {
+            --bg-light: #f8fafc;
+            --card-light: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-blue: #2563eb;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-radius: 12px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            
+            /* Dark theme variables */
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --text-primary-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+
+            /* Current theme defaults */
+            --bg: var(--bg-light);
+            --card: var(--card-light);
+            --text-main: var(--text-primary);
+            --text-sub: var(--text-secondary);
+        }
+
+        body.dark-theme {
+            --bg: var(--bg-dark);
+            --card: var(--card-dark);
+            --text-main: var(--text-primary-dark);
+            --text-sub: var(--text-secondary-dark);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            position: relative;
+        }
+
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            white-space: nowrap;
+        }
+
+        .logo span {
+            color: var(--accent-blue);
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: var(--border-radius);
+            border: none;
+            background: var(--card);
+            color: var(--text-main);
+            font-family: 'Poppins', sans-serif;
+            box-shadow: var(--shadow);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+        }
+
+        .menu-container {
+            position: relative;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 10px 0;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+            background: var(--card);
+            border-radius: var(--border-radius);
+            padding: 4px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .tab.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .games-grid, .investments-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .game-card, .investment-card {
+            background: var(--card);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+            padding: 15px;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-image-container {
+            width: 100%;
+            min-height: 100px;
+            max-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .game-image {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .investment-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: contain;
+            border: 2px solid var(--accent-green);
+            background: white;
+            padding: 3px;
+            margin: 0 auto;
+        }
+
+        .game-title, .investment-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .game-category, .investment-type {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .play-button, .invest-button {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 8px 0;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            font-size: 13px;
+            margin-top: auto;
+        }
+
+        .invest-button {
+            background: var(--accent-green);
+        }
+
+        .badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--accent-yellow);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .invest-badge {
+            background: var(--accent-green);
+        }
+
+        #lux-featured-games-title, #lux-recommended-investments-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 18px;
+            margin: 20px 0 12px;
+        }
+        
+        .rating {
+            display: flex;
+            justify-content: center;
+            margin: 8px 0;
+        }
+        
+        .star {
+            color: var(--accent-yellow);
+            font-size: 14px;
+            margin: 0 1px;
+        }
+        
+        .rating-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
