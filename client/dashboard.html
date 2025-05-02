@@ -464,22 +464,19 @@ function toggleBalance() {
 // ================== LOGOUT ==================
 document.querySelector('.home-menu-item .fa-sign-out-alt').closest('.home-menu-item').addEventListener('click', async () => {
     try {
-        const response = await fetch('/api/logout', {
+        await fetch('/api/logout', {
             method: 'GET',
             credentials: 'include'
         });
 
-        if (response.redirected) {
-            window.location.href = response.url;
-        } else {
-            // Fallback redirect if response doesn't auto-redirect
-            window.location.href = '/api/login';
-        }
+        // Always redirect to /login regardless of response status
+        window.location.href = '/login';
     } catch (error) {
-        console.error('Logout failed:', error);
-        alert('Logout failed. Please try again.');
+        // Still redirect even if fetch fails
+        window.location.href = '/login';
     }
 });
+
 
 
 
