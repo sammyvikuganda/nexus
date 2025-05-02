@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --card-light: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-blue: #2563eb;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-radius: 12px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --border-light: rgba(0,0,0,0.1);
+            
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --text-primary-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+            --border-dark: rgba(255,255,255,0.15);
+
+            --bg: var(--bg-light);
+            --card: var(--card-light);
+            --text-main: var(--text-primary);
+            --text-sub: var(--text-secondary);
+            --border-color: var(--border-light);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.4;
+            font-size: 14px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-top: 70px;
+        }
+        
+        .settings-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .settings-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .settings-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1.2rem;
+        }
+        
+        .settings-card {
+            background: var(--card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .settings-section {
+            padding: 1.2rem;
+        }
+        
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        
+        .profile-picture-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.8rem;
+            border: 3px solid var(--accent-blue);
+            background-color: #f0f0f0;
+        }
+        
+        .change-photo-btn {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--card);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+        
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .phone-prefix {
+            padding: 0.8rem;
+            background-color: var(--bg);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            color: var(--text-sub);
+        }
+        
+        .phone-input {
+            flex: 1;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        .country-display {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg);
+            color: var(--text-sub);
+        }
+        
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+        
+        .btn-primary:enabled {
+            opacity: 1;
+        }
+        
+        .btn-primary:hover:enabled {
+            background: #1d4ed8;
+        }
+        
+        .phone-error {
+            color: var(--accent-red);
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        
+        .message-container {
+            margin: 1.5rem 0;
+        }
+        
+        .message {
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+        
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+        
+        body.dark-theme {
+            --bg: var(--bg-dark);
+            --card: var(--card-dark);
+            --text-main: var(--text-primary-dark);
+            --text-sub: var(--text-secondary-dark);
+            --border-color: rgba(255,255,255,0.15);
+        }
+        
+        /* Skeleton Loading Styles */
+        .skeleton {
+            background-color: var(--border-color);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        .skeleton-circle {
+            border-radius: 50%;
+        }
+        
+        .skeleton-text {
+            height: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .skeleton-input {
+            height: 2.8rem;
+            width: 100%;
+        }
+        
+        .skeleton-btn {
+            height: 2.8rem;
+            width: 100%;
+        }
+        
+        .skeleton-container {
+            display: none;
+        }
+        
+        .loading .skeleton-container {
+            display: block;
+        }
+        
+        .loading .content-container {
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .settings-container {
+                padding: 1rem;
+            }
+            
+            .settings-header {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-header">
+        <a href="/user-setting" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="settings-title">Edit Profile</h1>
+    </div>
+    
+    <div class="settings-container">
+        <div class="settings-card">
+            <div class="settings-section">
+                <!-- Skeleton Loading Container -->
+                <div class="skeleton-container">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-edit"></i>
+                        Personal Information
+                    </h2>
+                    
+                    <div class="profile-picture-container">
+                        <div class="profile-picture skeleton skeleton-circle" style="border: none;"></div>
+                        <div class="skeleton skeleton-text" style="width: 100px; height: 1.2rem;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="skeleton skeleton-text" style="width: 80px;"></div>
+                        <div class="skeleton skeleton-input"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="skeleton skeleton-text" style="width: 80px;"></div>
+                        <div class="skeleton skeleton-input"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="skeleton skeleton-text" style="width: 100px;"></div>
+                        <div class="skeleton skeleton-input"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="skeleton skeleton-text" style="width: 100px;"></div>
+                        <div style="display: flex;">
+                            <div class="skeleton skeleton-text" style="width: 60px; height: 2.8rem; border-radius: var(--border-radius) 0 0 var(--border-radius);"></div>
+                            <div class="skeleton skeleton-input" style="border-radius: 0 var(--border-radius) var(--border-radius) 0;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="skeleton skeleton-text" style="width: 60px;"></div>
+                        <div class="skeleton skeleton-input"></div>
+                    </div>
+                    
+                    <div class="skeleton skeleton-btn"></div>
+                </div>
+                
+                <!-- Actual Content Container -->
+                <div class="content-container">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-edit"></i>
+                        Personal Information
+                    </h2>
+                    
+                    <div class="profile-picture-container">
+                        <img src="https://i.postimg.cc/QNWG53V4/9187604.png" alt="Profile Picture" class="profile-picture" id="profilePicture">
+                        <button class="change-photo-btn" onclick="document.getElementById('photoUpload').click()">
+                            <i class="fas fa-camera"></i> Change Photo
+                        </button>
+                        <input type="file" id="photoUpload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    </div>
+                    
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" id="firstName" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" id="lastName" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <div class="phone-input-container">
+                                <span class="phone-prefix" id="phonePrefix">+256</span>
+                                <input type="tel" id="phone" class="form-control phone-input" required>
+                            </div>
+                            <div class="phone-error" id="phoneError">Phone number must be exactly X digits</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Country</label>
+                            <div class="country-display" id="countryDisplay">Uganda</div>
+                        </div>
+                        
+                        <!-- Message container above the button -->
+                        <div class="message-container">
+                            <div id="successMessage" class="message success-message">
+                                <i class="fas fa-check-circle"></i> Profile updated successfully!
+                            </div>
+                            <div id="errorMessage" class="message error-message">
+                                <i class="fas fa-exclamation-circle"></i> Error updating profile. Please try again.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" id="saveButton" disabled>Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
+        authDomain: "records-1674c.firebaseapp.com",
+        databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
+        projectId: "records-1674c",
+        storageBucket: "records-1674c.firebasestorage.app",
+        messagingSenderId: "592414404602",
+        appId: "1:592414404602:web:917365f2b54522ef953e43",
+        measurementId: "G-H6HCSQWZY2"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    let userId = null;
+    let countriesData = [];
+    let currentPhoneLength = 9;
+
+    let originalValues = {
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        country: ''
+    };
+
+    function showLoading() {
+        document.body.classList.add('loading');
+    }
+
+    function hideLoadingWhenReady() {
+        const allFieldsFilled = 
+            document.getElementById('firstName').value.trim() !== '' &&
+            document.getElementById('lastName').value.trim() !== '' &&
+            document.getElementById('email').value.trim() !== '' &&
+            document.getElementById('phone').value.trim() !== '' &&
+            document.getElementById('countryDisplay').textContent.trim() !== '';
+        
+        if (allFieldsFilled) {
+            document.body.classList.remove('loading');
+        } else {
+            setTimeout(hideLoadingWhenReady, 100);
+        }
+    }
+
+    function showMessage(type, duration = 3000) {
+        const successMsg = document.getElementById('successMessage');
+        const errorMsg = document.getElementById('errorMessage');
+        successMsg.style.display = 'none';
+        errorMsg.style.display = 'none';
+
+        if (type === 'success') successMsg.style.display = 'block';
+        else if (type === 'error') errorMsg.style.display = 'block';
+
+        if (duration > 0) {
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+                errorMsg.style.display = 'none';
+            }, duration);
+        }
+    }
+
+    function checkFormChanges() {
+        const saveButton = document.getElementById('saveButton');
+        const hasChanges = 
+            document.getElementById('firstName').value !== originalValues.firstName ||
+            document.getElementById('lastName').value !== originalValues.lastName ||
+            document.getElementById('email').value !== originalValues.email ||
+            document.getElementById('phone').value !== originalValues.phone;
+        saveButton.disabled = !hasChanges;
+    }
+
+    async function fetchCountriesData() {
+        try {
+            const response = await fetch('https://upay-2r8z6g7xc-nexus-int.vercel.app/api/countries');
+            countriesData = await response.json();
+            console.log("Countries data loaded");
+        } catch (error) {
+            console.error("Error fetching countries data:", error);
+        }
+    }
+
+    function setPhoneValidation(countryName) {
+        const country = countriesData.find(c => c.country === countryName);
+        if (country) {
+            currentPhoneLength = country.phone_length;
+            const phoneInput = document.getElementById('phone');
+            phoneInput.maxLength = currentPhoneLength;
+            document.getElementById('phoneError').textContent = 
+                `Phone number must be exactly ${currentPhoneLength} digits`;
+        }
+    }
+
+    function fetchUserData() {
+        showLoading();
+        const userRef = database.ref('users/' + userId);
+
+        userRef.once('value')
+            .then((snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    originalValues.firstName = userData.firstName || '';
+                    originalValues.lastName = userData.lastName || '';
+                    originalValues.email = userData.email || '';
+
+                    let phoneNumber = userData.phoneNumber || '+256 ';
+                    let phoneParts = phoneNumber.split(' ');
+                    let phonePrefix = phoneParts[0] + (phoneParts.length > 1 ? ' ' : '');
+                    let phoneNumberWithoutPrefix = phoneParts.slice(1).join(' ');
+
+                    originalValues.phone = phoneNumberWithoutPrefix;
+
+                    document.getElementById('firstName').value = originalValues.firstName;
+                    document.getElementById('lastName').value = originalValues.lastName;
+                    document.getElementById('email').value = originalValues.email;
+                    document.getElementById('phonePrefix').textContent = phonePrefix;
+                    document.getElementById('phone').value = originalValues.phone;
+
+                    const country = userData.country || 'Uganda';
+                    originalValues.country = country;
+                    document.getElementById('countryDisplay').textContent = country;
+
+                    setPhoneValidation(country);
+                    hideLoadingWhenReady();
+                } else {
+                    console.log("No user data found");
+                    hideLoadingWhenReady();
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching user data:", error);
+                hideLoadingWhenReady();
+            });
+    }
+
+    function validatePhoneNumber() {
+        const phoneInput = document.getElementById('phone');
+        const phoneError = document.getElementById('phoneError');
+
+        if (phoneInput.value.length !== currentPhoneLength) {
+            phoneError.style.display = 'block';
+            return false;
+        } else {
+            phoneError.style.display = 'none';
+            return true;
+        }
+    }
+
+    function applySavedTheme() {
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (!savedTheme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                body.classList.add('dark-theme');
+            }
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-theme');
+        }
+    }
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profilePicture').src = e.target.result;
+                document.getElementById('saveButton').disabled = false;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function handleSubmit(e) {
+        e.preventDefault();
+
+        if (!validatePhoneNumber()) {
+            return;
+        }
+
+        const phonePrefix = document.getElementById('phonePrefix').textContent;
+        const phoneNumber = document.getElementById('phone').value;
+
+        const formData = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            phoneNumber: phonePrefix + phoneNumber
+        };
+
+        database.ref('users/' + userId).update(formData)
+            .then(() => {
+                showMessage('success');
+                originalValues.firstName = formData.firstName;
+                originalValues.lastName = formData.lastName;
+                originalValues.email = formData.email;
+                originalValues.phone = phoneNumber;
+                document.getElementById('saveButton').disabled = true;
+            })
+            .catch((error) => {
+                console.error("Error updating profile:", error);
+                showMessage('error');
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        applySavedTheme();
+        showLoading();
+
+        try {
+            const sessionRes = await fetch('/api/session');
+            const sessionData = await sessionRes.json();
+            if (!sessionData.userId) {
+                window.location.href = '/api/login';
+                return;
+            }
+
+            userId = sessionData.userId;
+
+            await fetchCountriesData();
+            await fetchUserData();
+        } catch (err) {
+            console.error('Session or init error:', err);
+            window.location.href = '/login';
+        }
+
+        const inputs = ['firstName', 'lastName', 'email', 'phone'];
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', checkFormChanges);
+        });
+
+        document.getElementById('phone').addEventListener('input', function(e) {
+            if (this.value.length > currentPhoneLength) {
+                this.value = this.value.slice(0, currentPhoneLength);
+            }
+            validatePhoneNumber();
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', handleSubmit);
+    });
+</script>
+
+</body>
+</html>
