@@ -253,58 +253,6 @@ app.post('/api/register', async (req, res) => {
 });
 
 
-// Endpoint to handle withdrawal request
-app.post('/api/withdraw', async (req, res) => {
-  // Destructure the required data from the request body
-  const { mobile, amount, tx, description } = req.body;
-
-  // Validate required fields
-  if (!mobile || !amount || !tx || !description) {
-    return res.status(400).json({ message: 'Mobile number, amount, transaction ID, and description are required.' });
-  }
-
-  // Get environment variables (ensure they are set in Vercel or locally)
-  const JPESA_API_KEY = process.env.JPESA_API_KEY; // Using JPESA_API_KEY for the JPesa API key
-  const CALLBACK_URL = process.env.CALLBACK_URL;
-
-  // Check if the environment variables are set
-  if (!JPESA_API_KEY || !CALLBACK_URL) {
-    return res.status(500).json({ message: 'JPesa API Key or Callback URL missing in environment variables.' });
-  }
-
-  // Construct the XML data using dynamic user inputs
-  const DATA = `<?xml version="1.0" encoding="ISO-8859-1"?>
-    <g7bill>
-      <_key_>${JPESA_API_KEY}</_key_>
-      <cmd>account</cmd>
-      <action>debit</action>
-      <pt>mm</pt>
-      <mobile>${mobile}</mobile>
-      <amount>${amount}</amount>
-      <callback>${CALLBACK_URL}</callback>
-      <tx>${tx}</tx>
-      <description>${description}</description>
-    </g7bill>`;
-
-  try {
-    // Send the request to JPesa API
-    const response = await axios.post('https://my.jpesa.com/api/', DATA, {
-      headers: {
-        'Content-Type': 'text/xml',
-      },
-    });
-
-    // Log the response from JPesa API for debugging
-    console.log(response.data);
-
-    // Send success response to the client
-    res.status(200).json({ message: 'Withdrawal request sent successfully!', data: response.data });
-  } catch (error) {
-    // Handle error and send a failure response
-    console.error('Error sending request to JPesa:', error);
-    res.status(500).json({ message: 'Error processing withdrawal', error: error.message });
-  }
-});
 
 
 
@@ -338,323 +286,70 @@ app.patch('/api/update-server-status', async (req, res) => {
 
 
 
-// Endpoint to handle both Top Up and Withdraw
-app.patch('/api/update-balance', async (req, res) => {
-  const { userId, amount, reason, phone } = req.body;
 
-  if (!userId || amount === undefined || !reason || !phone) {
-    return res.status(400).json({ message: 'User ID, amount, reason, and phone are required' });
+// Unified JPesa payment endpoint with dynamic description and transaction ID format
+app.post('/api/payment', async (req, res) => {
+  const { mobile, amount, reason } = req.body;
+
+  if (!mobile || !amount || !reason) {
+    return res.status(400).json({ message: 'Mobile number, amount, and reason are required.' });
   }
+
+  const JPESA_API_KEY = process.env.JPESA_API_KEY;
+  const CALLBACK_URL = process.env.CALLBACK_URL;
+
+  if (!JPESA_API_KEY || !CALLBACK_URL) {
+    return res.status(500).json({ message: 'JPesa API Key or Callback URL missing in environment variables.' });
+  }
+
+  // Generate a unique transaction ID that starts with "NXN"
+  const tx = `NXN${Date.now()}`;
+
+  // Set the description and action based on the reason
+  let action, description;
+  if (reason.toLowerCase() === 'top up') {
+    action = 'credit';
+    description = 'Top Up Wallet';
+  } else if (reason.toLowerCase() === 'withdraw') {
+    action = 'debit';
+    description = 'Withdraw Money';
+  } else {
+    return res.status(400).json({ message: 'Reason must be either "Top Up" or "Withdraw".' });
+  }
+
+  const DATA = `<?xml version="1.0" encoding="ISO-8859-1"?>
+    <g7bill>
+      <_key_>${JPESA_API_KEY}</_key_>
+      <cmd>account</cmd>
+      <action>${action}</action>
+      <pt>mm</pt>
+      <mobile>${mobile}</mobile>
+      <amount>${amount}</amount>
+      <callback>${CALLBACK_URL}</callback>
+      <tx>${tx}</tx>
+      <description>${description}</description>
+    </g7bill>`;
 
   try {
-    // Check server status before processing the request
-    const serverStatusRef = db.ref('serverStatus');
-    const serverStatusSnapshot = await serverStatusRef.once('value');
-    const serverStatus = serverStatusSnapshot.val();
+    const response = await axios.post('https://my.jpesa.com/api/', DATA, {
+      headers: {
+        'Content-Type': 'text/xml',
+      },
+    });
 
-    // If server status is busy, only allow Top Up
-    if (serverStatus === 'busy' && reason !== 'Top Up') {
-      return res.status(403).json({ message: 'Server is currently busy. Only Top Up operations are allowed.' });
-    }
+    console.log(response.data);
 
-    const userRef = db.ref(`users/${userId}`);
-    const snapshot = await userRef.once('value');
-
-    if (!snapshot.exists()) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const user = snapshot.val();
-    const currentBalance = user.balance || 0;
-    const sponsorCode = user.sponsorCode || null;
-    const reference = `ref-${userId}-${Date.now()}`;
-
-    const formattedPhone = phone.replace(/\s+/g, '').replace(/^\+/, '');
-
-    let tezaApiUrl = '';
-    let tezaApiData = {
-      apikey: publicKey,
-      reference: reference,
-      phone: formattedPhone,
-      amount: amount,
-      description: `${reason} request for user: ${userId}`
-    };
-
-    let companyTax = 0;
-    let companyCollection = 0;
-    let sponsorCommission = 0;
-
-    if (reason === 'Withdraw') {
-      if (currentBalance < amount) {
-        return res.status(400).json({ message: 'Insufficient balance for withdrawal' });
-      }
-
-      const amountToSend = amount * 0.9;
-      tezaApiData.amount = amountToSend;
-      tezaApiUrl = 'https://tezanetwork.com/api/v1/withdraw';
-
-      companyTax = amount * 0.08;
-
-      if (sponsorCode) {
-        const sponsorRef = db.ref(`users/${sponsorCode}`);
-        const sponsorSnapshot = await sponsorRef.once('value');
-        if (sponsorSnapshot.exists()) {
-          sponsorCommission = amount * 0.02;
-        }
-      } else {
-        companyCollection = amount * 0.02;
-      }
-    } else if (reason === 'Top Up') {
-      tezaApiUrl = 'https://tezanetwork.com/api/v1/deposit';
-    } else {
-      return res.status(400).json({ message: 'Invalid reason. Must be "Withdraw" or "Top Up"' });
-    }
-
-    try {
-      const tezaResponse = await axios.post(tezaApiUrl, tezaApiData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${secretKey}`
-        }
-      });
-
-      if (tezaResponse.status >= 200 && tezaResponse.status < 300) {
-        const { status, transaction_id } = tezaResponse.data;
-
-        if (status === 'success') {
-          const transactionsRef = userRef.child('transactions');
-          const newTransactionRef = transactionsRef.push();
-
-          await newTransactionRef.set({
-            amount: amount,
-            reason: reason,
-            transactionId: transaction_id,
-            reference: reference,
-            phone: phone,
-            status: 'pending',
-            timestamp: new Date().toISOString()
-          });
-
-          if (reason === 'Withdraw') {
-            const newBalance = currentBalance - amount;
-            await userRef.update({ balance: newBalance });
-
-            // Update company tax and collection by adding to existing values
-            const companyRef = db.ref('companyData');
-            const companySnapshot = await companyRef.once('value');
-            const companyData = companySnapshot.val() || {};
-            await companyRef.update({
-              companyTax: (companyData.companyTax || 0) + companyTax,
-              companyCollection: (companyData.companyCollection || 0) + companyCollection
-            });
-          }
-
-          // Update sponsor referral commission if valid
-          if (sponsorCode && sponsorCommission > 0) {
-            const sponsorRef = db.ref(`users/${sponsorCode}`);
-            const sponsorSnapshot = await sponsorRef.once('value');
-            if (sponsorSnapshot.exists()) {
-              const sponsorUser = sponsorSnapshot.val();
-              const newReferralCommission = (sponsorUser.referralCommission || 0) + sponsorCommission;
-              await sponsorRef.update({ referralCommission: newReferralCommission });
-            }
-          }
-
-          return res.status(200).json({
-            message: `${reason} initiated successfully`,
-            transactionId: transaction_id,
-            reference
-          });
-        } else {
-          return res.status(422).json({
-            message: `Failed to initiate ${reason.toLowerCase()} with Teza`,
-            details: tezaResponse.data.message || 'Unknown error'
-          });
-        }
-      } else {
-        return res.status(422).json({
-          message: `Failed to initiate ${reason.toLowerCase()} with Teza`,
-          details: tezaResponse.data.message || 'Unknown error'
-        });
-      }
-    } catch (error) {
-      console.error(`Error during Teza ${reason.toLowerCase()} submission:`, error);
-      return res.status(500).json({
-        message: `Failed to submit ${reason.toLowerCase()} to Teza`,
-        error: error.message
-      });
-    }
-
+    res.status(200).json({
+      message: `${reason} request sent successfully!`,
+      transaction_id: tx,
+      description: description,
+      data: response.data,
+    });
   } catch (error) {
-    console.error('Server error:', error);
-    return res.status(500).json({ message: 'Error processing request', error: error.message });
+    console.error(`Error processing ${reason} request to JPesa:`, error);
+    res.status(500).json({ message: `Error processing ${reason}`, error: error.message });
   }
 });
-
-
-
-
-
-
-
-// Endpoint to manually process all failed logs (supports both GET and POST)
-app.all('/api/process-failed-logs', async (req, res) => {
-  if (req.method === 'POST' || req.method === 'GET') {
-    try {
-      const usersSnapshot = await db.ref('users').once('value');
-      
-      if (!usersSnapshot.exists()) {
-        return res.status(404).json({ message: 'No users found' });
-      }
-
-      const users = usersSnapshot.val();
-
-      // Loop through each user
-      for (let userId in users) {
-        const userRef = db.ref(`users/${userId}`);
-        const transactionsRef = userRef.child('transactions');
-
-        // Get failed logs for the user
-        const failedLogsSnapshot = await userRef.child('failed_logs').once('value');
-
-        if (failedLogsSnapshot.exists()) {
-          const failedLogs = failedLogsSnapshot.val();
-
-          // Loop through each failed log and process
-          for (let logId in failedLogs) {
-            const failedLog = failedLogs[logId];
-            const reference_id = failedLog.reference_id;
-            const transaction_id = failedLog.transaction_id;
-            const failedStatus = failedLog.status;  // Get the status from the failed log ('Approved' or 'Failed')
-
-            // Look for the transaction by reference_id
-            const transactionSnapshot = await transactionsRef
-              .orderByChild('reference')
-              .equalTo(reference_id)
-              .once('value');
-
-            if (transactionSnapshot.exists()) {
-              // Find the transaction
-              const transactionKey = Object.keys(transactionSnapshot.val())[0];
-              const transaction = transactionSnapshot.val()[transactionKey];
-
-              // Update the transaction status based on the failed log's status
-              const updatedStatus = (failedStatus === 'Approved') ? 'completed' : failedStatus;
-
-              await transactionsRef.child(transactionKey).update({
-                status: updatedStatus,  // Update status to 'completed' if Approved, or keep it 'Failed'
-                timestamp: new Date().toISOString(),
-              });
-
-              // Delete the failed log after processing
-              await userRef.child('failed_logs').child(logId).remove();
-
-              console.log(`Transaction with reference ${reference_id} processed and status updated to ${updatedStatus}.`);
-            } else {
-              console.log(`Transaction with reference ${reference_id} not found for user ${userId}.`);
-            }
-          }
-        }
-      }
-
-      return res.status(200).json({ message: 'All failed logs processed successfully.' });
-    } catch (error) {
-      console.error('Error processing failed logs:', error);
-      return res.status(500).json({ message: 'Failed to process logs', error: error.message });
-    }
-  } else {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-});
-
-
-
-
-
-// Endpoint to process failed logs for a specific user by userId
-app.all('/api/process-failed-logs/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  if (req.method === 'POST' || req.method === 'GET') {
-    try {
-      const userRef = db.ref(`users/${userId}`);
-      const transactionsRef = userRef.child('transactions');
-
-      // Check if the user exists
-      const userSnapshot = await userRef.once('value');
-      if (!userSnapshot.exists()) {
-        return res.status(404).json({ message: `User with ID ${userId} not found` });
-      }
-
-      // Get the failed logs for the specific user
-      const failedLogsSnapshot = await userRef.child('failed_logs').once('value');
-      if (!failedLogsSnapshot.exists()) {
-        return res.status(404).json({ message: `No failed logs found for user ${userId}` });
-      }
-
-      const failedLogs = failedLogsSnapshot.val();
-      let processedCount = 0;
-      let skippedCount = 0;
-      let failedToProcess = 0;
-
-      // Process each failed log independently
-      for (let logId in failedLogs) {
-        const failedLog = failedLogs[logId];
-        const { reference_id, transaction_id, status: failedStatus } = failedLog;
-
-        try {
-          const transactionSnapshot = await transactionsRef
-            .orderByChild('reference')
-            .equalTo(reference_id)
-            .once('value');
-
-          if (transactionSnapshot.exists()) {
-            const transactionKey = Object.keys(transactionSnapshot.val())[0];
-            const transaction = transactionSnapshot.val()[transactionKey];
-
-            const updatedStatus = failedStatus === 'Approved' ? 'completed' : failedStatus;
-
-            // Use the original timestamp from the transaction, not the current time
-            const transactionTimestamp = transaction.timestamp || new Date().toISOString();
-
-            await transactionsRef.child(transactionKey).update({
-              status: updatedStatus,
-              timestamp: transactionTimestamp,  // Keep the original timestamp
-            });
-
-            console.log(`Transaction ${reference_id} updated to ${updatedStatus} with original timestamp.`);
-
-            // Only delete log after successful processing
-            await userRef.child('failed_logs').child(logId).remove();
-            console.log(`Processed and deleted log ${logId}.`);
-            processedCount++;
-          } else {
-            console.log(`Transaction ${reference_id} not found. Log ${logId} kept for retry.`);
-            skippedCount++;
-          }
-
-        } catch (logErr) {
-          console.error(`Error processing log ${logId}:`, logErr);
-          failedToProcess++;
-        }
-      }
-
-      return res.status(200).json({
-        message: `Logs processed for user ${userId}.`,
-        processedLogs: processedCount,
-        skippedLogs: skippedCount,
-        failedLogs: failedToProcess,
-      });
-
-    } catch (error) {
-      console.error('Unexpected error while processing failed logs:', error);
-      return res.status(500).json({ message: 'Failed to process logs', error: error.message });
-    }
-  } else {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-});
-
 
 
 
