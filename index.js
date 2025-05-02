@@ -289,10 +289,10 @@ app.patch('/api/update-server-status', async (req, res) => {
 
 // Unified JPesa payment endpoint with dynamic description and transaction ID format
 app.post('/api/payment', async (req, res) => {
-  const { mobile, amount, reason } = req.body;
+  const { mobile, amount, reason, userId } = req.body;
 
-  if (!mobile || !amount || !reason) {
-    return res.status(400).json({ message: 'Mobile number, amount, and reason are required.' });
+  if (!mobile || !amount || !reason || !userId) {
+    return res.status(400).json({ message: 'Mobile number, amount, reason, and userId are required.' });
   }
 
   const JPESA_API_KEY = process.env.JPESA_API_KEY;
@@ -302,17 +302,15 @@ app.post('/api/payment', async (req, res) => {
     return res.status(500).json({ message: 'JPesa API Key or Callback URL missing in environment variables.' });
   }
 
-  // Generate a unique transaction ID that starts with "NXN"
-  const tx = `NXN${Date.now()}`;
+  const nxs = `NXN${Date.now()}`;
 
-  // Set the description and action based on the reason
-  let action, description;
+  let action, finalReason;
   if (reason.toLowerCase() === 'top up') {
     action = 'credit';
-    description = 'Top Up Wallet';
+    finalReason = 'Top Up';
   } else if (reason.toLowerCase() === 'withdraw') {
     action = 'debit';
-    description = 'Withdraw Money';
+    finalReason = 'Withdraw';
   } else {
     return res.status(400).json({ message: 'Reason must be either "Top Up" or "Withdraw".' });
   }
@@ -326,28 +324,43 @@ app.post('/api/payment', async (req, res) => {
       <mobile>${mobile}</mobile>
       <amount>${amount}</amount>
       <callback>${CALLBACK_URL}</callback>
-      <tx>${tx}</tx>
-      <description>${description}</description>
+      <tx>${nxs}</tx>
+      <description>${finalReason}</description>
     </g7bill>`;
 
   try {
     const response = await axios.post('https://my.jpesa.com/api/', DATA, {
-      headers: {
-        'Content-Type': 'text/xml',
-      },
+      headers: { 'Content-Type': 'text/xml' },
     });
 
-    console.log(response.data);
+    if (response.data.api_status === 'success') {
+      const tid = response.data.tid;
 
-    res.status(200).json({
-      message: `${reason} request sent successfully!`,
-      transaction_id: tx,
-      description: description,
-      data: response.data,
-    });
+      const transactionData = {
+        transactionId: tid,
+        mobile,
+        amount,
+        reason: finalReason,
+        status: 'Pending',
+        createdAt: Date.now()
+      };
+
+      await db.ref(`users/${userId}/transactions/${nxs}`).set(transactionData);
+
+      res.status(200).json({
+        message: `${finalReason} request sent successfully!`,
+        transaction_id: nxs,
+        data: response.data,
+      });
+    } else {
+      res.status(400).json({
+        message: `Transaction failed: ${response.data.msg}`,
+        data: response.data,
+      });
+    }
   } catch (error) {
-    console.error(`Error processing ${reason} request to JPesa:`, error);
-    res.status(500).json({ message: `Error processing ${reason}`, error: error.message });
+    console.error(`Error processing ${finalReason} request to JPesa:`, error);
+    res.status(500).json({ message: `Error processing ${finalReason}`, error: error.message });
   }
 });
 
