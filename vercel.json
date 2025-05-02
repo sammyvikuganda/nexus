@@ -20,6 +20,7 @@
     { "src": "/user-profile", "dest": "/client/user-profile.html" },
     { "src": "/report", "dest": "/client/report.html" },
     { "src": "/developer-api", "dest": "/client/developer-api.html" },
+    { "src": "/edit-profile", "dest": "/client/edit-profile.html" },
     { "src": "/(.*)", "dest": "/client/index.html" }
   ]
 }
