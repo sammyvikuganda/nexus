@@ -124,6 +124,11 @@
             color: var(--accent-green);
         }
         
+        .kyc-badge.pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--accent-yellow);
+        }
+        
         .kyc-badge.not-verified {
             background-color: rgba(239, 68, 68, 0.1);
             color: var(--accent-red);
@@ -402,9 +407,9 @@
         <div id="profileContent">
             <div class="profile-card">
                 <div class="profile-header">
-                    <img src="https://i.postimg.cc/KvWfCL0S/9187604.png" alt="Profile Photo" class="profile-avatar">
-                    <h1 class="profile-name" id="fullName">Sammy Vik</h1>
-                    <span class="kyc-badge">
+                    <img src="https://i.postimg.cc/KvWfCL0S/9187604.png" alt="Profile Photo" class="profile-avatar" id="profileAvatar">
+                    <h1 class="profile-name" id="fullName">Loading...</h1>
+                    <span class="kyc-badge" id="kycBadge">
                         <i class="fas fa-check-circle"></i>
                         KYC Verified
                     </span>
@@ -415,21 +420,21 @@
                         <div class="contact-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <div class="contact-value" id="userEmail">sammyviktgtbthhththhug@gmail.com</div>
+                        <div class="contact-value" id="userEmail">Loading...</div>
                     </div>
                     
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
                         </div>
-                        <div class="contact-value" id="userPhone">+256 740035509</div>
+                        <div class="contact-value" id="userPhone">Loading...</div>
                     </div>
                     
                     <div class="contact-item">
                         <div class="contact-icon">
-                            <i class="fas fa-id-card"></i>
+                            <i class="fas fa-map-marker-alt"></i>
                         </div>
-                        <div class="contact-value" id="userId">ID: 295703</div>
+                        <div class="contact-value" id="userCountry">Loading...</div>
                     </div>
                 </div>
                 
@@ -441,17 +446,17 @@
                     
                     <div class="info-item">
                         <div class="info-label">Full Name</div>
-                        <div class="info-value" id="fullNameDetail">Sammy Vik</div>
+                        <div class="info-value" id="fullNameDetail">Loading...</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">Account ID</div>
+                        <div class="info-value" id="accountId">Loading...</div>
                     </div>
                     
                     <div class="info-item">
                         <div class="info-label">Registered At</div>
-                        <div class="info-value" id="registeredAt">May 1, 2025</div>
-                    </div>
-                    
-                    <div class="info-item">
-                        <div class="info-label">Nationality</div>
-                        <div class="info-value" id="country">Uganda</div>
+                        <div class="info-value" id="registeredAt">Loading...</div>
                     </div>
                 </div>
 
@@ -467,141 +472,120 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Apply saved theme on load
-        function applySavedTheme() {
-            const body = document.body;
-            const savedTheme = localStorage.getItem('theme');
+    // Apply saved theme on load
+    function applySavedTheme() {
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
 
-            if (!savedTheme) {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
-                    body.classList.add('dark-theme');
-                }
-            } else if (savedTheme === 'dark') {
+        if (!savedTheme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
                 body.classList.add('dark-theme');
             }
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-theme');
         }
+    }
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
-            authDomain: "records-1674c.firebaseapp.com",
-            databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
-            projectId: "records-1674c",
-            storageBucket: "records-1674c.appspot.com",
-            messagingSenderId: "592414404602",
-            appId: "1:592414404602:web:917365f2b54522ef953e43",
-            measurementId: "G-H6HCSQWZY2"
-        };
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
+        authDomain: "records-1674c.firebaseapp.com",
+        databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
+        projectId: "records-1674c",
+        storageBucket: "records-1674c.appspot.com",
+        messagingSenderId: "592414404602",
+        appId: "1:592414404602:web:917365f2b54522ef953e43",
+        measurementId: "G-H6HCSQWZY2"
+    };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-        // Format phone number
-        function formatPhoneNumber(phone) {
-            if (!phone) return 'Not provided';
-            
-            // Simple formatting - you can enhance this based on your needs
-            const cleaned = ('' + phone).replace(/\D/g, '');
-            const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-            if (match) {
-                return `(${match[1]}) ${match[2]}-${match[3]}`;
-            }
-            return phone;
+    // Format date
+    function formatDate(dateString) {
+        if (!dateString) return 'Not available';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return dateString || 'Not available';
         }
+    }
 
-        // Format date
-        function formatDate(dateString) {
-            if (!dateString) return 'Not available';
-            
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            } catch (e) {
-                return dateString || 'Not available';
-            }
-        }
+    // Fetch user data from Firebase
+    function fetchUserData(userId) {
+        const dbRef = firebase.database().ref(`users/${userId}`);
+        dbRef.once('value')
+            .then((snapshot) => {
+                const userData = snapshot.val();
 
-        // Truncate long text
-        function truncateText(text, maxLength = 30) {
-            if (!text) return '';
-            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-        }
+                if (userData) {
+                    const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
+                    document.getElementById('fullName').textContent = fullName || 'No name provided';
+                    document.getElementById('fullNameDetail').textContent = fullName || 'No name provided';
+                    document.getElementById('userEmail').textContent = userData.email || 'Not provided';
+                    document.getElementById('userPhone').textContent = userData.phoneNumber || 'Not provided';
+                    document.getElementById('userCountry').textContent = userData.country || 'Not provided';
+                    document.getElementById('accountId').textContent = userId || 'Not available';
+                    document.getElementById('registeredAt').textContent = formatDate(userData.registeredAt);
 
-        // Fetch user data from Firebase
-        function fetchUserData(userId) {
-            const dbRef = firebase.database().ref(`users/${userId}`);
-            dbRef.once('value')
-                .then((snapshot) => {
-                    const userData = snapshot.val();
+                    document.getElementById('profileAvatar').src = "https://i.postimg.cc/KvWfCL0S/9187604.png";
 
-                    if (userData) {
-                        // Display user data
-                        const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
-                        document.getElementById('fullName').textContent = truncateText(fullName || 'No name provided', 30);
-                        document.getElementById('fullNameDetail').textContent = truncateText(fullName || 'No name provided', 30);
-                        document.getElementById('userEmail').textContent = truncateText(userData.email || 'Not provided', 30);
-                        document.getElementById('userPhone').textContent = formatPhoneNumber(userData.phoneNumber);
-                        document.getElementById('userId').textContent = truncateText(`ID: ${userId}`, 20);
-                        document.getElementById('country').textContent = truncateText(userData.country || 'Not provided', 20);
-                        document.getElementById('registeredAt').textContent = formatDate(userData.registeredAt);
-
-                        // Handle KYC status
-                        const kycBadge = document.getElementById('kycBadge');
-                        if (userData.kyc === true || userData.kyc === 'verified') {
-                            kycBadge.innerHTML = '<i class="fas fa-check-circle"></i> KYC Verified';
-                            kycBadge.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-                            kycBadge.style.color = 'var(--accent-green)';
-                        } else {
-                            kycBadge.innerHTML = '<i class="fas fa-times-circle"></i> KYC Not Verified';
-                            kycBadge.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                            kycBadge.style.color = 'var(--accent-red)';
-                            kycBadge.classList.add('not-verified');
-                        }
-
-                        // Hide skeleton and show content
-                        document.getElementById('skeletonLoading').style.display = 'none';
-                        document.getElementById('profileContent').style.display = 'block';
+                    const kycBadge = document.getElementById('kycBadge');
+                    if (userData.kyc === 'Verified') {
+                        kycBadge.innerHTML = '<i class="fas fa-check-circle"></i> KYC Verified';
+                        kycBadge.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                        kycBadge.style.color = 'var(--accent-green)';
+                        kycBadge.className = 'kyc-badge';
+                    } else if (userData.kyc === 'Pending') {
+                        kycBadge.innerHTML = '<i class="fas fa-clock"></i> KYC Pending';
+                        kycBadge.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                        kycBadge.style.color = 'var(--accent-yellow)';
+                        kycBadge.className = 'kyc-badge pending';
                     } else {
-                        console.error("No user data found for ID:", userId);
-                        // You might want to redirect or show an error message
+                        kycBadge.innerHTML = '<i class="fas fa-times-circle"></i> KYC Not Verified';
+                        kycBadge.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                        kycBadge.style.color = 'var(--accent-red)';
+                        kycBadge.className = 'kyc-badge not-verified';
                     }
-                })
-                .catch((error) => {
-                    console.error("Error fetching user data:", error);
-                    // Handle error (show message to user)
-                });
-        }
 
-        // On DOM load
-        window.addEventListener('DOMContentLoaded', () => {
-            applySavedTheme();
+                    document.getElementById('skeletonLoading').style.display = 'none';
+                    document.getElementById('profileContent').style.display = 'block';
+                } else {
+                    console.error("No user data found for ID:", userId);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching user data:", error);
+            });
+    }
 
-            // Fetch user session
-            fetch('/api/session')
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error('Session fetch failed');
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (!data.userId) {
-                        window.location.href = '/login';
-                    } else {
-                        fetchUserData(data.userId);
-                    }
-                })
-                .catch(err => {
-                    console.error('Session fetch error:', err);
+    // On DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+        applySavedTheme();
+
+        fetch('/api/session')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.userId) {
                     window.location.href = '/login';
-                });
-        });
-    </script>
+                } else {
+                    const userId = data.userId;
+                    fetchUserData(userId);
+                }
+            })
+            .catch(err => {
+                console.error('Session fetch error:', err);
+                window.location.href = '/login';
+            });
+    });
+</script>
+
 </body>
 </html>
