@@ -41,14 +41,20 @@
             box-sizing: border-box;
         }
         
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             transition: background-color 0.3s ease, color 0.3s ease;
             line-height: 1.5;
-            padding: 0;
-            margin: 0;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
         
@@ -62,29 +68,28 @@
         
         .container {
             max-width: 800px;
+            width: 100%;
             margin: 0 auto;
             padding: 2rem 1.5rem;
+            flex: 1;
+        }
+        
+        /* Profile Card */
+        .profile-card {
+            background-color: var(--card);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            width: 100%;
         }
         
         /* Profile Header */
         .profile-header {
-            background-color: var(--card);
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-md);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            position: relative;
-        }
-        
-        .profile-main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
+            margin-bottom: 2rem;
         }
         
         .profile-avatar {
@@ -102,6 +107,8 @@
             font-weight: 600;
             margin-bottom: 0.75rem;
             color: var(--text-main);
+            word-break: break-word;
+            max-width: 100%;
         }
         
         .kyc-badge {
@@ -124,23 +131,19 @@
         
         /* Contact Info */
         .contact-info {
-            background-color: var(--card);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-md);
-        }
-        
-        .contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
         
         .contact-item {
             display: flex;
             align-items: center;
             gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .contact-item:last-child {
+            border-bottom: none;
         }
         
         .contact-icon {
@@ -155,13 +158,15 @@
             flex-shrink: 0;
         }
         
+        .contact-value {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
         /* Personal Info */
         .personal-info {
-            background-color: var(--card);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-md);
+            margin-top: 1.5rem;
         }
         
         .section-title {
@@ -178,16 +183,15 @@
             color: var(--accent-blue);
         }
         
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-        
         .info-item {
             display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
         }
         
         .info-label {
@@ -199,6 +203,10 @@
         .info-value {
             font-weight: 500;
             color: var(--text-main);
+            text-align: right;
+            max-width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         /* Buttons */
@@ -218,6 +226,7 @@
             justify-content: center;
             gap: 0.75rem;
             box-shadow: var(--shadow-sm);
+            margin-top: 2rem;
         }
         
         .settings-btn:hover {
@@ -231,10 +240,12 @@
         /* Skeleton Loading */
         #skeletonLoading {
             display: block;
+            width: 100%;
         }
         
         #profileContent {
             display: none;
+            width: 100%;
         }
         
         .skeleton {
@@ -265,16 +276,19 @@
         .skeleton-text {
             height: 1.5rem;
             width: 200px;
+            max-width: 100%;
         }
         
         .skeleton-text-sm {
             height: 1rem;
             width: 80px;
+            max-width: 100%;
         }
         
         .skeleton-badge {
             height: 1.75rem;
             width: 120px;
+            max-width: 100%;
             border-radius: 50px;
             margin-bottom: 1.5rem;
         }
@@ -288,6 +302,7 @@
         .skeleton-item {
             height: 1.25rem;
             width: 120px;
+            max-width: 100%;
         }
         
         @keyframes shimmer {
@@ -306,12 +321,26 @@
                 padding: 1.5rem 1rem;
             }
             
-            .profile-header {
+            .profile-card {
                 padding: 1.5rem;
             }
             
-            .contact-grid {
-                grid-template-columns: 1fr;
+            .profile-name {
+                font-size: 1.25rem;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .info-item {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            
+            .info-value {
+                text-align: left;
+                max-width: 100%;
             }
         }
     </style>
@@ -320,124 +349,116 @@
     <div class="container">
         <!-- Skeleton Loading -->
         <div id="skeletonLoading">
-            <div class="profile-header">
-                <div class="profile-main">
+            <div class="profile-card">
+                <div class="profile-header">
                     <div class="skeleton skeleton-avatar"></div>
-                    <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
                         <div class="skeleton skeleton-text" style="width: 150px; margin-bottom: 0.75rem;"></div>
                         <div class="skeleton skeleton-badge"></div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="contact-info">
-                <div class="contact-grid">
-                    <div class="contact-item">
-                        <div class="skeleton skeleton-icon"></div>
-                        <div class="skeleton skeleton-item"></div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <div class="skeleton skeleton-icon"></div>
-                        <div class="skeleton skeleton-item"></div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <div class="skeleton skeleton-icon"></div>
-                        <div class="skeleton skeleton-item"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="personal-info">
-                <div class="skeleton skeleton-text" style="width: 120px; margin-bottom: 1.5rem;"></div>
                 
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="skeleton skeleton-text-sm" style="margin-bottom: 0.5rem;"></div>
-                        <div class="skeleton skeleton-text"></div>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton skeleton-item" style="flex: 1;"></div>
                     </div>
                     
-                    <div class="info-item">
-                        <div class="skeleton skeleton-text-sm" style="margin-bottom: 0.5rem;"></div>
-                        <div class="skeleton skeleton-text"></div>
+                    <div class="contact-item">
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton skeleton-item" style="flex: 1;"></div>
                     </div>
                     
-                    <div class="info-item">
-                        <div class="skeleton skeleton-text-sm" style="margin-bottom: 0.5rem;"></div>
-                        <div class="skeleton skeleton-text"></div>
+                    <div class="contact-item">
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton skeleton-item" style="flex: 1;"></div>
                     </div>
                 </div>
-            </div>
+                
+                <div class="personal-info">
+                    <div class="skeleton skeleton-text" style="width: 120px; margin-bottom: 1.5rem;"></div>
+                    
+                    <div class="info-item">
+                        <div class="skeleton skeleton-text-sm"></div>
+                        <div class="skeleton skeleton-text-sm" style="width: 100px;"></div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="skeleton skeleton-text-sm"></div>
+                        <div class="skeleton skeleton-text-sm" style="width: 100px;"></div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="skeleton skeleton-text-sm"></div>
+                        <div class="skeleton skeleton-text-sm" style="width: 100px;"></div>
+                    </div>
+                </div>
 
-            <div class="skeleton" style="height: 48px; border-radius: var(--border-radius); margin-top: 1.5rem;"></div>
+                <div class="skeleton" style="height: 48px; border-radius: var(--border-radius); margin-top: 2rem;"></div>
+            </div>
         </div>
 
         <!-- Actual Profile Content -->
         <div id="profileContent">
-            <div class="profile-header">
-                <div class="profile-main">
+            <div class="profile-card">
+                <div class="profile-header">
                     <img src="https://i.postimg.cc/KvWfCL0S/9187604.png" alt="Profile Photo" class="profile-avatar">
-                    <h1 class="profile-name" id="fullName">Loading...</h1>
-                    <span class="kyc-badge" id="kycBadge">
+                    <h1 class="profile-name" id="fullName">Sammy Vik</h1>
+                    <span class="kyc-badge">
                         <i class="fas fa-check-circle"></i>
                         KYC Verified
                     </span>
                 </div>
-            </div>
-            
-            <div class="contact-info">
-                <div class="contact-grid">
+                
+                <div class="contact-info">
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <div id="userEmail">Loading...</div>
+                        <div class="contact-value" id="userEmail">sammyviktgtbthhththhug@gmail.com</div>
                     </div>
                     
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
                         </div>
-                        <div id="userPhone">Loading...</div>
+                        <div class="contact-value" id="userPhone">+256 740035509</div>
                     </div>
                     
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-id-card"></i>
                         </div>
-                        <div id="userId">Loading...</div>
+                        <div class="contact-value" id="userId">ID: 295703</div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="personal-info">
-                <h2 class="section-title">
-                    <i class="fas fa-user"></i>
-                    Account Details
-                </h2>
                 
-                <div class="info-grid">
+                <div class="personal-info">
+                    <h2 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Account Details
+                    </h2>
+                    
                     <div class="info-item">
                         <div class="info-label">Full Name</div>
-                        <div class="info-value" id="fullNameDetail">Loading...</div>
+                        <div class="info-value" id="fullNameDetail">Sammy Vik</div>
                     </div>
                     
                     <div class="info-item">
                         <div class="info-label">Registered At</div>
-                        <div class="info-value" id="registeredAt">Loading...</div>
+                        <div class="info-value" id="registeredAt">May 1, 2025</div>
                     </div>
                     
                     <div class="info-item">
                         <div class="info-label">Nationality</div>
-                        <div class="info-value" id="country">Loading...</div>
+                        <div class="info-value" id="country">Uganda</div>
                     </div>
                 </div>
-            </div>
 
-            <button class="settings-btn" onclick="window.location.href='/user-setting'">
-                <i class="fas fa-cog"></i> Account Settings
-            </button>
+                <button class="settings-btn" onclick="window.location.href='/user-setting'">
+                    <i class="fas fa-cog"></i> Account Settings
+                </button>
+            </div>
         </div>
     </div>
 
@@ -506,6 +527,12 @@
             }
         }
 
+        // Truncate long text
+        function truncateText(text, maxLength = 30) {
+            if (!text) return '';
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
         // Fetch user data from Firebase
         function fetchUserData(userId) {
             const dbRef = firebase.database().ref(`users/${userId}`);
@@ -516,12 +543,12 @@
                     if (userData) {
                         // Display user data
                         const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
-                        document.getElementById('fullName').textContent = fullName || 'No name provided';
-                        document.getElementById('fullNameDetail').textContent = fullName || 'No name provided';
-                        document.getElementById('userEmail').textContent = userData.email || 'Not provided';
+                        document.getElementById('fullName').textContent = truncateText(fullName || 'No name provided', 30);
+                        document.getElementById('fullNameDetail').textContent = truncateText(fullName || 'No name provided', 30);
+                        document.getElementById('userEmail').textContent = truncateText(userData.email || 'Not provided', 30);
                         document.getElementById('userPhone').textContent = formatPhoneNumber(userData.phoneNumber);
-                        document.getElementById('userId').textContent = `ID: ${userId}`;
-                        document.getElementById('country').textContent = userData.country || 'Not provided';
+                        document.getElementById('userId').textContent = truncateText(`ID: ${userId}`, 20);
+                        document.getElementById('country').textContent = truncateText(userData.country || 'Not provided', 20);
                         document.getElementById('registeredAt').textContent = formatDate(userData.registeredAt);
 
                         // Handle KYC status
