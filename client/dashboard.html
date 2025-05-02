@@ -13,6 +13,25 @@
 <script src="https://unpkg.com/feather-icons"></script>
 
     <title>Navigation Example</title>
+
+
+
+<style>
+        /* Add dark theme styles */
+        .dark-theme {
+            background-color: #1a202c;
+            color: #f7fafc;
+        }
+        .dark-theme .card {
+            background-color: #2d3748;
+            color: #f7fafc;
+        }
+        .dark-theme .nav-item {
+            color: #f7fafc;
+        }
+        /* Add other dark theme styles as needed */
+    </style>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
@@ -32,6 +51,27 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+
+
+
+
+// Apply saved theme on load
+        function applySavedTheme() {
+            const body = document.body;
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (!savedTheme) {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) {
+                    body.classList.add('dark-theme');
+                }
+            } else if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+            }
+        }
+
+
+
 
         let userId = null;
 
@@ -99,7 +139,7 @@ function setActive(navItem) {
 
 document.addEventListener('DOMContentLoaded', (event) => {
     loadHomeContent(); // Load Home section immediately on page load
-
+applySavedTheme();
     // Set the Home button as active by default
     setActive(document.querySelector('.nav-item.home'));
 
