@@ -13,25 +13,6 @@
 <script src="https://unpkg.com/feather-icons"></script>
 
     <title>Navigation Example</title>
-
-
-
-<style>
-        /* Add dark theme styles */
-        .dark-theme {
-            background-color: #1a202c;
-            color: #f7fafc;
-        }
-        .dark-theme .card {
-            background-color: #2d3748;
-            color: #f7fafc;
-        }
-        .dark-theme .nav-item {
-            color: #f7fafc;
-        }
-        /* Add other dark theme styles as needed */
-    </style>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
@@ -52,27 +33,6 @@
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
 
-
-
-
-// Apply saved theme on load
-        function applySavedTheme() {
-            const body = document.body;
-            const savedTheme = localStorage.getItem('theme');
-            
-            if (!savedTheme) {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
-                    body.classList.add('dark-theme');
-                }
-            } else if (savedTheme === 'dark') {
-                body.classList.add('dark-theme');
-            }
-        }
-
-
-
-
         let userId = null;
 
 fetch('/api/session')
@@ -80,7 +40,7 @@ fetch('/api/session')
     .then(data => {
         if (!data.userId) {
             // No userId means unauthenticated, redirect to login
-            window.location.href = '/api/login';
+            window.location.href = '/login';
         } else {
             userId = data.userId;
             console.log('Session userId:', userId);
@@ -139,7 +99,7 @@ function setActive(navItem) {
 
 document.addEventListener('DOMContentLoaded', (event) => {
     loadHomeContent(); // Load Home section immediately on page load
-applySavedTheme();
+
     // Set the Home button as active by default
     setActive(document.querySelector('.nav-item.home'));
 
@@ -362,9 +322,6 @@ setupMenuToggle();
 setupThemeToggle();
 fetchAndDisplayRecentTransactions();
 
-
-
-
 let countryCurrencyMap = {};
 let isBalanceLoading = true;  // Flag to indicate if the balance is still loading
 
@@ -424,7 +381,6 @@ async function fetchCountryCurrencyMap() {
     });
 }
 
-
 function setupRealtimeListener() {
     const dbRef = ref(database, `users/${userId}`);
     onValue(dbRef, async (snapshot) => {
@@ -432,9 +388,8 @@ function setupRealtimeListener() {
             const data = snapshot.val();
             const userName = data.firstName || 'Unknown';
             
-            // Get current time and determine the appropriate greeting
             const currentHour = new Date().getHours();
-            let greeting = 'Good evening';  // Default greeting
+            let greeting = 'Good evening';
 
             if (currentHour < 12) {
                 greeting = 'Good morning';
@@ -442,10 +397,8 @@ function setupRealtimeListener() {
                 greeting = 'Good afternoon';
             }
 
-            // Update the user's name and greeting
             document.getElementById('dynamic-user-name').textContent = `${greeting}, ${userName}`;
 
-            // Start by disabling the toggle icon until the balance is loaded
             isBalanceLoading = true;
             document.getElementById('toggle-icon').disabled = true;
 
@@ -453,8 +406,6 @@ function setupRealtimeListener() {
             document.getElementById('balance-amount').textContent = Number(balance).toLocaleString();
             document.getElementById('balance-amount').style.display = 'block';
             document.getElementById('balance-skeleton').style.display = 'none';
-
-            // Immediately hide the balance placeholder once the balance is fetched
             document.getElementById('balance-placeholder').style.display = 'none';
 
             const userCountry = data.country;
@@ -462,26 +413,21 @@ function setupRealtimeListener() {
 
             document.querySelector('.currency').textContent = dynamicCurrency;
 
-            // Set totalGained value with real currency
             const totalGained = data.totalGained || 0;
             document.querySelector('.monthly-gain .amount').textContent = `${dynamicCurrency} ${Number(totalGained).toLocaleString()}`;
 
-            // Set registration date
             const registeredAt = data.registeredAt;
             if (registeredAt) {
                 const date = new Date(registeredAt);
-                const formattedDate = date.toLocaleDateString('en-GB'); // e.g., 23/04/2025
+                const formattedDate = date.toLocaleDateString('en-GB');
                 document.querySelector('.monthly-gain .month').textContent = `Registered on ${formattedDate}`;
             }
 
-            // Once balance is loaded, enable the toggle button
             isBalanceLoading = false;
             document.getElementById('toggle-icon').disabled = false;
         }
     });
 }
-
-
 
 function fetchPhoneNumber() {
     const dbRef = ref(database, `users/${userId}/phoneNumber`);
@@ -494,11 +440,7 @@ function fetchPhoneNumber() {
     });
 }
 
-
-
-
 function toggleBalance() {
-    // Prevent toggling if balance is still being fetched
     if (isBalanceLoading) return;
 
     const balanceAmount = document.getElementById('balance-amount');
@@ -507,11 +449,9 @@ function toggleBalance() {
 
     const isHidden = balanceAmount.style.display === 'none';
     
-    // Toggle visibility
     balanceAmount.style.display = isHidden ? 'block' : 'none';
     balancePlaceholder.style.display = isHidden ? 'none' : 'block';
 
-    // Adjust the toggle icon
     if (isHidden) {
         toggleIcon.classList.remove('fa-eye-slash');
         toggleIcon.classList.add('fa-eye');
@@ -520,6 +460,30 @@ function toggleBalance() {
         toggleIcon.classList.add('fa-eye-slash');
     }
 }
+
+// ================== LOGOUT ==================
+document.querySelector('.home-menu-item .fa-sign-out-alt').closest('.home-menu-item').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            // Fallback redirect if response doesn't auto-redirect
+            window.location.href = '/api/login';
+        }
+    } catch (error) {
+        console.error('Logout failed:', error);
+        alert('Logout failed. Please try again.');
+    }
+});
+
+
+
+
 
 
 
