@@ -54,21 +54,12 @@ fetch('/api/session')
 
 
 
-        const serverUrl = 'https://suppay-ppnnit8wl-nexus-int.vercel.app';
-
-
-        const balanceServerUrl = 'https://suppay-ppnnit8wl-nexus-int.vercel.app';
-
-
-
-
-    const capitalServerUrl = 'https://suppay-ppnnit8wl-nexus-int.vercel.app';
-
-
-const BASE_URL = 'https://suppay-ppnnit8wl-nexus-int.vercel.app';
-
-
 const host = window.location.origin;
+const serverUrl = host;
+const balanceServerUrl = host;
+const capitalServerUrl = host;
+const BASE_URL = host;
+
 
 let progressInterval = null;
 let countdownInterval = null;
@@ -680,38 +671,37 @@ function processWithdrawal(phone, amount) {
         get(userRef).then((snapshot) => {
             const currentBalance = snapshot.val().balance || 0;
             if (currentBalance >= amount) {
-                // Use the constant balanceServerUrl instead of the hardcoded URL
-                fetch(`${balanceServerUrl}/api/update-balance`, {
-                    method: 'PATCH',
+                // Call the unified JPesa payment endpoint for withdrawal
+                fetch(`${balanceServerUrl}/api/payment`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        userId: userId,
+                        mobile: phone,
                         amount: amount,
                         reason: 'Withdraw',
-                        phone: phone,
+                        userId: userId,
                     }),
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.message === "Withdraw initiated successfully") {
+                    if (data.message && data.message.includes("Withdraw request sent successfully")) {
                         resetBottomSheet();
                         bottomSheet.classList.remove('open');
                         resetWithdrawButton();
-                    } else if (data.message === "Failed to initiate withdraw with Teza" && data.details === "Insufficient funds available for withdrawal") {
+                    } else if (data.message && data.message.includes("Transaction failed") && data.data?.msg?.includes("Insufficient funds")) {
                         document.getElementById('insufficient-balance').style.display = 'block';
                         resetWithdrawButton();
-                    } else if (data.message === "Failed to initiate withdraw with Teza" && data.details === "Transaction failed from provider: try again later") {
-                        // Show a custom error message for provider issues
-                        document.getElementById('provider-error').style.display = 'block'; // This is the new error div
+                    } else if (data.message && data.message.includes("Transaction failed") && data.data?.msg?.includes("try again later")) {
+                        document.getElementById('provider-error').style.display = 'block';
                         resetWithdrawButton();
                     } else {
                         resetWithdrawButton();
                     }
                 })
                 .catch(error => {
-                    console.error('Error making withdrawal request:', error);
+                    console.error('Error processing withdrawal:', error);
                     resetWithdrawButton();
                 });
             } else {
@@ -721,6 +711,8 @@ function processWithdrawal(phone, amount) {
         });
     });
 }
+
+
 
 
 function processTopup(phone, amount) {
@@ -733,28 +725,28 @@ function processTopup(phone, amount) {
 
     const userRef = ref(database, `users/${userId}`);
     import('https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js').then(({ get }) => {
-        get(userRef).then((snapshot) => {
-            // Use the constant balanceServerUrl instead of the hardcoded URL
-            fetch(`${balanceServerUrl}/api/update-balance`, {
-                method: 'PATCH',
+        get(userRef).then(() => {
+            // Call the unified JPesa payment endpoint for top up
+            fetch(`${balanceServerUrl}/api/payment`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    userId: userId,
+                    mobile: phone,
                     amount: amount,
                     reason: 'Top Up',
-                    phone: phone,
+                    userId: userId,
                 }),
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message === "Top Up initiated successfully") {
+                if (data.message && data.message.includes("Top Up request sent successfully")) {
                     resetBottomSheet();
                     bottomSheet.classList.remove('open');
                     resetWithdrawButton();
                 } else {
-                    alert('Top-up failed: ' + data.message);
+                    alert('Top-up failed: ' + (data.message || 'Unknown error'));
                     resetWithdrawButton();
                 }
             })
@@ -766,8 +758,6 @@ function processTopup(phone, amount) {
         });
     });
 }
-
-
 
 
 
