@@ -1218,6 +1218,22 @@ function fetchAndDisplayRecentTransactions() {
         <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
     </div>
 
+
+
+
+<!-- Modal for stopping investment -->
+    <div class="modal-required" id="stopInvestmentModal">
+        <div class="modal-content-required">
+            <h2 class="modal-heading">Are you sure you want to withdraw your savings?</h2>
+            <p>Note that this will stop the saving contract with us and your savings will be transferred back to main wallet.</p>
+            <div>
+                <button class="close-required" id="confirmStopInvestment">Yes Stop</button>
+                <button class="cancel-required" id="cancelStopInvestment">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
     <p id="countdownTimer" class="countdown-text"></p>
 
     <div class="circle-container">
@@ -1231,7 +1247,7 @@ function fetchAndDisplayRecentTransactions() {
     </div>
 
     <div class="buttons">
-        <button id="investButton"><i class="fas fa-plus-circle"></i> Invest</button>
+        <button id="investButton"><i class="fas fa-plus-circle"></i> Save</button>
         <button id="stopInvestmentButton"><i class="fas fa-stop-circle"></i> Stop</button>
         <button id="cashOutButton"><i class="fas fa-coins"></i> Cashout</button>
     </div>
@@ -1239,19 +1255,8 @@ function fetchAndDisplayRecentTransactions() {
     <div class="info-text">
         Press stop to withdraw your capital.
     </div>
-
-    <!-- Modal for stopping investment -->
-    <div class="modal-required" id="stopInvestmentModal">
-        <div class="modal-content-required">
-            <h2 class="modal-heading">Are you sure you want to withdraw your savings?</h2>
-            <p>Note that this will stop the saving contract with us and your savings will be transferred back to main wallet.</p>
-            <div>
-                <button class="close-required" id="confirmStopInvestment">Yes Stop</button>
-                <button class="cancel-required" id="cancelStopInvestment">Cancel</button>
-            </div>
-        </div>
-    </div>
-
+</div>
+    
     
     <div class="section-title">Transaction History</div>
     <div class="transaction-cards" id="transactionCards">
@@ -1468,7 +1473,7 @@ function openBottomSheet(action) {
   const label = document.querySelector('#cashOutSheet label');
   const premiumBtn = document.getElementById('getPremiumBtn');
 
-  heading.innerText = action === 'invest' ? 'Invest' : 'Withdraw profits';
+  heading.innerText = action === 'invest' ? 'Save' : 'Withdraw profits';
   label.innerText = action === 'invest' ? `Enter amount you want to save (${userCurrency})` : `Enter Amount (${userCurrency})`;
 
   // Update the placeholder to reflect the currency
@@ -1516,7 +1521,7 @@ document.getElementById('confirmCashOut').addEventListener('click', async () => 
     return;
   }
 
-  const reason = currentAction === 'invest' ? 'Investment added' : 'Withdraw profits';
+  const reason = currentAction === 'invest' ? 'Savings added' : 'Withdraw profits';
 
   try {
     const url = currentAction === 'invest'
@@ -1552,7 +1557,7 @@ document.getElementById('stopInvestmentButton').addEventListener('click', () => 
   if (investedAmount <= 0) return; // No active investment to stop
   
   // Show the modal for confirmation
-  document.getElementById('stopInvestmentModal').style.display = 'block';
+  document.getElementById('stopInvestmentModal').style.display = 'flex';
 });
 
 // Handle "Yes, Withdraw savings" button click in the modal
@@ -3147,17 +3152,19 @@ function getDefaultImage(section) {
 
         /* Modal - Compact */
         .modal-required {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
+    display: none;                /* Start hidden */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+
 
         .modal-content-required {
             background: var(--card-light);
