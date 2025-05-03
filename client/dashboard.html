@@ -665,7 +665,6 @@ function prepareBottomSheetForTopup() {
 
 
 
-
 function processWithdrawal(phone, amount) {
     const minAmount = 1000;
     if (amount < minAmount) {
@@ -694,7 +693,10 @@ function processWithdrawal(phone, amount) {
                 })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('API Response:', data); // Log the full API response for debugging
+
                     if (data.message && data.message.includes("Withdraw request sent successfully")) {
+                        // Successful withdrawal, close the bottom sheet
                         resetBottomSheet();
                         bottomSheet.classList.remove('open');
                         resetWithdrawButton();
@@ -705,6 +707,8 @@ function processWithdrawal(phone, amount) {
                         document.getElementById('provider-error').style.display = 'block';
                         resetWithdrawButton();
                     } else {
+                        // Handle other cases or unknown errors
+                        alert('Withdrawal failed: ' + (data.message || 'Unknown error'));
                         resetWithdrawButton();
                     }
                 })
@@ -719,6 +723,7 @@ function processWithdrawal(phone, amount) {
         });
     });
 }
+
 
 
 
@@ -749,11 +754,15 @@ function processTopup(phone, amount) {
             })
             .then(response => response.json())
             .then(data => {
+                console.log('API Response:', data); // Log the full API response for debugging
+
                 if (data.message && data.message.includes("Top Up request sent successfully")) {
+                    // Successful top-up, close the bottom sheet
                     resetBottomSheet();
                     bottomSheet.classList.remove('open');
                     resetWithdrawButton();
                 } else {
+                    // Handle failure scenarios
                     alert('Top-up failed: ' + (data.message || 'Unknown error'));
                     resetWithdrawButton();
                 }
@@ -766,6 +775,8 @@ function processTopup(phone, amount) {
         });
     });
 }
+
+
 
 
 
