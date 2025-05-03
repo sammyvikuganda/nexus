@@ -1,16 +1,3 @@
-<script>
-    // Apply theme immediately before page renders
-    (function() {
-        // Check for saved theme or prefer-color-scheme
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        // Apply dark theme if either saved theme is dark or no preference but OS prefers dark
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            document.documentElement.classList.add('dark-theme');
-        }
-})();
-</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,6 +71,17 @@ let stopInvestmentAmount = 0; // Store amount for use in modal confirmation
 
 
 
+(function() {
+  // Check for saved theme or system preference
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  // Apply dark theme immediately if needed
+  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    document.documentElement.classList.add('dark-theme');
+    document.body.classList.add('dark-theme');
+  }
+})();
 
 
         
@@ -110,7 +108,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Adding event listeners to each nav item and setting the active class
     document.querySelector('.nav-item.home').addEventListener('click', () => {
         loadHomeContent();
-        setActive(document.querySelector('.nav-item.home'));
+        
+
+
+document.documentElement.classList.add('dark-theme');
+
+
+
+setActive(document.querySelector('.nav-item.home'));
     });
 
     // Updated to load Support section instead of Chat
