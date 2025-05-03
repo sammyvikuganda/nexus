@@ -622,8 +622,10 @@
             }
         }
 
-        // Update referral link
-        const referralLink = `https://suppay-kdt46s2ck-nexus-int.vercel.app/api/register?sponsorid=${userId}`;
+        // Update referral link using current host
+        const currentHost = window.location.host;
+        const referralPath = '/api/register';
+        const referralLink = `${window.location.protocol}//${currentHost}${referralPath}?sponsorid=${userId}`;
         document.getElementById('referralLink').value = referralLink;
 
         const userRef = ref(db, `users/${userId}/referral`);
