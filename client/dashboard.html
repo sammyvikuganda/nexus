@@ -1428,7 +1428,7 @@ async function loadInvestmentData(data) {
     txContainer.innerHTML = '<div class="transaction-empty">No transactions yet</div>';
   } else {
     txContainer.innerHTML = transactions.slice().reverse().map(tx => {
-      const isPositive = tx.reason === 'Commission paid' || tx.reason === 'Investment added';
+      const isPositive = tx.reason === 'Commission paid' || tx.reason === 'Savings added';
       const amountClass = isPositive ? 'positive' : 'negative';
       const amountPrefix = isPositive ? '+' : '-';
       
