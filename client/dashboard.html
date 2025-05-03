@@ -1430,27 +1430,30 @@ async function loadInvestmentData(data) {
   const transactions = investData.transactions || [];
   
   if (transactions.length === 0) {
-    txContainer.innerHTML = '<div class="transaction-empty">No transactions yet</div>';
-  } else {
     txContainer.innerHTML = transactions.slice().reverse().map(tx => {
-      const isPositive = tx.reason === 'Commission paid' || tx.reason === 'Savings added';
-      const amountClass = isPositive ? 'positive' : 'negative';
-      const amountPrefix = isPositive ? '+' : '-';
-      
-      return `
-        <div class="transaction-card">
-          <div class="transaction-info">
-            <h4>${tx.reason}</h4>
-            <p>${new Date(tx.time).toLocaleString()}</p>
-          </div>
-          <div class="transaction-amount ${amountClass}">
-            ${amountPrefix} ${formatCurrency(tx.amount, userCurrency)}
-          </div>
-        </div>
-      `;
-    }).join('');
+  let reason = tx.reason;
+  if (reason === 'Investment added') {
+    reason = 'Savings added';
   }
 
+  const isPositive = ['Commission paid', 'Savings added'].includes(reason);
+  const amountClass = isPositive ? 'positive' : 'negative';
+  const amountPrefix = isPositive ? '+' : '-';
+  
+  return `
+    <div class="transaction-card">
+      <div class="transaction-info">
+        <h4>${reason}</h4>
+        <p>${new Date(tx.time).toLocaleString()}</p>
+      </div>
+      <div class="transaction-amount ${amountClass}">
+        ${amountPrefix} ${formatCurrency(tx.amount, userCurrency)}
+      </div>
+    </div>
+  `;
+}).join('');
+
+}
   updateCircleProgress(investData.lastUpdated, invested);
 }
 
@@ -1521,9 +1524,7 @@ document.getElementById('confirmCashOut').addEventListener('click', async () => 
     return;
   }
 
-  const reason = currentAction === 'invest' ? 'Savings added' : 'Withdraw profits';
-
-
+  const reason = currentAction === 'invest' ? 'Investment added' : 'Withdraw profits';
 
   try {
     const url = currentAction === 'invest'
