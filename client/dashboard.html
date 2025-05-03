@@ -1,30 +1,3 @@
-<script>
-    // Apply theme immediately before page renders (should be in head)
-    (function() {
-        // Check for saved theme or prefer-color-scheme
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        // Apply dark theme if either saved theme is dark or no preference but OS prefers dark
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            document.documentElement.classList.add('dark-theme');
-            // Add a style element to prevent flash
-            const antiFlash = document.createElement('style');
-            antiFlash.textContent = `
-                body { background-color: ${savedTheme === 'dark' ? 'var(--bg-dark)' : prefersDark ? 'var(--bg-dark)' : 'var(--bg-light)'} !important; }
-                body.dark-theme { background-color: var(--bg-dark) !important; }
-                body:not(.dark-theme) { background-color: var(--bg-light) !important; }
-            `;
-            document.head.appendChild(antiFlash);
-            // Remove after page loads
-            window.addEventListener('DOMContentLoaded', () => {
-                setTimeout(() => document.head.removeChild(antiFlash), 100);
-            });
-        }
-    })();
-</script>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2373,8 +2346,7 @@ function getDefaultImage(section) {
             min-height: 100vh;
             padding: 20px;
             padding-bottom: 80px; /* Added space for bottom nav */
-            transition: none;
-       
+            transition: background-color 0.3s, color 0.3s;
             position: relative;
         }
 
@@ -2848,7 +2820,12 @@ function getDefaultImage(section) {
             font-family: 'Inter', sans-serif;
         }
 
-        
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
         body.dark-theme {
             background-color: var(--bg-dark);
@@ -3857,7 +3834,14 @@ header {
             transition: background-color 0.3s, color 0.3s;
         }
 
-        
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
         .header {
             display: flex;
             justify-content: space-between;
