@@ -50,7 +50,7 @@
             color: var(--text-main);
             line-height: 1.4;
             font-size: 14px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: none;
             padding-top: 70px;
         }
         
@@ -523,10 +523,12 @@
         <span>Insufficient referral balance</span>
     </div>
 
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+    <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+<script>
+    // Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
         authDomain: "records-1674c.firebaseapp.com",
@@ -538,31 +540,28 @@
         measurementId: "G-H6HCSQWZY2"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
     let userId = null;
     let currencySymbol = "";
     let currencyCode = "";
 
-    // First check session to get userId
-    fetch('/api/session')
-        .then(res => res.json())
-        .then(data => {
-            if (!data.userId) {
-                // No userId means unauthenticated, redirect to login
-                window.location.href = '/login';
-            } else {
-                userId = data.userId;
-                console.log('Session userId:', userId);
-                // Now initialize the rest of the dashboard
-                initializeDashboard();
+    // Apply saved theme on load
+    function applySavedTheme() {
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (!savedTheme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                body.classList.add('dark-theme');
             }
-        })
-        .catch(err => {
-            console.error('Session fetch error:', err);
-            window.location.href = '/login';
-        });
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-theme');
+        }
+    }
 
     function initializeDashboard() {
         // Function to clean up old transactions (keep only last 10)
@@ -796,26 +795,32 @@
             }
         });
 
-        function applySavedTheme() {
-            const body = document.body;
-            const savedTheme = localStorage.getItem('theme');
-            
-            if (!savedTheme) {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
-                    body.classList.add('dark-theme');
-                }
-            } else if (savedTheme === 'dark') {
-                body.classList.add('dark-theme');
-            }
-        }
-
         // Initialize dashboard functions after getting userId
         applySavedTheme();
         updateReferralLink();
         fetchUserCountryAndCurrency();
         setTimeout(removeLoadingState, 5000);
     }
+
+    // On DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+        applySavedTheme();
+
+        fetch('/api/session')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.userId) {
+                    window.location.href = '/login';
+                } else {
+                    userId = data.userId;
+                    initializeDashboard();
+                }
+            })
+            .catch(err => {
+                console.error('Session fetch error:', err);
+                window.location.href = '/login';
+            });
+    });
 </script>
 </body>
 </html>
