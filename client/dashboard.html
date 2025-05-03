@@ -1300,15 +1300,8 @@ function fetchAndDisplayRecentTransactions() {
 
 `;
 
-  loadContent(reportsContent);
-const dbRef = ref(database, `users/${userId}`);
-
-When I invest use Saving added and use plus 
-
 loadContent(reportsContent);
 const dbRef = ref(database, `users/${userId}`);
-
-
 
 let userCurrency = 'USD';
 let countryCurrencyMap = {};
@@ -1478,7 +1471,7 @@ function openBottomSheet(action) {
   const label = document.querySelector('#cashOutSheet label');
   const premiumBtn = document.getElementById('getPremiumBtn');
 
-  heading.innerText = action === 'invest' ? 'Invest' : 'Withdraw profits';
+  heading.innerText = action === 'invest' ? 'Add saving' : 'Withdraw profits';
   label.innerText = action === 'invest' ? `Enter amount you want to save (${userCurrency})` : `Enter Amount (${userCurrency})`;
 
   // Update the placeholder to reflect the currency
