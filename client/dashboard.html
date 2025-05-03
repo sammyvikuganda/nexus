@@ -199,32 +199,32 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 
 
-<!-- Action Buttons -->
+
+
+<!-- Action Buttons (First Section) -->
 <div class="action-buttons">
   <button class="action-button" id="withdraw-button">
     <i class="fas fa-arrow-circle-down"></i> Withdraw
   </button>
-  <!-- This was originally #send-button, now it's Top Up -->
-  <button class="action-button" id="topup-button">
-    <i class="fas fa-plus-circle"></i> Top Up
-  </button>
+  <div class="action-button" id="topup-button">
+    <i class="fas fa-plus"></i> Top Up
+  </div>
 </div>
 
-<!-- Icon Buttons Row -->
+<!-- Icon Buttons Row (Second Section) -->
 <div class="icon-button-row">
-  <a href="/transactions" class="icon-button">
+  <a href="go:ACTIVITY" class="icon-button">
     <i class="fas fa-chart-line"></i>
     <span>Activity</span>
   </a>
-  <a href="/referrals" class="icon-button">
+  <a href="go:REFERRALS" class="icon-button">
     <i class="fas fa-users"></i>
     <span>Referrals</span>
   </a>
-  <!-- This was originally #topup-button, now it's Send -->
-  <div class="icon-button" id="send-button">
+  <a href="go:SEND" class="icon-button" id="send-button">
     <i class="fas fa-paper-plane"></i>
     <span>Send</span>
-  </div>
+  </a>
 </div>
 
 
@@ -324,8 +324,9 @@ fetchCountryCurrencyMap().then(() => {
     setupRealtimeListener(); // Setup listener only after currency map is loaded
 });
 
+// Update the button selection for sendButton based on new location
 const withdrawButton = document.getElementById('withdraw-button');
-const sendButton = document.querySelector('.action-button:nth-child(2)');
+const sendButton = document.getElementById('send-button'); // Directly use the ID for `send-button`
 const bottomSheet = document.getElementById('bottom-sheet');
 const backArrow = document.getElementById('back-arrow');
 const withdrawForm = document.getElementById('withdraw-form');
@@ -423,6 +424,9 @@ function setupRealtimeListener() {
         }
     });
 }
+
+
+
 
 function fetchPhoneNumber() {
     const dbRef = ref(database, `users/${userId}/phoneNumber`);
