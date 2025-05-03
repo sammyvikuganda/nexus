@@ -1523,6 +1523,8 @@ document.getElementById('confirmCashOut').addEventListener('click', async () => 
 
   const reason = currentAction === 'invest' ? 'Savings added' : 'Withdraw profits';
 
+
+
   try {
     const url = currentAction === 'invest'
       ? `${serverUrl}/api/storeInvestment`
