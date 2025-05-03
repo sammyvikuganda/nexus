@@ -545,7 +545,7 @@
     let currencySymbol = "";
     let currencyCode = "";
 
-    // First fetch user session to get userId
+    // First check session to get userId
     fetch('/api/session')
         .then(res => res.json())
         .then(data => {
@@ -555,7 +555,7 @@
             } else {
                 userId = data.userId;
                 console.log('Session userId:', userId);
-                // Now initialize the dashboard with the real userId
+                // Now initialize the rest of the dashboard
                 initializeDashboard();
             }
         })
@@ -813,16 +813,11 @@
             }
         }
 
-        // Initialize the dashboard after we have the userId
-        function initializeAppAfterSession() {
-            applySavedTheme();
-            fetchUserCountryAndCurrency();
-            setTimeout(removeLoadingState, 5000);
-        }
-
-        // This will be called after we get the userId from session
-        initializeDashboard();
-    });
+        // Initialize dashboard functions after getting userId
+        applySavedTheme();
+        fetchUserCountryAndCurrency();
+        setTimeout(removeLoadingState, 5000);
+    }
 </script>
 </body>
 </html>
