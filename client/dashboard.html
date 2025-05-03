@@ -1214,7 +1214,7 @@ function fetchAndDisplayRecentTransactions() {
         
             <div class="content">
     <div class="top-info">
-        <div class="info-box"><h4>Invested</h4><p id="investedAmount">---</p></div>
+        <div class="info-box"><h4>Savings</h4><p id="investedAmount">---</p></div>
         <div class="info-box"><h4>Profits</h4><p id="profitAmount">---</p></div>
     </div>
 
@@ -1243,8 +1243,8 @@ function fetchAndDisplayRecentTransactions() {
     <!-- Modal for stopping investment -->
     <div class="modal-required" id="stopInvestmentModal">
         <div class="modal-content-required">
-            <h2 class="modal-heading">Are you sure you want to stop this investment?</h2>
-            <p>Note that your capital will be transferred back to your main wallet and daily payout will stop.</p>
+            <h2 class="modal-heading">Are you sure you want to withdraw your savings?</h2>
+            <p>Note that this will stop the saving contract with us and your savings will be transferred back to main wallet.</p>
             <div>
                 <button class="close-required" id="confirmStopInvestment">Yes Stop</button>
                 <button class="cancel-required" id="cancelStopInvestment">Cancel</button>
@@ -1469,7 +1469,7 @@ function openBottomSheet(action) {
   const premiumBtn = document.getElementById('getPremiumBtn');
 
   heading.innerText = action === 'invest' ? 'Invest' : 'Withdraw profits';
-  label.innerText = action === 'invest' ? `Enter amount to invest (${userCurrency})` : `Enter Amount (${userCurrency})`;
+  label.innerText = action === 'invest' ? `Enter amount you want to save (${userCurrency})` : `Enter Amount (${userCurrency})`;
 
   // Update the placeholder to reflect the currency
   document.getElementById('cashOutAmount').placeholder = `e.g., 1000 ${userCurrency}`;
@@ -1555,7 +1555,7 @@ document.getElementById('stopInvestmentButton').addEventListener('click', () => 
   document.getElementById('stopInvestmentModal').style.display = 'block';
 });
 
-// Handle "Yes, Stop Investment" button click in the modal
+// Handle "Yes, Withdraw savings" button click in the modal
 document.getElementById('confirmStopInvestment').addEventListener('click', async () => {
   // Check the invested amount again
   const investedAmount = parseFloat(document.getElementById('investedAmount').innerText.replace(/[^0-9.-]+/g, ""));
@@ -4109,32 +4109,32 @@ header {
 </head>
 <body>
     <div id="content"></div>
-    <div class="bottom-nav">
-        <div class="nav-items-wrapper">
-            <div class="nav-item home inactive">
-                <i class="fas fa-home"></i>
-                <p>Home</p>
-            </div>
-            <div class="nav-item chat inactive">
-                <i class="fas fa-headset"></i>
-                <p>Support</p>
-            </div>
-
-            <!-- Centered Games Icon with Shining Effect -->
-            <div class="nav-item wallet inactive">
-                <i class="fas fa-gamepad"></i> <!-- Changed icon to 'gamepad' -->
-                <p>Games</p>
-            </div>
-
-            <div class="nav-item reports inactive">
-                <i class="fas fa-chart-line"></i>
-                <p>Investments</p>
-            </div>
-            <div class="nav-item settings inactive">
-                <i class="fas fa-cogs"></i>
-                <p>Settings</p>
-            </div>
+<div class="bottom-nav">
+    <div class="nav-items-wrapper">
+        <div class="nav-item home inactive">
+            <i class="fas fa-home"></i>
+            <p>Home</p>
         </div>
+        <div class="nav-item chat inactive">
+            <i class="fas fa-headset"></i>
+            <p>Support</p>
+        </div>
+
+        <!-- Centered Store Icon -->
+        <div class="nav-item wallet inactive">
+            <i class="fas fa-store"></i> <!-- Changed from gamepad to store -->
+            <p>Store</p>
+        </div>
+
+        <div class="nav-item reports inactive">
+            <i class="fas fa-piggy-bank"></i> <!-- Changed from chart-line to piggy-bank -->
+            <p>Saving</p>
+        </div>
+        <div class="nav-item settings inactive">
+            <i class="fas fa-compass"></i> <!-- Changed from cogs to compass -->
+            <p>Explore</p>
+        </div>
+    </div>
     </div>
 </body>
 </html>
