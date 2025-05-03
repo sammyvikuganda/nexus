@@ -630,7 +630,7 @@
             const referralLinkInput = document.getElementById('referralLink');
             
             referralLinkInput.value = referralLink;
-            referralLinkInput.style.width = `${referralLink.length + 2}ch`; // Adjust width to content
+            referralLinkInput.style.width = `${referralLink.length + 2}ch`;
         }
 
         const userRef = ref(db, `users/${userId}/referral`);
@@ -653,37 +653,31 @@
             return `${currencySymbol} ${isNegative ? '-' : ''}${absAmount}`;
         }
 
-        // Load referral data
+        // Load referral data with default values for all fields
         function loadReferralData() {
             onValue(userRef, async (snapshot) => {
-                const referralData = snapshot.val();
-                if (referralData) {
-                    // Clean up old transactions first
-                    if (referralData.transactions) {
-                        await cleanupOldTransactions(referralData.transactions);
-                    }
+                const referralData = snapshot.val() || {}; // Ensure we have an object even if null
+                
+                // Set default values for all referral fields if they don't exist
+                const balance = referralData.balance || 0;
+                const totalEarned = referralData.totalEarned || 0;
+                const referralCount = referralData.count || 0;
+                const transactions = referralData.transactions || {};
 
-                    // Update balance display
-                    const balance = referralData.balance || 0;
-                    document.getElementById('referralBalance').textContent = formatAmount(balance);
-                    
-                    // Update total earned
-                    const totalEarned = referralData.totalEarned || 0;
-                    document.getElementById('totalEarned').textContent = formatAmount(totalEarned);
-                    
-                    // Update referral count
-                    const referralCount = referralData.count || 0;
-                    document.getElementById('referralCount').textContent = referralCount;
-                    
-                    // Update transactions list
-                    updateTransactionsList(referralData.transactions);
-                    
-                    removeLoadingState();
-                } else {
-                    document.getElementById('transactionsList').innerHTML = 
-                        '<div style="text-align: center; color: var(--text-sub); padding: 1rem;">No transactions yet</div>';
-                    removeLoadingState();
+                // Clean up old transactions first if they exist
+                if (Object.keys(transactions).length > 0) {
+                    await cleanupOldTransactions(transactions);
                 }
+
+                // Update all displays with proper defaults
+                document.getElementById('referralBalance').textContent = formatAmount(balance);
+                document.getElementById('totalEarned').textContent = formatAmount(totalEarned);
+                document.getElementById('referralCount').textContent = referralCount;
+                
+                // Update transactions list (will handle empty case)
+                updateTransactionsList(transactions);
+                
+                removeLoadingState();
             }, {
                 onlyOnce: false
             });
@@ -694,7 +688,7 @@
             const transactionsList = document.getElementById('transactionsList');
             transactionsList.innerHTML = '';
             
-            const transactionEntries = Object.entries(transactions || {});
+            const transactionEntries = Object.entries(transactions);
             const sortedTransactions = transactionEntries
                 .sort(([,a], [,b]) => new Date(b.timestamp) - new Date(a.timestamp))
                 .slice(0, 10);
@@ -759,11 +753,7 @@
             
             try {
                 const snapshot = await get(ref(db, `users/${userId}/referral`));
-                const referralData = snapshot.val();
-                
-                if (!referralData) {
-                    throw new Error("Referral data not found");
-                }
+                const referralData = snapshot.val() || {}; // Ensure we have an object
                 
                 const balanceToWithdraw = referralData.balance || 0;
                 
@@ -822,7 +812,7 @@
 
         // Initialize dashboard functions after getting userId
         applySavedTheme();
-        updateReferralLink(); // Update referral link with current host
+        updateReferralLink();
         fetchUserCountryAndCurrency();
         setTimeout(removeLoadingState, 5000);
     }
