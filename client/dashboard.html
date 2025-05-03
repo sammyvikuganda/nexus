@@ -1,3 +1,30 @@
+<script>
+    // Apply theme immediately before page renders (should be in head)
+    (function() {
+        // Check for saved theme or prefer-color-scheme
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Apply dark theme if either saved theme is dark or no preference but OS prefers dark
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark-theme');
+            // Add a style element to prevent flash
+            const antiFlash = document.createElement('style');
+            antiFlash.textContent = `
+                body { background-color: ${savedTheme === 'dark' ? 'var(--bg-dark)' : prefersDark ? 'var(--bg-dark)' : 'var(--bg-light)'} !important; }
+                body.dark-theme { background-color: var(--bg-dark) !important; }
+                body:not(.dark-theme) { background-color: var(--bg-light) !important; }
+            `;
+            document.head.appendChild(antiFlash);
+            // Remove after page loads
+            window.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => document.head.removeChild(antiFlash), 100);
+            });
+        }
+    })();
+</script>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,17 +98,6 @@ let stopInvestmentAmount = 0; // Store amount for use in modal confirmation
 
 
 
-(function() {
-  // Check for saved theme or system preference
-  const savedTheme = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
-  // Apply dark theme immediately if needed
-  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-    document.documentElement.classList.add('dark-theme');
-    document.body.classList.add('dark-theme');
-  }
-})();
 
 
         
@@ -108,14 +124,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Adding event listeners to each nav item and setting the active class
     document.querySelector('.nav-item.home').addEventListener('click', () => {
         loadHomeContent();
-        
-
-
-document.documentElement.classList.add('dark-theme');
-
-
-
-setActive(document.querySelector('.nav-item.home'));
+        setActive(document.querySelector('.nav-item.home'));
     });
 
     // Updated to load Support section instead of Chat
