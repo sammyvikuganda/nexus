@@ -528,6 +528,21 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+    // Apply saved theme on load
+    function applySavedTheme() {
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (!savedTheme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                body.classList.add('dark-theme');
+            }
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-theme');
+        }
+    }
+
     // Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
@@ -547,21 +562,6 @@
     let userId = null;
     let currencySymbol = "";
     let currencyCode = "";
-
-    // Apply saved theme on load
-    function applySavedTheme() {
-        const body = document.body;
-        const savedTheme = localStorage.getItem('theme');
-
-        if (!savedTheme) {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (prefersDark) {
-                body.classList.add('dark-theme');
-            }
-        } else if (savedTheme === 'dark') {
-            body.classList.add('dark-theme');
-        }
-    }
 
     function initializeDashboard() {
         // Function to clean up old transactions (keep only last 10)
@@ -586,7 +586,7 @@
                 });
 
                 // Apply updates
-                await update(ref(db), updates);
+                await database.ref().update(updates);
             } catch (error) {
                 console.error("Error cleaning up transactions:", error);
             }
@@ -595,7 +595,7 @@
         // Fetch user's country and set currency
         async function fetchUserCountryAndCurrency() {
             try {
-                const userSnapshot = await get(ref(db, `users/${userId}`));
+                const userSnapshot = await database.ref(`users/${userId}`).once('value');
                 const userData = userSnapshot.val();
                 const userCountry = userData?.country || "United States";
                 
@@ -632,7 +632,7 @@
             referralLinkInput.style.width = `${referralLink.length + 2}ch`;
         }
 
-        const userRef = ref(db, `users/${userId}/referral`);
+        const userRef = database.ref(`users/${userId}/referral`);
 
         function removeLoadingState() {
             document.body.classList.remove('loading');
@@ -654,7 +654,7 @@
 
         // Load referral data with default values for all fields
         function loadReferralData() {
-            onValue(userRef, async (snapshot) => {
+            userRef.on('value', async (snapshot) => {
                 const referralData = snapshot.val() || {}; // Ensure we have an object even if null
                 
                 // Set default values for all referral fields if they don't exist
@@ -677,8 +677,6 @@
                 updateTransactionsList(transactions);
                 
                 removeLoadingState();
-            }, {
-                onlyOnce: false
             });
         }
 
@@ -751,7 +749,7 @@
             button.innerHTML = '<i class="fas fa-spinner spinner"></i> Processing';
             
             try {
-                const snapshot = await get(ref(db, `users/${userId}/referral`));
+                const snapshot = await database.ref(`users/${userId}/referral`).once('value');
                 const referralData = snapshot.val() || {}; // Ensure we have an object
                 
                 const balanceToWithdraw = referralData.balance || 0;
@@ -761,7 +759,7 @@
                     return;
                 }
                 
-                const userSnapshot = await get(ref(db, `users/${userId}`));
+                const userSnapshot = await database.ref(`users/${userId}`).once('value');
                 const userData = userSnapshot.val() || {};
                 
                 const newBalance = (userData.balance || 0) + balanceToWithdraw;
@@ -779,7 +777,7 @@
                     [`users/${userId}/referral/transactions/${Date.now()}`]: withdrawalTransaction
                 };
                 
-                await update(ref(db), updates);
+                await database.ref().update(updates);
                 
                 successMessage.classList.add('show');
                 setTimeout(() => {
@@ -795,24 +793,32 @@
             }
         });
 
-        // Initialize dashboard functions after getting userId
+        // Initialize dashboard functions
         applySavedTheme();
         updateReferralLink();
         fetchUserCountryAndCurrency();
         setTimeout(removeLoadingState, 5000);
     }
 
-    // On DOM load
+    // Check session and initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
         applySavedTheme();
-
+        
         fetch('/api/session')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Session check failed');
+                }
+                return res.json();
+            })
             .then(data => {
                 if (!data.userId) {
+                    // No userId means unauthenticated, redirect to login
                     window.location.href = '/login';
                 } else {
                     userId = data.userId;
+                    console.log('Session userId:', userId);
+                    // Continue initializing dashboard
                     initializeDashboard();
                 }
             })
