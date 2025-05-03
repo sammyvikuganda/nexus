@@ -291,6 +291,7 @@ app.patch('/api/update-server-status', async (req, res) => {
 app.post('/api/payment', async (req, res) => {
   const { mobile, amount, reason, userId } = req.body;
 
+  // Validate input fields
   if (!mobile || !amount || !reason || !userId) {
     return res.status(400).json({ message: 'Mobile number, amount, reason, and userId are required.' });
   }
@@ -298,23 +299,45 @@ app.post('/api/payment', async (req, res) => {
   const JPESA_API_KEY = process.env.JPESA_API_KEY;
   const CALLBACK_URL = process.env.CALLBACK_URL;
 
+  // Ensure JPESA API Key and Callback URL are present in environment variables
   if (!JPESA_API_KEY || !CALLBACK_URL) {
     return res.status(500).json({ message: 'JPesa API Key or Callback URL missing in environment variables.' });
   }
 
+  // Generate a unique transaction ID
   const nxs = `NXN${Date.now()}`;
 
   let action, finalReason;
+  let amountToSend;
+
+  // Handle "Top Up" logic
   if (reason.toLowerCase() === 'top up') {
     action = 'credit';
     finalReason = 'Top Up';
+    // Calculate the amount to send to JPesa to account for the 3% deduction and round up
+    amountToSend = Math.ceil(amount / 0.97);  // Round up for top-up
   } else if (reason.toLowerCase() === 'withdraw') {
     action = 'debit';
     finalReason = 'Withdraw';
+
+    // Minimum withdrawal validation
+    if (amount < 1000) {
+      return res.status(400).json({ message: 'Minimum withdrawal amount is 1000.' });
+    }
+
+    // Check if the user has enough balance to cover both the withdrawal and the 2000 flat fee
+    const currentBalance = await db.ref(`users/${userId}/balance`).once('value');
+    if (currentBalance.val() < (amount + 2000)) {
+      return res.status(400).json({ message: 'Insufficient balance to cover the withdrawal fee.' });
+    }
+
+    // Deduct the 2000 flat fee from the withdrawal amount to send to JPesa
+    amountToSend = amount - 2000;  // Send to JPesa after deducting 2000 flat charge
   } else {
     return res.status(400).json({ message: 'Reason must be either "Top Up" or "Withdraw".' });
   }
 
+  // Prepare the XML data for JPesa API request
   const DATA = `<?xml version="1.0" encoding="ISO-8859-1"?>
     <g7bill>
       <_key_>${JPESA_API_KEY}</_key_>
@@ -322,43 +345,65 @@ app.post('/api/payment', async (req, res) => {
       <action>${action}</action>
       <pt>mm</pt>
       <mobile>${mobile}</mobile>
-      <amount>${amount}</amount>
+      <amount>${amountToSend}</amount>
       <callback>${CALLBACK_URL}</callback>
       <tx>${nxs}</tx>
       <description>${finalReason}</description>
     </g7bill>`;
 
   try {
+    // Send the request to JPesa
     const response = await axios.post('https://my.jpesa.com/api/', DATA, {
       headers: { 'Content-Type': 'text/xml' },
     });
 
+    // Check if JPesa responded with success
     if (response.data.api_status === 'success') {
       const tid = response.data.tid;
 
+      // Prepare transaction data for logging
       const transactionData = {
         transactionId: tid,
         mobile,
-        amount,
+        amount: parseFloat(amount),  // Log the real amount entered by the user (not adjusted)
         reason: finalReason,
         status: 'Pending',
-        createdAt: Date.now()
+        createdAt: Date.now(),
       };
 
+      // **Only** deduct balance and log transaction if JPesa response is successful
+      if (reason.toLowerCase() === 'withdraw') {
+        // Deduct the exact amount entered by the user (not the flat fee) for withdrawal
+        await db.ref(`users/${userId}/balance`).transaction((currentBalance) => {
+          if (currentBalance === null) return; // Handle case if balance is null
+          if (currentBalance < amount) {
+            // Insufficient balance for the entered withdrawal amount
+            throw new Error('Insufficient balance for the transaction.');
+          }
+
+          // Deduct the exact amount entered by the user for withdrawal
+          return currentBalance - amount;
+        });
+      }
+
+      // Store the transaction in the database
       await db.ref(`users/${userId}/transactions/${nxs}`).set(transactionData);
 
+      // Respond with success message
       res.status(200).json({
         message: `${finalReason} request sent successfully!`,
         transaction_id: nxs,
         data: response.data,
       });
     } else {
+      // If JPesa response is not success, do not modify the database
       res.status(400).json({
         message: `Transaction failed: ${response.data.msg}`,
         data: response.data,
       });
     }
   } catch (error) {
+    // Catch and log any error
     console.error(`Error processing ${finalReason} request to JPesa:`, error);
     res.status(500).json({ message: `Error processing ${finalReason}`, error: error.message });
   }
