@@ -1,3 +1,16 @@
+<script>
+    // Apply theme immediately before page renders
+    (function() {
+        // Check for saved theme or prefer-color-scheme
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Apply dark theme if either saved theme is dark or no preference but OS prefers dark
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark-theme');
+        }
+})();
+</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2346,7 +2359,8 @@ function getDefaultImage(section) {
             min-height: 100vh;
             padding: 20px;
             padding-bottom: 80px; /* Added space for bottom nav */
-            transition: background-color 0.3s, color 0.3s;
+            transition: none;
+       
             position: relative;
         }
 
@@ -2820,12 +2834,7 @@ function getDefaultImage(section) {
             font-family: 'Inter', sans-serif;
         }
 
-        body {
-            background-color: var(--bg-light);
-            color: var(--text-primary);
-            min-height: 100vh;
-            transition: background-color 0.3s, color 0.3s;
-        }
+        
 
         body.dark-theme {
             background-color: var(--bg-dark);
@@ -3834,14 +3843,7 @@ header {
             transition: background-color 0.3s, color 0.3s;
         }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Poppins', sans-serif;
-            min-height: 100vh;
-            padding: 15px;
-        }
-
+        
         .header {
             display: flex;
             justify-content: space-between;
