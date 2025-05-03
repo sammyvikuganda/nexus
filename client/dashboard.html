@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   You cannot send money to yourself
 </div>
 <div class="withdraw-insufficient-balance" id="min-withdrawal" style="display:none;">
-  Minimum withdrawal is UGX 1,500
+  Minimum withdrawal is UGX 3,000
 </div>
 <div class="withdraw-insufficient-balance" id="min-topup" style="display:none;">
   Minimum top up is UGX 1,000
@@ -553,14 +553,15 @@ function prepareBottomSheetForWithdraw() {
     amountInput.addEventListener('input', function () {
         const inputAmount = parseFloat(this.value);
         const receiveAmountElement = document.getElementById('receive-amount');
-        if (!isNaN(inputAmount) && inputAmount > 0) {
-            const receiveAmount = inputAmount * 0.9; // Adjust calculation logic as needed
+        if (!isNaN(inputAmount) && inputAmount > 2000) {
+            const receiveAmount = inputAmount - 2000;
             receiveAmountElement.textContent = `You receive: ${receiveAmount.toLocaleString()}`;
         } else {
             receiveAmountElement.textContent = `You receive: 0`;
         }
     });
 }
+
 
 function prepareBottomSheetForSend() {
     const phoneInput = document.getElementById('phone-number');
@@ -666,7 +667,7 @@ function prepareBottomSheetForTopup() {
 
 
 function processWithdrawal(phone, amount) {
-    const minAmount = 1000;
+    const minAmount = 3000;
     if (amount < minAmount) {
         document.getElementById('min-withdrawal').style.display = 'block';
         resetWithdrawButton();
