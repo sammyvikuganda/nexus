@@ -1473,7 +1473,7 @@ function openBottomSheet(action) {
   const label = document.querySelector('#cashOutSheet label');
   const premiumBtn = document.getElementById('getPremiumBtn');
 
-  heading.innerText = action === 'invest' ? 'Save' : 'Withdraw profits';
+  heading.innerText = action === 'invest' ? 'Invest' : 'Withdraw profits';
   label.innerText = action === 'invest' ? `Enter amount you want to save (${userCurrency})` : `Enter Amount (${userCurrency})`;
 
   // Update the placeholder to reflect the currency
