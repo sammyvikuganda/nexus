@@ -623,10 +623,15 @@
         }
 
         // Update referral link using current host
-        const currentHost = window.location.host;
-        const referralPath = '/api/register';
-        const referralLink = `${window.location.protocol}//${currentHost}${referralPath}?sponsorid=${userId}`;
-        document.getElementById('referralLink').value = referralLink;
+        function updateReferralLink() {
+            const currentHost = window.location.host;
+            const protocol = window.location.protocol;
+            const referralLink = `${protocol}//${currentHost}/api/register?sponsorid=${userId}`;
+            const referralLinkInput = document.getElementById('referralLink');
+            
+            referralLinkInput.value = referralLink;
+            referralLinkInput.style.width = `${referralLink.length + 2}ch`; // Adjust width to content
+        }
 
         const userRef = ref(db, `users/${userId}/referral`);
 
@@ -817,6 +822,7 @@
 
         // Initialize dashboard functions after getting userId
         applySavedTheme();
+        updateReferralLink(); // Update referral link with current host
         fetchUserCountryAndCurrency();
         setTimeout(removeLoadingState, 5000);
     }
