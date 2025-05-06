@@ -1833,10 +1833,132 @@
                 grid-template-columns: 1fr;
             }
 
+
+
+
+
+
+
+
+
+.skeleton-loading {
+            padding: 20px;
+        }
+        
+        .skeleton-card {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        .dark-theme .skeleton-card {
+            background: #374151;
+        }
+        
+        .skeleton-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .skeleton-title {
+            width: 120px;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 6px;
+        }
+        
+        .dark-theme .skeleton-title {
+            background: #4b5563;
+        }
+        
+        .skeleton-amount {
+            width: 80px;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 6px;
+        }
+        
+        .dark-theme .skeleton-amount {
+            background: #4b5563;
+        }
+        
+        .skeleton-details {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .skeleton-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+        }
+        
+        .dark-theme .skeleton-icon {
+            background: #4b5563;
+        }
+        
+        .skeleton-info {
+            flex: 1;
+        }
+        
+        .skeleton-recipient {
+            width: 70%;
+            height: 16px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        
+        .dark-theme .skeleton-recipient {
+            background: #4b5563;
+        }
+        
+        .skeleton-footer {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .skeleton-time {
+            width: 120px;
+            height: 14px;
+            background: #e5e7eb;
+            border-radius: 4px;
+        }
+        
+        .dark-theme .skeleton-time {
+            background: #4b5563;
+        }
+        
+        .skeleton-status {
+            width: 60px;
+            height: 14px;
+            background: #e5e7eb;
+            border-radius: 4px;
+        }
+        
+        .dark-theme .skeleton-status {
+            background: #4b5563;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
     </style>
 </head>
 <body>
     <div id="content"></div>
+<!-- Skeleton loading will be shown here initially -->
+</div>
     <div class="bottom-nav">
         <div class="nav-items-wrapper">
             <div class="nav-item home inactive">
@@ -1893,6 +2015,72 @@
         let currentAction = null;
         let stopInvestmentAmount = 0; // Store amount for use in modal confirmation
         let userId = null; // Will be set after session check
+
+
+
+
+
+
+
+
+// Function to show skeleton loading
+        function showSkeletonLoading() {
+            const skeletonHTML = `
+                <div class="skeleton-loading">
+                    <div class="skeleton-card">
+                        <div class="skeleton-header">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-amount"></div>
+                        </div>
+                        <div class="skeleton-details">
+                            <div class="skeleton-icon"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-recipient"></div>
+                                <div class="skeleton-footer">
+                                    <div class="skeleton-time"></div>
+                                    <div class="skeleton-status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-header">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-amount"></div>
+                        </div>
+                        <div class="skeleton-details">
+                            <div class="skeleton-icon"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-recipient"></div>
+                                <div class="skeleton-footer">
+                                    <div class="skeleton-time"></div>
+                                    <div class="skeleton-status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-header">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-amount"></div>
+                        </div>
+                        <div class="skeleton-details">
+                            <div class="skeleton-icon"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-recipient"></div>
+                                <div class="skeleton-footer">
+                                    <div class="skeleton-time"></div>
+                                    <div class="skeleton-status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('content').innerHTML = skeletonHTML;
+        }
+
+
 
 
 
@@ -3519,6 +3707,11 @@ document.getElementById('cashOutSheet').addEventListener('click', (event) => {
 
         // Check session and initialize app
         function initializeAppWithSession() {
+
+showSkeletonLoading();
+
+
+
             fetch('/api/session')
                 .then(res => {
                     if (!res.ok) {
