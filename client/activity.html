@@ -351,222 +351,236 @@
     </div>
 
     <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-    
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
-            authDomain: "records-1674c.firebaseapp.com",
-            databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
-            projectId: "records-1674c",
-            storageBucket: "records-1674c.appspot.com",
-            messagingSenderId: "592414404602",
-            appId: "1:592414404602:web:917365f2b54522ef953e43",
-            measurementId: "G-H6HCSQWZY2"
-        };
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
+        authDomain: "records-1674c.firebaseapp.com",
+        projectId: "records-1674c",
+        storageBucket: "records-1674c.appspot.com",
+        messagingSenderId: "592414404602",
+        appId: "1:592414404602:web:917365f2b54522ef953e43",
+        measurementId: "G-H6HCSQWZY2"
+    };
 
-        // Theme toggle functionality
-        function initializeTheme() {
-            const themeToggle = document.getElementById('themeToggle');
-            const themeIcon = document.getElementById('themeIcon');
-            const isDark = document.documentElement.classList.contains('dark-theme');
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Theme toggle functionality
+    function initializeTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const isDark = document.documentElement.classList.contains('dark-theme');
+        
+        // Set initial icon
+        if (isDark) {
+            themeIcon.classList.add('fa-sun');
+        } else {
+            themeIcon.classList.add('fa-moon');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark-theme');
             
-            // Set initial icon
-            if (isDark) {
+            // Update icon
+            if (document.documentElement.classList.contains('dark-theme')) {
+                themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
             } else {
+                themeIcon.classList.remove('fa-sun');
                 themeIcon.classList.add('fa-moon');
             }
             
-            themeToggle.addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark-theme');
-                
-                // Update icon
-                if (document.documentElement.classList.contains('dark-theme')) {
-                    themeIcon.classList.remove('fa-moon');
-                    themeIcon.classList.add('fa-sun');
-                } else {
-                    themeIcon.classList.remove('fa-sun');
-                    themeIcon.classList.add('fa-moon');
-                }
-                
-                // Save preference to localStorage
-                localStorage.setItem('darkMode', document.documentElement.classList.contains('dark-theme'));
-            });
-        }
+            // Save preference to localStorage
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark-theme'));
+        });
+    }
 
-        // User ID
-        const userId = "553481";
+    // Create skeleton loading cards
+    function createSkeletonLoading() {
+        const container = document.getElementById('transactionsContainer');
+        container.innerHTML = '';
         
-        // Create skeleton loading cards
-        function createSkeletonLoading() {
-            const container = document.getElementById('transactionsContainer');
-            container.innerHTML = '';
-            
-            const skeletonContainer = document.createElement('div');
-            skeletonContainer.className = 'skeleton-loading';
-            
-            // Create 3 skeleton cards (you can adjust this number)
-            for (let i = 0; i < 3; i++) {
-                const skeletonCard = document.createElement('div');
-                skeletonCard.className = 'skeleton-card';
-                skeletonCard.innerHTML = `
-                    <div class="skeleton-header">
-                        <div class="skeleton-title"></div>
-                        <div class="skeleton-amount"></div>
-                    </div>
-                    <div class="skeleton-details">
-                        <div class="skeleton-icon"></div>
-                        <div class="skeleton-info">
-                            <div class="skeleton-recipient"></div>
-                            <div class="skeleton-footer">
-                                <div class="skeleton-time"></div>
-                                <div class="skeleton-status"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                skeletonContainer.appendChild(skeletonCard);
-            }
-            
-            container.appendChild(skeletonContainer);
-        }
-
-        // Fetch and display transactions
-        function fetchTransactions() {
-            const transactionsContainer = document.getElementById('transactionsContainer');
-            
-            // Show skeleton loading first
-            createSkeletonLoading();
-            
-            const dbRef = firebase.database().ref(`users/${userId}/transactions`);
-            
-            dbRef.on('value', (snapshot) => {
-                const transactions = snapshot.val();
-                transactionsContainer.innerHTML = '';
-                
-                if (!transactions) {
-                    transactionsContainer.innerHTML = '<div class="loading">No transactions found</div>';
-                    return;
-                }
-                
-                // Convert transactions object to array and sort by createdAt (newest first)
-                const transactionsArray = Object.entries(transactions).map(([key, value]) => ({
-                    id: key,
-                    ...value
-                })).sort((a, b) => b.createdAt - a.createdAt);
-                
-                transactionsArray.forEach(transaction => {
-                    const transactionCard = createTransactionCard(transaction);
-                    transactionsContainer.appendChild(transactionCard);
-                });
-            }, (error) => {
-                transactionsContainer.innerHTML = `<div class="loading">Error loading transactions: ${error.message}</div>`;
-            });
-        }
+        const skeletonContainer = document.createElement('div');
+        skeletonContainer.className = 'skeleton-loading';
         
-        function createTransactionCard(transaction) {
-            const card = document.createElement('div');
-            let transactionClass = '';
-            let iconClass = '';
-            
-            // Determine transaction type and styling
-            switch(transaction.reason.toLowerCase()) {
-                case 'withdraw':
-                    transactionClass = 'withdraw';
-                    iconClass = 'fas fa-money-bill-transfer';
-                    break;
-                case 'sent':
-                    transactionClass = 'sent';
-                    iconClass = 'fas fa-paper-plane';
-                    break;
-                case 'received':
-                    transactionClass = 'received';
-                    iconClass = 'fas fa-wallet';
-                    break;
-                case 'top up':
-                    transactionClass = 'topup';
-                    iconClass = 'fas fa-plus-circle';
-                    break;
-                default:
-                    transactionClass = 'received';
-                    iconClass = 'fas fa-exchange-alt';
-            }
-            
-            // Format amount
-            const amount = parseFloat(transaction.amount);
-            const formattedAmount = amount >= 0 ? `+$${amount.toFixed(2)}` : `-$${Math.abs(amount).toFixed(2)}`;
-            
-            // Format date
-            const date = new Date(Number(transaction.createdAt));
-            const formattedDate = date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            const formattedTime = date.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            // Determine status
-            let statusClass = '';
-            switch(transaction.status.toLowerCase()) {
-                case 'success':
-                    statusClass = 'status-success';
-                    break;
-                case 'pending':
-                    statusClass = 'status-pending';
-                    break;
-                case 'failed':
-                    statusClass = 'status-failed';
-                    break;
-                default:
-                    statusClass = 'status-pending';
-            }
-            
-            card.className = `transaction-card ${transactionClass}`;
-            card.innerHTML = `
-                <div class="transaction-header">
-                    <div class="transaction-title">${transaction.reason}</div>
-                    <div class="transaction-amount">${formattedAmount}</div>
+        // Create 3 skeleton cards (you can adjust this number)
+        for (let i = 0; i < 3; i++) {
+            const skeletonCard = document.createElement('div');
+            skeletonCard.className = 'skeleton-card';
+            skeletonCard.innerHTML = `
+                <div class="skeleton-header">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-amount"></div>
                 </div>
-                <div class="transaction-details">
-                    <div class="transaction-icon">
-                        <i class="${iconClass}"></i>
-                    </div>
-                    <div class="transaction-info">
-                        <span class="transaction-recipient">
-                            ${transaction.reason === 'Sent' || transaction.reason === 'Withdraw' ? 
-                              `To: <strong>${transaction.mobile || 'N/A'}</strong>` : 
-                              transaction.reason === 'Received' ? 
-                              `From: <strong>${transaction.mobile || 'N/A'}</strong>` :
-                              `Method: <strong>${transaction.method || 'N/A'}</strong>`}
-                        </span>
-                        <div class="transaction-footer">
-                            <div class="transaction-time">
-                                <i class="far fa-clock"></i> ${formattedDate} • ${formattedTime}
-                            </div>
-                            <span class="transaction-status ${statusClass}">${transaction.status}</span>
+                <div class="skeleton-details">
+                    <div class="skeleton-icon"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton-recipient"></div>
+                        <div class="skeleton-footer">
+                            <div class="skeleton-time"></div>
+                            <div class="skeleton-status"></div>
                         </div>
                     </div>
                 </div>
             `;
-            
-            return card;
+            skeletonContainer.appendChild(skeletonCard);
         }
+        
+        container.appendChild(skeletonContainer);
+    }
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeTheme();
-            fetchTransactions();
+    // Fetch and display transactions
+    function fetchTransactions(userId) {
+        const transactionsContainer = document.getElementById('transactionsContainer');
+        
+        // Show skeleton loading first
+        createSkeletonLoading();
+        
+        const dbRef = firebase.database().ref(`users/${userId}/transactions`);
+        
+        dbRef.on('value', (snapshot) => {
+            const transactions = snapshot.val();
+            transactionsContainer.innerHTML = '';
+            
+            if (!transactions) {
+                transactionsContainer.innerHTML = '<div class="loading">No transactions found</div>';
+                return;
+            }
+            
+            // Convert transactions object to array and sort by createdAt (newest first)
+            const transactionsArray = Object.entries(transactions).map(([key, value]) => ({
+                id: key,
+                ...value
+            })).sort((a, b) => b.createdAt - a.createdAt);
+            
+            transactionsArray.forEach(transaction => {
+                const transactionCard = createTransactionCard(transaction);
+                transactionsContainer.appendChild(transactionCard);
+            });
+        }, (error) => {
+            transactionsContainer.innerHTML = `<div class="loading">Error loading transactions: ${error.message}</div>`;
         });
-    </script>
+    }
+    
+    function createTransactionCard(transaction) {
+        const card = document.createElement('div');
+        let transactionClass = '';
+        let iconClass = '';
+        
+        // Determine transaction type and styling
+        switch(transaction.reason.toLowerCase()) {
+            case 'withdraw':
+                transactionClass = 'withdraw';
+                iconClass = 'fas fa-money-bill-transfer';
+                break;
+            case 'sent':
+                transactionClass = 'sent';
+                iconClass = 'fas fa-paper-plane';
+                break;
+            case 'received':
+                transactionClass = 'received';
+                iconClass = 'fas fa-wallet';
+                break;
+            case 'top up':
+                transactionClass = 'topup';
+                iconClass = 'fas fa-plus-circle';
+                break;
+            default:
+                transactionClass = 'received';
+                iconClass = 'fas fa-exchange-alt';
+        }
+        
+        // Format amount
+        const amount = parseFloat(transaction.amount);
+        const formattedAmount = amount >= 0 ? `+$${amount.toFixed(2)}` : `-$${Math.abs(amount).toFixed(2)}`;
+        
+        // Format date
+        const date = new Date(Number(transaction.createdAt));
+        const formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Determine status
+        let statusClass = '';
+        switch(transaction.status.toLowerCase()) {
+            case 'success':
+                statusClass = 'status-success';
+                break;
+            case 'pending':
+                statusClass = 'status-pending';
+                break;
+            case 'failed':
+                statusClass = 'status-failed';
+                break;
+            default:
+                statusClass = 'status-pending';
+        }
+        
+        card.className = `transaction-card ${transactionClass}`;
+        card.innerHTML = `
+            <div class="transaction-header">
+                <div class="transaction-title">${transaction.reason}</div>
+                <div class="transaction-amount">${formattedAmount}</div>
+            </div>
+            <div class="transaction-details">
+                <div class="transaction-icon">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="transaction-info">
+                    <span class="transaction-recipient">
+                        ${transaction.reason === 'Sent' || transaction.reason === 'Withdraw' ? 
+                          `To: <strong>${transaction.mobile || 'N/A'}</strong>` : 
+                          transaction.reason === 'Received' ? 
+                          `From: <strong>${transaction.mobile || 'N/A'}</strong>` :
+                          `Method: <strong>${transaction.method || 'N/A'}</strong>`}
+                    </span>
+                    <div class="transaction-footer">
+                        <div class="transaction-time">
+                            <i class="far fa-clock"></i> ${formattedDate} • ${formattedTime}
+                        </div>
+                        <span class="transaction-status ${statusClass}">${transaction.status}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeTheme();
+        
+        // Get userId from session
+        fetch('/api/session')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.userId) {
+                    // No userId means unauthenticated, redirect to login
+                    window.location.href = '/login';
+                } else {
+                    const userId = data.userId;
+                    console.log('Session userId:', userId);
+                    // Initialize dashboard with the userId
+                    fetchTransactions(userId);
+                }
+            })
+            .catch(err => {
+                console.error('Session fetch error:', err);
+                window.location.href = '/login';
+            });
+    });
+</script>
 </body>
 </html>
