@@ -1,203 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Transactions</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/feather-icons"></script>
-  <style>
-    .header {
-      background-color: #1A7EB1;
-      color: white;
-      padding: 12px 0;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 10;
-    }
-    .content-wrapper {
-      margin-top: 44px;
-      max-height: calc(100vh - 64px);
-      overflow-y: auto;
-    }
-    .skeleton {
-      animation: pulse 1.5s infinite;
-      background-color: #e2e8f0;
-      border-radius: 0.5rem;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-  </style>
-</head>
-<body class="bg-[#f9fafb] text-gray-800 font-sans">
-
-  <div class="header">Transactions</div>
-
-  <div class="content-wrapper">
-    <div class="min-h-screen max-w-3xl mx-auto py-8 px-4">
-      <div id="transaction-list" class="space-y-4">
-        <!-- Skeleton loaders while loading -->
-        <div class="bg-white p-4 rounded-xl shadow-sm space-y-3 border border-gray-100">
-          <div class="flex justify-between">
-            <div class="h-4 w-24 skeleton"></div>
-            <div class="h-4 w-20 skeleton"></div>
-          </div>
-          <div class="grid grid-cols-2 gap-4 mt-2">
-            <div class="h-4 w-full skeleton"></div>
-            <div class="h-4 w-full skeleton"></div>
-          </div>
-          <div class="h-6 w-24 skeleton mt-3"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
-    authDomain: "records-1674c.firebaseapp.com",
-    databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
-    projectId: "records-1674c",
-    storageBucket: "records-1674c.appspot.com",
-    messagingSenderId: "592414404602",
-    appId: "1:592414404602:web:917365f2b54522ef953e43",
-    measurementId: "G-H6HCSQWZY2"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-
-  const transactionList = document.getElementById("transaction-list");
-
-  const loaderHTML = `
-    <div class="bg-white shadow-sm rounded-xl p-4 border border-gray-100 animate-pulse">
-      <div class="flex justify-between items-center mb-2">
-        <div class="h-5 w-1/3 bg-gray-200 rounded"></div>
-        <div class="h-4 w-1/4 bg-gray-200 rounded"></div>
-      </div>
-      <div class="grid grid-cols-2 gap-4 mt-2">
-        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-      </div>
-      <div class="mt-3 h-4 bg-gray-200 rounded w-20"></div>
-    </div>
-  `;
-
-  const showLoaders = () => {
-    transactionList.innerHTML = loaderHTML + loaderHTML + loaderHTML;
-  };
-
-  const processFailedLogs = async (userId) => {
-    try {
-      const res = await fetch(`https://suppay-nh5u39w5h-nexus-int.vercel.app/api/process-failed-logs/${userId}`, {
-        method: 'POST'
-      });
-      const result = await res.json();
-      console.log("Failed log processing result:", result);
-    } catch (err) {
-      console.error("Error calling failed log endpoint:", err);
-    }
-  };
-
-  const getStatusStyle = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'completed': return 'bg-green-100 text-green-700';
-      case 'pending': return 'bg-yellow-100 text-yellow-700';
-      case 'rejected': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  const getIcon = (reason) => {
-    return reason?.toLowerCase() === 'top up' ? 'arrow-down-circle' : 'arrow-up-circle';
-  };
-
-  const getColorClass = (reason) => {
-    return reason?.toLowerCase() === 'top up' ? 'text-green-500' : 'text-red-500';
-  };
-
-  // Fetch session userId
-  fetch('/api/session')
-    .then(res => res.json())
-    .then(async data => {
-      const userId = data.userId;
-
-      if (!userId) {
-        window.location.href = '/api/login';
-        return;
-      }
-
-      showLoaders();
-      await processFailedLogs(userId);
-
-      const userTxRef = ref(database, `users/${userId}/transactions`);
-      onValue(userTxRef, (snapshot) => {
-        transactionList.innerHTML = "";
-
-        if (snapshot.exists()) {
-          const transactions = Object.entries(snapshot.val())
-            .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
-
-          transactions.forEach(([id, tx]) => {
-            const reason = tx.reason || 'Top Up';
-            const icon = getIcon(reason);
-            const iconColor = getColorClass(reason);
-            const date = new Date(tx.timestamp).toLocaleString();
-            const amount = Number(tx.amount || 0).toLocaleString();
-            const statusStyle = getStatusStyle(tx.status);
-
-            const toField = reason.toLowerCase() === 'withdraw' && tx.phone
-              ? tx.phone
-              : 'Balance';
-
-            transactionList.innerHTML += `
-              <div class="bg-white shadow-sm rounded-xl p-4 border border-gray-100">
-                <div class="flex justify-between items-center mb-2">
-                  <div class="flex items-center space-x-2">
-                    <i data-feather="${icon}" class="${iconColor}"></i>
-                    <span class="text-lg font-medium capitalize">${reason}</span>
-                  </div>
-                  <span class="text-sm text-gray-500">${date}</span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
-                  <div><span class="text-gray-500">To:</span> <span class="font-medium">${toField}</span></div>
-                  <div><span class="text-gray-500">Amount:</span> <span class="font-bold ${iconColor.replace('text-', 'text-')}">UGX ${amount}</span></div>
-                </div>
-
-                <div class="mt-3">
-                  <span class="inline-block px-3 py-1 text-xs rounded-full font-medium ${statusStyle}">
-                    ${tx.status?.toUpperCase() || 'UNKNOWN'}
-                  </span>
-                </div>
-              </div>
-            `;
-          });
-
-          feather.replace();
-        } else {
-          transactionList.innerHTML = "<p class='text-center text-gray-400'>No transactions found.</p>";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Check for saved user preference immediately
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark-theme');
         }
-      });
-    })
-    .catch(err => {
-      console.error('Session fetch error:', err);
-      window.location.href = '/api/login';
-    });
-</script>
+    </script>
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --card-light: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-blue: #2563eb;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-radius: 14px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-light: rgba(0,0,0,0.1);
+            
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --text-primary-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+            --border-dark: rgba(255,255,255,0.15);
 
+            --bg: var(--bg-light);
+            --card: var(--card-light);
+            --text-main: var(--text-primary);
+            --text-sub: var(--text-secondary);
+            --border-color: var(--border-light);
+        }
 
+        .dark-theme {
+            --bg: var(--bg-dark);
+            --card: var(--card-dark);
+            --text-main: var(--text-primary-dark);
+            --text-sub: var(--text-secondary-dark);
+            --border-color: var(--border-dark);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding-top: 80px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .transactions-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+        }
+
+        .transaction-card {
+            background-color: var(--card);
+            border-radius: var(--border-radius);
+            padding: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .transaction-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .transaction-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .withdraw .transaction-amount {
+            color: var(--accent-red);
+        }
+
+        .sent .transaction-amount {
+            color: var(--accent-blue);
+        }
+
+        .received .transaction-amount {
+            color: var(--accent-yellow);
+        }
+
+        .topup .transaction-amount {
+            color: var(--accent-green);
+        }
+
+        .transaction-details {
+            display: flex;
+            gap: 14px;
+        }
+
+        .transaction-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .withdraw .transaction-icon {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        .sent .transaction-icon {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .received .transaction-icon {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--accent-yellow);
+        }
+
+        .topup .transaction-icon {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        .transaction-info {
+            flex-grow: 1;
+        }
+
+        .transaction-recipient {
+            display: block;
+            font-size: 13px;
+            color: var(--text-sub);
+            margin: 4px 0 8px 0;
+        }
+
+        .transaction-recipient strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .transaction-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-time {
+            font-size: 12px;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .transaction-status {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .status-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--accent-yellow);
+        }
+
+        .status-failed {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        /* Skeleton Loading Styles */
+        .skeleton-loading {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .skeleton-card {
+            background-color: var(--card);
+            border-radius: var(--border-radius);
+            padding: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .skeleton-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .skeleton-title {
+            width: 100px;
+            height: 20px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .skeleton-amount {
+            width: 80px;
+            height: 20px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .skeleton-details {
+            display: flex;
+            gap: 14px;
+        }
+
+        .skeleton-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background-color: var(--border-color);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .skeleton-info {
+            flex-grow: 1;
+        }
+
+        .skeleton-recipient {
+            width: 70%;
+            height: 16px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            margin: 4px 0 8px 0;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .skeleton-footer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .skeleton-time {
+            width: 120px;
+            height: 14px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .skeleton-status {
+            width: 60px;
+            height: 14px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding-top: 70px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .transaction-card, .skeleton-card {
+                padding: 16px;
+            }
+            
+            h1 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Transactions</h1>
+        <button id="themeToggle" style="background: none; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer;">
+            <i class="fas" id="themeIcon"></i>
+        </button>
+    </div>
+
+    <div class="transactions-container" id="transactionsContainer">
+        <!-- Skeleton loading will be inserted here by JavaScript -->
+    </div>
+
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyChlMYXcLFlfRsX3UARcoK8-IC8XRxig14",
+            authDomain: "records-1674c.firebaseapp.com",
+            databaseURL: "https://records-1674c-default-rtdb.firebaseio.com",
+            projectId: "records-1674c",
+            storageBucket: "records-1674c.appspot.com",
+            messagingSenderId: "592414404602",
+            appId: "1:592414404602:web:917365f2b54522ef953e43",
+            measurementId: "G-H6HCSQWZY2"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Theme toggle functionality
+        function initializeTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const isDark = document.documentElement.classList.contains('dark-theme');
+            
+            // Set initial icon
+            if (isDark) {
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.add('fa-moon');
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark-theme');
+                
+                // Update icon
+                if (document.documentElement.classList.contains('dark-theme')) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+                
+                // Save preference to localStorage
+                localStorage.setItem('darkMode', document.documentElement.classList.contains('dark-theme'));
+            });
+        }
+
+        // User ID
+        const userId = "553481";
+        
+        // Create skeleton loading cards
+        function createSkeletonLoading() {
+            const container = document.getElementById('transactionsContainer');
+            container.innerHTML = '';
+            
+            const skeletonContainer = document.createElement('div');
+            skeletonContainer.className = 'skeleton-loading';
+            
+            // Create 3 skeleton cards (you can adjust this number)
+            for (let i = 0; i < 3; i++) {
+                const skeletonCard = document.createElement('div');
+                skeletonCard.className = 'skeleton-card';
+                skeletonCard.innerHTML = `
+                    <div class="skeleton-header">
+                        <div class="skeleton-title"></div>
+                        <div class="skeleton-amount"></div>
+                    </div>
+                    <div class="skeleton-details">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-info">
+                            <div class="skeleton-recipient"></div>
+                            <div class="skeleton-footer">
+                                <div class="skeleton-time"></div>
+                                <div class="skeleton-status"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                skeletonContainer.appendChild(skeletonCard);
+            }
+            
+            container.appendChild(skeletonContainer);
+        }
+
+        // Fetch and display transactions
+        function fetchTransactions() {
+            const transactionsContainer = document.getElementById('transactionsContainer');
+            
+            // Show skeleton loading first
+            createSkeletonLoading();
+            
+            const dbRef = firebase.database().ref(`users/${userId}/transactions`);
+            
+            dbRef.on('value', (snapshot) => {
+                const transactions = snapshot.val();
+                transactionsContainer.innerHTML = '';
+                
+                if (!transactions) {
+                    transactionsContainer.innerHTML = '<div class="loading">No transactions found</div>';
+                    return;
+                }
+                
+                // Convert transactions object to array and sort by createdAt (newest first)
+                const transactionsArray = Object.entries(transactions).map(([key, value]) => ({
+                    id: key,
+                    ...value
+                })).sort((a, b) => b.createdAt - a.createdAt);
+                
+                transactionsArray.forEach(transaction => {
+                    const transactionCard = createTransactionCard(transaction);
+                    transactionsContainer.appendChild(transactionCard);
+                });
+            }, (error) => {
+                transactionsContainer.innerHTML = `<div class="loading">Error loading transactions: ${error.message}</div>`;
+            });
+        }
+        
+        function createTransactionCard(transaction) {
+            const card = document.createElement('div');
+            let transactionClass = '';
+            let iconClass = '';
+            
+            // Determine transaction type and styling
+            switch(transaction.reason.toLowerCase()) {
+                case 'withdraw':
+                    transactionClass = 'withdraw';
+                    iconClass = 'fas fa-money-bill-transfer';
+                    break;
+                case 'sent':
+                    transactionClass = 'sent';
+                    iconClass = 'fas fa-paper-plane';
+                    break;
+                case 'received':
+                    transactionClass = 'received';
+                    iconClass = 'fas fa-wallet';
+                    break;
+                case 'top up':
+                    transactionClass = 'topup';
+                    iconClass = 'fas fa-plus-circle';
+                    break;
+                default:
+                    transactionClass = 'received';
+                    iconClass = 'fas fa-exchange-alt';
+            }
+            
+            // Format amount
+            const amount = parseFloat(transaction.amount);
+            const formattedAmount = amount >= 0 ? `+$${amount.toFixed(2)}` : `-$${Math.abs(amount).toFixed(2)}`;
+            
+            // Format date
+            const date = new Date(Number(transaction.createdAt));
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            const formattedTime = date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Determine status
+            let statusClass = '';
+            switch(transaction.status.toLowerCase()) {
+                case 'success':
+                    statusClass = 'status-success';
+                    break;
+                case 'pending':
+                    statusClass = 'status-pending';
+                    break;
+                case 'failed':
+                    statusClass = 'status-failed';
+                    break;
+                default:
+                    statusClass = 'status-pending';
+            }
+            
+            card.className = `transaction-card ${transactionClass}`;
+            card.innerHTML = `
+                <div class="transaction-header">
+                    <div class="transaction-title">${transaction.reason}</div>
+                    <div class="transaction-amount">${formattedAmount}</div>
+                </div>
+                <div class="transaction-details">
+                    <div class="transaction-icon">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <span class="transaction-recipient">
+                            ${transaction.reason === 'Sent' || transaction.reason === 'Withdraw' ? 
+                              `To: <strong>${transaction.mobile || 'N/A'}</strong>` : 
+                              transaction.reason === 'Received' ? 
+                              `From: <strong>${transaction.mobile || 'N/A'}</strong>` :
+                              `Method: <strong>${transaction.method || 'N/A'}</strong>`}
+                        </span>
+                        <div class="transaction-footer">
+                            <div class="transaction-time">
+                                <i class="far fa-clock"></i> ${formattedDate} • ${formattedTime}
+                            </div>
+                            <span class="transaction-status ${statusClass}">${transaction.status}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+            fetchTransactions();
+        });
+    </script>
 </body>
 </html>
