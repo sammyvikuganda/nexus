@@ -686,6 +686,49 @@ app.post('/api/withdraw', async (req, res) => {
 
 
 
+// Login user endpoint
+app.post('/api/X-Pay-login', async (req, res) => {
+    const { phoneNumber, pin } = req.body;
+
+    try {
+        // Search for the user by phoneNumber
+        const usersSnapshot = await db.ref('users').once('value');
+        let userFound = null;
+        let userId = null;
+
+        usersSnapshot.forEach(childSnapshot => {
+            const user = childSnapshot.val();
+            if (user.phoneNumber === phoneNumber && user.password === pin) {
+                userFound = user;
+                userId = childSnapshot.key;
+            }
+        });
+
+        if (userFound) {
+            return res.json({
+                success: true,
+                userId: userId,
+                country: userFound.country || null,
+                firstName: userFound.firstName || null,
+                lastName: userFound.lastName || null
+            });
+        } else {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid phone number or PIN'
+            });
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Login failed due to server error'
+        });
+    }
+});
+
+
+
 
 // ================== LOGIN ==================
 app.post('/api/login', async (req, res) => {
