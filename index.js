@@ -686,38 +686,51 @@ app.post('/api/withdraw', async (req, res) => {
 
 
 
-// Login user endpoint
-app.post('/api/X-Pay-login', async (req, res) => {
+
+// Login endpoint
+app.post('/api/app-login', async (req, res) => {
     const { phoneNumber, pin } = req.body;
 
-    try {
-        // Search for the user by phoneNumber
-        const usersSnapshot = await db.ref('users').once('value');
-        let userFound = null;
-        let userId = null;
+    if (!phoneNumber || !pin) {
+        return res.status(400).json({
+            success: false,
+            message: 'Phone number and PIN are required'
+        });
+    }
 
-        usersSnapshot.forEach(childSnapshot => {
-            const user = childSnapshot.val();
-            if (user.phoneNumber === phoneNumber && user.password === pin) {
-                userFound = user;
-                userId = childSnapshot.key;
-            }
+    try {
+        // Fetch all users and find one with matching phoneNumber and pin
+        const usersSnapshot = await db.ref('users').once('value');
+        const users = usersSnapshot.val();
+
+        if (!users) {
+            return res.status(404).json({
+                success: false,
+                message: 'No users found'
+            });
+        }
+
+        const matchedUser = Object.entries(users).find(([userId, userData]) => {
+            return userData.phoneNumber === phoneNumber && userData.pin === pin;
         });
 
-        if (userFound) {
-            return res.json({
-                success: true,
-                userId: userId,
-                country: userFound.country || null,
-                firstName: userFound.firstName || null,
-                lastName: userFound.lastName || null
-            });
-        } else {
+        if (!matchedUser) {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid phone number or PIN'
             });
         }
+
+        const [userId, userData] = matchedUser;
+
+        return res.json({
+            success: true,
+            message: 'Login successful',
+            userId: userId,
+            phoneNumber: userData.phoneNumber,
+            pin: userData.pin,
+            country: userData.country
+        });
     } catch (error) {
         console.error('Login error:', error);
         return res.status(500).json({
