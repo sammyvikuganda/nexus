@@ -812,6 +812,44 @@ app.get('/api/session', (req, res) => {
 
 
 
+// Fetch user's phone number and name by userId
+app.get('/api/user-details/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        // Query the user data from the database
+        const userRef = await db.ref(`users/${userId}`).once('value');
+
+        // Check if the user exists
+        if (!userRef.exists()) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Get the user data from the snapshot
+        const userData = userRef.val();
+
+        // Return the response with the phone number and name
+        return res.json({
+            success: true,
+            phoneNumber: userData.phoneNumber,
+            firstName: userData.firstName,
+            lastName: userData.lastName
+        });
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to fetch user details'
+        });
+    }
+});
+
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
