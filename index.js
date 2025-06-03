@@ -142,8 +142,16 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
 
 // Register user endpoint
 app.post('/api/register', async (req, res) => {
-    const { phoneNumber, country, firstName, lastName, dob, nin, email, password, deviceDetails } = req.body;
+    const { phoneNumber, country, firstName, lastName, dob, nin, email, password, pin, deviceDetails } = req.body;
     const sponsorId = req.query.sponsorid;
+
+    // pin is required
+    if (!pin) {
+        return res.status(400).json({
+            success: false,
+            message: 'Pin is required'
+        });
+    }
 
     try {
         const { credentialsExist, deviceExists } = await checkIfExists(phoneNumber, email, nin, deviceDetails);
@@ -183,6 +191,7 @@ app.post('/api/register', async (req, res) => {
             }
         }
 
+        // Construct user data object
         const userData = {
             phoneNumber,
             country,
@@ -190,7 +199,7 @@ app.post('/api/register', async (req, res) => {
             lastName,
             nin: nin || null,
             email,
-            password,
+            pin,                   // pin is required, so always present
             balance: 0,
             cryptoBalance: 0,
             robotCredit: 0,
@@ -210,14 +219,20 @@ app.post('/api/register', async (req, res) => {
             referralCount: 0
         };
 
+        // Add dob if provided
         if (dob) {
             userData.dob = dob;
+        }
+
+        // Add password only if provided (optional)
+        if (password) {
+            userData.password = password;
         }
 
         await db.ref(`users/${userId}`).set(userData);
 
         try {
-            const secondaryResponse = await axios.post('https://upay-5iyy6inv7-sammyviks-projects.vercel.app/api/create-user', {
+            const secondaryResponse = await axios.post('https://nexus-webapp-jll2j2zj6-nexus-projects-af3f0529.vercel.app/api/create-user', {
                 userId: userId,
             });
 
