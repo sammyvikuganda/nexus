@@ -270,7 +270,25 @@ app.post('/api/register', async (req, res) => {
 
 
 
+// New endpoint to get crypto balance
+app.get('/api/user-crypto-balance/:userId', async (req, res) => {
+    const { userId } = req.params;
 
+    try {
+        const userRef = await db.ref(`users/${userId}`).once('value');
+        if (!userRef.exists()) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const userData = userRef.val();
+        const cryptoBalance = userData.cryptoBalance !== undefined ? userData.cryptoBalance : null;
+
+        return res.json({ success: true, userId, cryptoBalance });
+    } catch (error) {
+        console.error('Error fetching crypto balance:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
 
 
 
