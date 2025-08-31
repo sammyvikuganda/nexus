@@ -875,32 +875,29 @@ app.post('/api/transfer-crypto', async (req, res) => {
 
         await db.ref().update(updates);
 
-        const transactionId = db.ref().child('transactions').push().key;
-        const now = Date.now();
+        const transactionId = db.ref().child(`users/${fromUserId}/transactions`).push().key;
 
         const fromTransaction = {
             transactionId,
-            userId: fromUserId,
             counterpartyId: toUserId,
             toName: `${toUserData.firstName} ${toUserData.lastName}`,
             amount,
             type: 'sent',
-            createdAt: now
+            date: Date.now()
         };
 
         const toTransaction = {
             transactionId,
-            userId: toUserId,
             counterpartyId: fromUserId,
             fromName: `${fromUserData.firstName} ${fromUserData.lastName}`,
             amount,
             type: 'received',
-            createdAt: now
+            date: Date.now()
         };
 
         const transactionUpdates = {};
-        transactionUpdates[`transactions/${transactionId}/${fromUserId}`] = fromTransaction;
-        transactionUpdates[`transactions/${transactionId}/${toUserId}`] = toTransaction;
+        transactionUpdates[`users/${fromUserId}/transactions/${transactionId}`] = fromTransaction;
+        transactionUpdates[`users/${toUserId}/transactions/${transactionId}`] = toTransaction;
 
         await db.ref().update(transactionUpdates);
 
@@ -911,13 +908,11 @@ app.post('/api/transfer-crypto', async (req, res) => {
             message: `You have sent ${amount} USD to ${toUserData.firstName} ${toUserData.lastName}`
         });
     } catch (error) {
-        await db.ref(`users/${req.body.fromUserId}/transactionInProgress`).set(false);
+        await db.ref(`users/${fromUserId}/transactionInProgress`).set(false);
         console.error('Transfer error:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
-
-
 
 
 app.get('/api/user-wallet/:userId', async (req, res) => {
@@ -925,23 +920,18 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
 
     try {
         const userRef = await db.ref(`users/${userId}`).once('value');
-
         if (!userRef.exists()) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
         const userData = userRef.val();
 
-        const transactionsRef = await db.ref('transactions').orderByChild(userId).once('value');
+        const transactionsRef = await db.ref(`users/${userId}/transactions`).once('value');
         const transactionsData = transactionsRef.val() || {};
 
-        // Flatten transactions to an array for this user
-        const userTransactions = [];
-        Object.keys(transactionsData).forEach(txId => {
-            if (transactionsData[txId][userId]) {
-                userTransactions.push(transactionsData[txId][userId]);
-            }
-        });
+        const userTransactions = Object.keys(transactionsData).map(txId => transactionsData[txId]);
+
+        userTransactions.sort((a, b) => b.date - a.date);
 
         return res.json({
             success: true,
