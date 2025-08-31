@@ -3,17 +3,12 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const path = require('path');
 const axios = require('axios');
-const session = require('express-session');
-const Redis = require('ioredis'); // Redis client
-const connectRedis = require('connect-redis'); // connect-redis v4
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
-require('dotenv').config(); // to load .env file
+require('dotenv').config();
 
 const app = express();
 
-
-// Initialize Firebase Admin SDK
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert({
@@ -25,92 +20,39 @@ if (!admin.apps.length) {
     });
 }
 
-
 const db = admin.database();
 const publicKey = process.env.TEZA_PUBLIC_KEY;
 const secretKey = process.env.TEZA_SECRET_KEY;
 
-// CORS and Body Parsing
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Redis connection setup
-const redisClient = new Redis({
-    host: process.env.REDIS_HOST, // your Upstash host
-    port: 6379,
-    password: process.env.REDIS_PASSWORD, // your Upstash password
-    tls: {} // important for Upstash
-});
-
-// Session setup with Redis
-const RedisStore = connectRedis(session); // Use directly as constructor for v4
-
-app.use(session({
-    store: new RedisStore({
-        client: redisClient,
-        ttl: 30 * 60
-    }),
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        secure: false,
-        maxAge: 30 * 60 * 1000
-    }
-}));
-
-
-
-
-
-// Function to generate a unique credit history ID with the format 'CREDITxxxxx'
 const generateCreditId = async () => {
-    // Generate a random number between 10000 and 99999
     const randomId = Math.floor(Math.random() * 90000) + 10000;
     const creditId = `CREDIT${randomId}`;
-
-// Check if the credit ID already exists in the database
     const creditRef = db.ref('credit-history');
     const snapshot = await creditRef.orderByKey().equalTo(creditId).once('value');
-    
     if (snapshot.exists()) {
-        // If it exists, recursively generate a new one
         return generateCreditId();
     }
-
     return creditId;
 };
 
-
-
-
-// Function to generate a unique withdrawal history ID with the format 'WITHDRAWxxxxx'
 const generateWithdrawalId = async () => {
     const randomId = Math.floor(Math.random() * 90000) + 10000;
     const withdrawalId = `WITHDRAW${randomId}`;
-
-    // Check if the withdrawal ID already exists in the database
     const withdrawalRef = db.ref('withdrawal-history');
     const snapshot = await withdrawalRef.orderByKey().equalTo(withdrawalId).once('value');
-
-if (snapshot.exists()) {
-        // If it exists, recursively generate a new one
+    if (snapshot.exists()) {
         return generateWithdrawalId();
     }
-
     return withdrawalId;
 };
 
-
-
 const currentMonth = new Date().toLocaleString('default', { month: 'long' });
 
-
-
-
-// Helper function to check for existing user details, including device info
 const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
     const snapshot = await db.ref('users').once('value');
     const users = snapshot.val();
@@ -118,7 +60,6 @@ const checkIfExists = async (phoneNumber, email, nin, deviceDetails) => {
     let credentialsExist = false;
     let deviceExists = false;
 
-    // Iterate through each user to check for conflicts
     for (const userId in users) {
         const user = users[userId];
         if (
