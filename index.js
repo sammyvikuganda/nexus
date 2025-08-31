@@ -883,8 +883,141 @@ app.get('/api/user-details/:userId', async (req, res) => {
 
 
 
+app.post('/api/transfer-crypto', async (req, res) => {
+    const { fromUserId, toUserId, amount, pin } = req.body;
+
+    if (!fromUserId || !toUserId || !amount || !pin) {
+        return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    if (fromUserId === toUserId) {
+        return res.status(400).json({ success: false, message: 'Cannot transfer to the same account' });
+    }
+
+    try {
+        const flagRef = db.ref(`users/${fromUserId}/transactionInProgress`);
+        const flagSnapshot = await flagRef.once('value');
+        if (flagSnapshot.val() === true) {
+            return res.status(429).json({ success: false, message: 'Transaction already in progress' });
+        }
+        await flagRef.set(true);
+
+        const fromUserRef = await db.ref(`users/${fromUserId}`).once('value');
+        const toUserRef = await db.ref(`users/${toUserId}`).once('value');
+
+        if (!fromUserRef.exists() || !toUserRef.exists()) {
+            await flagRef.set(false);
+            return res.status(404).json({ success: false, message: 'One or both users not found' });
+        }
+
+        const fromUserData = fromUserRef.val();
+        const toUserData = toUserRef.val();
+
+        if (fromUserData.pin !== pin) {
+            await flagRef.set(false);
+            return res.status(403).json({ success: false, message: 'Invalid PIN' });
+        }
+
+        if (amount <= 0) {
+            await flagRef.set(false);
+            return res.status(400).json({ success: false, message: 'Invalid amount' });
+        }
+
+        if (fromUserData.cryptoBalance < amount) {
+            await flagRef.set(false);
+            return res.status(400).json({ success: false, message: 'Insufficient funds' });
+        }
+
+        const updates = {};
+        updates[`users/${fromUserId}/cryptoBalance`] = fromUserData.cryptoBalance - amount;
+        updates[`users/${toUserId}/cryptoBalance`] = (toUserData.cryptoBalance || 0) + amount;
+
+        await db.ref().update(updates);
+
+        const transactionId = db.ref().child('transactions').push().key;
+        const now = Date.now();
+
+        const fromTransaction = {
+            transactionId,
+            userId: fromUserId,
+            counterpartyId: toUserId,
+            toName: `${toUserData.firstName} ${toUserData.lastName}`,
+            amount,
+            type: 'sent',
+            createdAt: now
+        };
+
+        const toTransaction = {
+            transactionId,
+            userId: toUserId,
+            counterpartyId: fromUserId,
+            fromName: `${fromUserData.firstName} ${fromUserData.lastName}`,
+            amount,
+            type: 'received',
+            createdAt: now
+        };
+
+        const transactionUpdates = {};
+        transactionUpdates[`transactions/${transactionId}/${fromUserId}`] = fromTransaction;
+        transactionUpdates[`transactions/${transactionId}/${toUserId}`] = toTransaction;
+
+        await db.ref().update(transactionUpdates);
+
+        await flagRef.set(false);
+
+        return res.json({
+            success: true,
+            message: `You have sent ${amount} USD to ${toUserData.firstName} ${toUserData.lastName}`
+        });
+    } catch (error) {
+        await db.ref(`users/${req.body.fromUserId}/transactionInProgress`).set(false);
+        console.error('Transfer error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+
+
+
+app.get('/api/user-wallet/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const userRef = await db.ref(`users/${userId}`).once('value');
+
+        if (!userRef.exists()) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const userData = userRef.val();
+
+        const transactionsRef = await db.ref('transactions').orderByChild(userId).once('value');
+        const transactionsData = transactionsRef.val() || {};
+
+        // Flatten transactions to an array for this user
+        const userTransactions = [];
+        Object.keys(transactionsData).forEach(txId => {
+            if (transactionsData[txId][userId]) {
+                userTransactions.push(transactionsData[txId][userId]);
+            }
+        });
+
+        return res.json({
+            success: true,
+            userId,
+            cryptoBalance: userData.cryptoBalance || 0,
+            transactions: userTransactions
+        });
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-
