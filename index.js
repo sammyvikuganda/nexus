@@ -932,13 +932,16 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
             const tx = transactionsData[txId];
 
             if (tx.reason && tx.timestamp) {
-                const type = tx.from === userId ? 'sent' : 'received';
+                const type = tx.reason === 'Sent' ? 'sent' : 'received';
+                const fromName = type === 'sent' ? `${userData.firstName} ${userData.lastName}` : tx.from;
+                const toName = type === 'sent' ? tx.to : `${userData.firstName} ${userData.lastName}`;
+
                 return {
                     transactionId: txId,
                     amount: tx.amount,
                     type,
-                    fromName: type === 'received' ? tx.from : userId,
-                    toName: type === 'sent' ? tx.to : userId,
+                    fromName,
+                    toName,
                     date: tx.timestamp
                 };
             }
@@ -966,9 +969,6 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
-
-
-
 
 
 
