@@ -942,7 +942,7 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
 
                 formatted = {
                     transactionId: txId,
-                    amount: tx.amount,
+                    amount: Math.abs(tx.amount),
                     type,
                     fromName,
                     toName,
@@ -951,7 +951,7 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
             } else {
                 formatted = {
                     transactionId: tx.transactionId || txId,
-                    amount: tx.amount,
+                    amount: Math.abs(tx.amount),
                     type: tx.type,
                     fromName: tx.fromName,
                     toName: tx.toName,
