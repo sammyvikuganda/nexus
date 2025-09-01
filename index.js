@@ -823,7 +823,6 @@ app.get('/api/user-details/:userId', async (req, res) => {
 
 
 
-
 app.post('/api/transfer-crypto', async (req, res) => {
     const { fromUserId, toUserId, amount, pin } = req.body;
 
@@ -875,7 +874,7 @@ app.post('/api/transfer-crypto', async (req, res) => {
 
         await db.ref().update(updates);
 
-        const transactionId = db.ref().child(`users/${fromUserId}/transactions`).push().key;
+        const transactionId = `TXN${Date.now()}`;
 
         const fromTransaction = {
             transactionId,
@@ -913,6 +912,7 @@ app.post('/api/transfer-crypto', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
 
 
 app.get('/api/user-wallet/:userId', async (req, res) => {
