@@ -118,7 +118,7 @@ app.post('/api/register', async (req, res) => {
             });
         }
 
-        const userId = Math.floor(100000 + Math.random() * 900000).toString();
+        const userId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
 
         if (sponsorId) {
             const sponsorRef = await db.ref(`users/${sponsorId}`).once('value');
@@ -928,15 +928,19 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
         const transactionsRef = await db.ref(`users/${userId}/transactions`).once('value');
         const transactionsData = transactionsRef.val() || {};
 
+        let totalSent = 0;
+        let totalReceived = 0;
+
         const userTransactions = Object.keys(transactionsData).map(txId => {
             const tx = transactionsData[txId];
+            let formatted;
 
             if (tx.reason && tx.timestamp) {
                 const type = tx.reason === 'Sent' ? 'sent' : 'received';
                 const fromName = type === 'sent' ? `${userData.firstName} ${userData.lastName}` : tx.from;
                 const toName = type === 'sent' ? tx.to : `${userData.firstName} ${userData.lastName}`;
 
-                return {
+                formatted = {
                     transactionId: txId,
                     amount: tx.amount,
                     type,
@@ -944,16 +948,29 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
                     toName,
                     date: tx.timestamp
                 };
+            } else {
+                formatted = {
+                    transactionId: tx.transactionId || txId,
+                    amount: tx.amount,
+                    type: tx.type,
+                    fromName: tx.fromName,
+                    toName: tx.toName,
+                    date: tx.date
+                };
             }
 
-            return {
-                transactionId: tx.transactionId || txId,
-                amount: tx.amount,
-                type: tx.type,
-                fromName: tx.fromName,
-                toName: tx.toName,
-                date: tx.date
-            };
+            const isInternal =
+                formatted.fromName === 'USD Wallet' ||
+                formatted.fromName === 'UGX Wallet' ||
+                formatted.toName === 'USD Wallet' ||
+                formatted.toName === 'UGX Wallet';
+
+            if (!isInternal) {
+                if (formatted.type === 'sent') totalSent += formatted.amount;
+                if (formatted.type === 'received') totalReceived += formatted.amount;
+            }
+
+            return formatted;
         });
 
         userTransactions.sort((a, b) => b.date - a.date);
@@ -962,6 +979,8 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
             success: true,
             userId,
             cryptoBalance: userData.cryptoBalance || 0,
+            totalSent,
+            totalReceived,
             transactions: userTransactions
         });
     } catch (error) {
@@ -969,6 +988,7 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
 
 
 
