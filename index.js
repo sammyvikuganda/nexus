@@ -925,11 +925,33 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
         }
 
         const userData = userRef.val();
-
         const transactionsRef = await db.ref(`users/${userId}/transactions`).once('value');
         const transactionsData = transactionsRef.val() || {};
 
-        const userTransactions = Object.keys(transactionsData).map(txId => transactionsData[txId]);
+        const userTransactions = Object.keys(transactionsData).map(txId => {
+            const tx = transactionsData[txId];
+
+            if (tx.reason && tx.timestamp) {
+                const type = tx.from === userId ? 'sent' : 'received';
+                return {
+                    transactionId: txId,
+                    amount: tx.amount,
+                    type,
+                    fromName: type === 'received' ? tx.from : userId,
+                    toName: type === 'sent' ? tx.to : userId,
+                    date: tx.timestamp
+                };
+            }
+
+            return {
+                transactionId: tx.transactionId || txId,
+                amount: tx.amount,
+                type: tx.type,
+                fromName: tx.fromName,
+                toName: tx.toName,
+                date: tx.date
+            };
+        });
 
         userTransactions.sort((a, b) => b.date - a.date);
 
@@ -944,6 +966,7 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
 
 
 
