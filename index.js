@@ -1108,14 +1108,34 @@ app.post('/api/send', async (req, res) => {
     }
 });
 
-app.post('/api/marzpay-webhook', (req, res) => {
-    const payload = req.body;
-    console.log('MarzPay Webhook Received:', payload);
-    res.json({ status: 'success', message: 'Webhook received' });
+
+
+app.post('/api/marzpay-webhook', async (req, res) => {
+    try {
+        const { event_type, transaction } = req.body;
+
+        if (!transaction || !transaction.reference) {
+            return res.status(400).json({ status: 'error', message: 'Invalid payload' });
+        }
+
+        const reference = transaction.reference;
+        const status = transaction.status;
+        const amount = transaction.amount.raw;
+        const phone_number = transaction.phone_number;
+
+        console.log('MarzPay Webhook:', event_type, transaction);
+
+        await db.ref(`ugx-transactions/${reference}`).update({
+            status,
+            updatedAt: Date.now()
+        });
+
+        return res.json({ status: 'success' });
+    } catch (error) {
+        console.error('Webhook error:', error.message);
+        return res.status(500).json({ status: 'error', message: error.message });
+    }
 });
-
-
-
 
 
 
