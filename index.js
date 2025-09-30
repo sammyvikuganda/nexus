@@ -995,11 +995,13 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
 
 
 
+
 const { v4: uuidv4 } = require('uuid');
 
 const MARZPAY_COLLECT_URL = 'https://wallet.wearemarz.com/api/v1/collect-money';
 const MARZPAY_SEND_URL = 'https://wallet.wearemarz.com/api/v1/send-money';
 const MARZPAY_AUTH = 'Basic bWFyel9Zbk1vWkdaUUh2cFFJUDhvOnA3VjFQaUdyS1M4WERQbHBuVnl6amdoVDAxZmJYUkdE';
+const CALLBACK_URL = 'https://nexus-kx9dhwi1z-nexus-projects-af3f0529.vercel.app/api/marzpay-webhook';
 
 app.post('/api/collect', async (req, res) => {
     try {
@@ -1010,7 +1012,6 @@ app.post('/api/collect', async (req, res) => {
 
         const reference = uuidv4();
         const description = 'Payment from user';
-        const callback_url = 'https://your-app.com/webhook';
 
         const response = await axios.post(MARZPAY_COLLECT_URL, {
             phone_number,
@@ -1018,7 +1019,7 @@ app.post('/api/collect', async (req, res) => {
             country: 'UG',
             reference,
             description,
-            callback_url
+            callback_url: CALLBACK_URL
         }, {
             headers: {
                 'Authorization': MARZPAY_AUTH,
@@ -1067,7 +1068,6 @@ app.post('/api/send', async (req, res) => {
 
         const reference = uuidv4();
         const description = 'Disbursement to customer';
-        const callback_url = 'https://your-app.com/webhook';
 
         const response = await axios.post(MARZPAY_SEND_URL, {
             phone_number,
@@ -1075,7 +1075,7 @@ app.post('/api/send', async (req, res) => {
             country: 'UG',
             reference,
             description,
-            callback_url
+            callback_url: CALLBACK_URL
         }, {
             headers: {
                 'Authorization': MARZPAY_AUTH,
@@ -1108,33 +1108,10 @@ app.post('/api/send', async (req, res) => {
     }
 });
 
-
-
-app.post('/api/marzpay-webhook', async (req, res) => {
-    try {
-        const { event_type, transaction } = req.body;
-
-        if (!transaction || !transaction.reference) {
-            return res.status(400).json({ status: 'error', message: 'Invalid payload' });
-        }
-
-        const reference = transaction.reference;
-        const status = transaction.status;
-        const amount = transaction.amount.raw;
-        const phone_number = transaction.phone_number;
-
-        console.log('MarzPay Webhook:', event_type, transaction);
-
-        await db.ref(`ugx-transactions/${reference}`).update({
-            status,
-            updatedAt: Date.now()
-        });
-
-        return res.json({ status: 'success' });
-    } catch (error) {
-        console.error('Webhook error:', error.message);
-        return res.status(500).json({ status: 'error', message: error.message });
-    }
+app.post('/api/marzpay-webhook', (req, res) => {
+    const payload = req.body;
+    console.log('MarzPay Webhook Received:', payload);
+    res.json({ status: 'success', message: 'Webhook received' });
 });
 
 
