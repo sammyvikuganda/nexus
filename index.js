@@ -995,15 +995,11 @@ app.get('/api/user-wallet/:userId', async (req, res) => {
 
 
 
+const { v4: uuidv4 } = require('uuid');
+
 const MARZPAY_COLLECT_URL = 'https://wallet.wearemarz.com/api/v1/collect-money';
 const MARZPAY_SEND_URL = 'https://wallet.wearemarz.com/api/v1/send-money';
 const MARZPAY_AUTH = 'Basic bWFyel9Zbk1vWkdaUUh2cFFJUDhvOnA3VjFQaUdyS1M4WERQbHBuVnl6amdoVDAxZmJYUkdE';
-
-
-
-
-
-const { v4: uuidv4 } = require('uuid');
 
 app.post('/api/collect', async (req, res) => {
     try {
@@ -1012,7 +1008,7 @@ app.post('/api/collect', async (req, res) => {
             return res.status(400).json({ status: 'error', message: 'userId, phone_number and amount are required' });
         }
 
-        const reference = `${userId}-${uuidv4()}`;
+        const reference = uuidv4();
         const description = 'Payment from user';
         const callback_url = 'https://your-app.com/webhook';
 
@@ -1069,7 +1065,7 @@ app.post('/api/send', async (req, res) => {
             return res.status(400).json({ status: 'error', message: 'Insufficient balance' });
         }
 
-        const reference = `${userId}-${uuidv4()}`;
+        const reference = uuidv4();
         const description = 'Disbursement to customer';
         const callback_url = 'https://your-app.com/webhook';
 
@@ -1112,12 +1108,12 @@ app.post('/api/send', async (req, res) => {
     }
 });
 
-
 app.post('/api/marzpay-webhook', (req, res) => {
     const payload = req.body;
     console.log('MarzPay Webhook Received:', payload);
     res.json({ status: 'success', message: 'Webhook received' });
 });
+
 
 
 
