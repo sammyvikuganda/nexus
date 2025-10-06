@@ -1001,7 +1001,7 @@ const { v4: uuidv4 } = require('uuid');
 const MARZPAY_COLLECT_URL = 'https://wallet.wearemarz.com/api/v1/collect-money';
 const MARZPAY_SEND_URL = 'https://wallet.wearemarz.com/api/v1/send-money';
 const MARZPAY_AUTH = 'Basic bWFyel9Zbk1vWkdaUUh2cFFJUDhvOnA3VjFQaUdyS1M4WERQbHBuVnl6amdoVDAxZmJYUkdE';
-const CALLBACK_URL = 'https://nexus-1xxfjyq4z-nexus-projects-af3f0529.vercel.app/api/marzpay-webhook';
+const CALLBACK_URL = 'https://payments.vikotrust.com/api/marzpay-webhook/failed';
 
 app.post('/api/collect', async (req, res) => {
     try {
